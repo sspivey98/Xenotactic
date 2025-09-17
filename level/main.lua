@@ -3,8 +3,8 @@ local lib = {}
 
 local TILE_SIZE = 20 --size of tile in pixels
 local map = { --# of tiles
-    Width = 30,
-    Height = 30
+    Width = 29,
+    Height = 29
 }
 
 local TILES = {
