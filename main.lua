@@ -3,8 +3,8 @@ local DRAW = require('draw')
 local TURRET = require('turret')
 local NAV = require('nav')
 local MENU = require('menu')
-local LEVEL_SELECT = require('level_select')
-local LEVEL = require('level')
+local LEVEL_SELECT = require('level.select')
+local LEVEL = require('level.main')
 local SOUNDS = require('lib.sounds')
 local IMAGES = require('lib.images')
 
@@ -67,6 +67,7 @@ function love.mousepressed(x, y, mouseButton)
                         (SOUNDS.library["button_press2"]):play()
                         game.level = index
                         game.state = GAME.STATES.GAME
+                        LEVEL.init(index)
                         print("Selected level: "..index)
                 end
             end

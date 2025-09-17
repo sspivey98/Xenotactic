@@ -1,14 +1,15 @@
+--abstract interface for turret
 local lib = {}
 
-function lib:new()
-    local o = {
-        position = {
-            x = 0,
-            y = 0
-        },
-        image = nil
-    }
+function lib:new(o)
+    o = o or {}
     setmetatable(self, o)
+    self.__index = self
+    o.position = {
+        x = 0,
+        y = 0
+    }
+    o.image = nil
     return o
 end
 
