@@ -1,3 +1,4 @@
+if os.getenv("LOCAL_LUA_DEBUGGER_VSCODE") == "1" then require("lldebugger").start() end
 local GAME = require('game')
 local DRAW = require('draw')
 local TURRET = require('turret')
@@ -10,15 +11,16 @@ local IMAGES = require('lib.images')
 
 local game
 
+--initialize function
 function love.load()
     love.window.setTitle("Tower Defense")
     love.window.setMode(800, 600)
 
     game = GAME.newGame()
-
     love.graphics.setNewFont("/assets/fonts/11_Visitor_TT1_BRK.ttf", 16)
 end
 
+--interactive function
 function love.update()
     if game.state == GAME.STATES.MENU then
         MENU.update()
@@ -74,12 +76,14 @@ function love.mousepressed(x, y, mouseButton)
         end
     elseif game.state == GAME.STATES.GAME then
         --game logic
+        LEVEL.interact(game, x, y, mouseButton)
     end
 end
 
+--rendering
 function love.draw()
     if game.state == GAME.STATES.MENU then
-        MENU.drawMainMenu(game)
+        MENU.draw(game)
     elseif game.state == GAME.STATES.LEVEL_SELECT then
         LEVEL_SELECT.drawLevelSelect()
     elseif game.state == GAME.STATES.GAME then

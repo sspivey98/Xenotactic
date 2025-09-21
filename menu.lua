@@ -33,7 +33,7 @@ function lib.update()
             mouseY >= lib.Buttons.Quit.y and mouseY <= (lib.Buttons.Quit.y + lib.Buttons.Quit.height)
 end
 
-function lib.drawMainMenu(game)
+function lib.draw(game)
     -- Background
     splash_screen = IMAGES.library["title_screen"]
     love.graphics.setColor(1, 1, 1)
