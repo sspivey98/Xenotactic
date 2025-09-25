@@ -1,24 +1,10 @@
 --level metadata and functions
+local SETTINGS = require('settings')
 local lib = {}
 
-local TILE_SIZE = 20 --size of tile in pixels
-local map = { --# of tiles
-    Width = 29,
-    Height = 30
-}
-
-local SCREEN = {
-    WIDTH = love.graphics.getWidth(),
-    HEIGHT = love.graphics.getHeight(),
-    MAP = {
-        WIDTH = map.Width * TILE_SIZE,
-        HEIGHT = map.Height * TILE_SIZE
-    }
-}
-SCREEN.UI = {
-    WIDTH = SCREEN.WIDTH - SCREEN.MAP.WIDTH,
-    HEIGHT = SCREEN.HEIGHT - SCREEN.MAP.HEIGHT
-}
+local TILE_SIZE = SETTINGS.TILE_SIZE --size of tile in pixels
+local map = SETTINGS.map
+local SCREEN = SETTINGS.SCREEN
 
 local TILES = {
     EMPTY = 0,
@@ -86,10 +72,46 @@ function lib.draw()
         SCREEN.HEIGHT
     )
 
+    --separate into thirds
+    local third = SCREEN.HEIGHT / 3
+    local padding = 20
+
     --draw turret buttons
+    local grid = {
+        size = 48,
+        spacing = 8,
+        start_x = SCREEN.MAP.WIDTH + padding,
+        start_y = 0 + padding
+    }
+    for row = 1, 3 do
+        for col = 1, 3 do
+            local x = grid.start_x + (col - 1) * (grid.size + grid.spacing)
+            local y = grid.start_y + (row - 1) * (grid.size + grid.spacing)
+
+            --draw button background
+            love.graphics.setColor{0.3, 0.3, 0.3}
+            love.graphics.rectangle("fill", x, y, grid.size, grid.size)
+
+            --draw button border
+            love.graphics.setColor{0.6, 0.6, 0.6}
+            love.graphics.rectangle("line", x, y, grid.size, grid.size)
+
+            --icons
+            love.graphics.setColor{1, 1, 1}
+            local text = "T" .. ((row-1) * 3 + col)
+            love.graphics.print(text, x + grid.size/2 - 8, y + grid.size/2 - 6)
+        end
+    end
 
     --sell menu
+    local sellStartY = third + padding
+    love.graphics.setColor{1, 1, 1}
+    love.graphics.print("SELL", grid.start_x, sellStartY)
+    
     --upgrade menu
+    local upgradeStartY = third*2 + padding
+    love.graphics.setColor{1, 1, 1}
+    love.graphics.print("Upgrade", grid.start_x, upgradeStartY)
 end
 
 --translates to in-game coordinates

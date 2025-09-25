@@ -8,13 +8,14 @@ local LEVEL_SELECT = require('level.select')
 local LEVEL = require('level.main')
 local SOUNDS = require('lib.sounds')
 local IMAGES = require('lib.images')
+local SETTINGS = require('settings')
 
 local game
 
 --initialize function
 function love.load()
     love.window.setTitle("Tower Defense")
-    love.window.setMode(800, 600)
+    love.window.setMode(970, 700)
 
     game = GAME.newGame()
     love.graphics.setNewFont("/assets/fonts/11_Visitor_TT1_BRK.ttf", 16)

@@ -5,7 +5,8 @@ Player clicks UI turret
 confirm user has enough $
 the left mouse now has the turret in hover
 tilemap displays green/red if turret can be placed there
-user left clicks a spot
+outline of range is drawn as a red dotted line in a circle
+user left clicks a spot (top left)
 check if spot is okay
 turret is placed at location
 tilemap changes type at that location

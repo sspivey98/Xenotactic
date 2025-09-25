@@ -1,6 +1,6 @@
 --main menu
 local IMAGES = require('lib.images')
-
+local SETTINGS = require('settings')
 local lib = {}
 
 lib.Buttons = {
@@ -37,7 +37,20 @@ function lib.draw(game)
     -- Background
     splash_screen = IMAGES.library["title_screen"]
     love.graphics.setColor(1, 1, 1)
-    love.graphics.draw(splash_screen, 0, 0, 0, 800 / splash_screen:getWidth(), 600 / splash_screen:getHeight())
+
+    --center image
+    local scaled = {
+        x = SETTINGS.SCREEN.WIDTH / splash_screen:getWidth(),
+        y = SETTINGS.SCREEN.HEIGHT / splash_screen:getHeight()
+    }
+    local scale = math.min(scaled.x, scaled.y)
+    scaled.width = splash_screen:getWidth() * scale
+    scaled.height = splash_screen:getHeight() * scale
+    local x = (SETTINGS.SCREEN.WIDTH - scaled.width) / 2
+    local y = (SETTINGS.SCREEN.HEIGHT - scaled.height) / 2
+
+    --love.graphics.draw(splash_screen, 0, 0, 0, 800 / splash_screen:getWidth(), 600 / splash_screen:getHeight())
+    love.graphics.draw(splash_screen, x, y, 0, scale, scale)
     
     --draw buttons
     for name,button in pairs(lib.Buttons) do
