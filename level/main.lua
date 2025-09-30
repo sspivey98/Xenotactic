@@ -55,7 +55,7 @@ function lib.draw()
                 TILE_SIZE)
             
             -- Draw grid lines
-            love.graphics.setColor(0, 0, 0, 0.3)
+            love.graphics.setColor{0, 0, 0, 0.3}
             love.graphics.rectangle("line", 
                 (x-1) * TILE_SIZE, 
                 (y-1) * TILE_SIZE, 

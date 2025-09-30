@@ -1,6 +1,7 @@
 local lib = {}
 local SOUNDS = require('lib.sounds')
 local IMAGES = require('lib.images')
+local SETTINGS = require('settings')
 
 lib.Levels = {
     [1] = {
@@ -81,7 +82,7 @@ end
 function lib.drawLevelSelect()
     -- Background
     love.graphics.setColor(0.15, 0.25, 0.35)
-    love.graphics.rectangle("fill", 0, 0, 800, 600)
+    love.graphics.rectangle("fill", 0, 0, SETTINGS.SCREEN.WIDTH, SETTINGS.SCREEN.HEIGHT)
     
     -- Title
     love.graphics.setColor(1, 1, 1)

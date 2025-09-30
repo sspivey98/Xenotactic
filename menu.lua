@@ -5,25 +5,45 @@ local lib = {}
 
 lib.Buttons = {
     Play = {
-        width = 150,
-        height = 50,
-        x = 325,
-        y = 300,
+        -- width = 150,
+        -- height = 50,
+        -- x = 325,
+        -- y = 300,
         text = "Play",
         hovered = false,
         pressed = false
     },
     Quit = {
-        width = 150,
-        height = 50,
-        x = 325,
-        y = 350,
+        -- width = 150,
+        -- height = 50,
+        -- x = 325,
+        -- y = 350,
         text = "Quit",
         hovered = false,
         pressed = false
     }
 
 }
+
+--initialize buttons
+function lib.load()
+    local center = {
+        x = SETTINGS.SCREEN.WIDTH / 2,
+        y = SETTINGS.SCREEN.HEIGHT / 2
+    }
+    --x: 800 -> 325, 150
+    --y: 600 -> 300, 50
+
+    for _,button in pairs(lib.Buttons) do
+        button.width = 150
+        button.height = 50
+        button.x = 425
+        button.y = 300
+        if button.text == "Quit" then
+            button.y = button.y + button.height   
+        end
+    end
+end
 
 function lib.update()
     local mouseX, mouseY = love.mouse.getPosition()
