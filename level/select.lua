@@ -3,68 +3,34 @@ local SOUNDS = require('lib.sounds')
 local IMAGES = require('lib.images')
 local SETTINGS = require('settings')
 
-lib.Levels = {
-    [1] = {
-        x = 100,
-        y = 50,
-        width = 0,
-        height = 0,
-        img = IMAGES.library["level_1"],
-        hovered = false,
-        wasHovered = false
-    },
-    [2] = {
-        x = 500,
-        y = 50,
-        width = 0,
-        height = 0,
-        img = IMAGES.library["level_2"],
-        hovered = false,
-        wasHovered = false
-    },
-    [3] = {
-        x = 100,
-        y = 250,
-        width = 0,
-        height = 0,
-        img = IMAGES.library["level_3"],
-        hovered = false,
-        wasHovered = false
-    },
-    [4] = {
-        x = 500,
-        y = 250,
-        width = 0,
-        height = 0,
-        img = IMAGES.library["level_4"],
-        hovered = false,
-        wasHovered = false
-    },
-    [5] = {
-        x = 100,
-        y = 450,
-        width = 0,
-        height = 0,
-        img = IMAGES.library["level_5"],
-        hovered = false,
-        wasHovered = false
-    },
-    [6] = {
-        x = 500,
-        y = 450,
-        width = 0,
-        height = 0,
-        img = IMAGES.library["level_6"],
-        hovered = false,
-        wasHovered = false
-    }
-}
---add width and heights
-for _, level in pairs(lib.Levels) do
-    level.scaleX = 150 / level.img:getWidth()
-    level.scaleY = 150 / level.img:getHeight()
-    level.width = level.img:getWidth()
-    level.height = level.img:getHeight()
+lib.Levels = {}
+
+function lib.load()
+    --add width and heights to level selections
+    for i=1, 6 do
+        local level = {
+            img = IMAGES.library["level_"..i],
+            hovered = false,
+            wasHovered = false
+        }
+        level.scaleX = 200 / level.img:getWidth()
+        level.scaleY = 200 / level.img:getHeight()
+        level.width = level.img:getWidth() * level.scaleX
+        level.height = level.img:getHeight() * level.scaleY
+
+        --split x into 3 columns
+        if i % 3 == 1 then
+            level.x = (SETTINGS.SCREEN.WIDTH / 4) - level.width
+        elseif i % 3 == 2 then
+            level.x = (2 * SETTINGS.SCREEN.WIDTH / 4) - level.width / 2
+        else
+            level.x = (3 * SETTINGS.SCREEN.WIDTH / 4)
+        end
+
+        --split y into 2 rows
+        level.y = (math.ceil(i / 3) - 1) * (SETTINGS.SCREEN.HEIGHT / 3) + level.height / 2
+        table.insert(lib.Levels, level)
+    end
 end
 
 function lib.update()
@@ -86,7 +52,7 @@ function lib.drawLevelSelect()
     
     -- Title
     love.graphics.setColor(1, 1, 1)
-    love.graphics.printf("SELECT LEVEL", 0, 50, 800, "center")
+    love.graphics.printf("SELECT LEVEL", SETTINGS.SCREEN.WIDTH / 2 - 200, 50, 200, "center", 0, 2)
 
     --draw levels
     for key,level in pairs(lib.Levels) do

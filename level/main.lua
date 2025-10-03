@@ -74,11 +74,11 @@ function lib.draw()
 
     --separate into thirds
     local third = SCREEN.HEIGHT / 3
-    local padding = 20
+    local padding = 40
 
     --draw turret buttons
     local grid = {
-        size = 48,
+        size = 64,
         spacing = 8,
         start_x = SCREEN.MAP.WIDTH + padding,
         start_y = 0 + padding

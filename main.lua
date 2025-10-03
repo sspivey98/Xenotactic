@@ -54,6 +54,7 @@ function love.mousepressed(x, y, mouseButton)
             if x >= MENU.Buttons.Play.x and x <= (MENU.Buttons.Play.x + MENU.Buttons.Play.width) and
                 y >= MENU.Buttons.Play.y and y <= (MENU.Buttons.Play.y + MENU.Buttons.Play.height) then
                     (SOUNDS.library["button_press"]):play()
+                    LEVEL_SELECT.load()
                     game.state = GAME.STATES.LEVEL_SELECT
                     print("Moving game state to level select")
             end

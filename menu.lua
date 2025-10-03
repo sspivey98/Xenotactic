@@ -27,20 +27,13 @@ lib.Buttons = {
 
 --initialize buttons
 function lib.load()
-    local center = {
-        x = SETTINGS.SCREEN.WIDTH / 2,
-        y = SETTINGS.SCREEN.HEIGHT / 2
-    }
-    --x: 800 -> 325, 150
-    --y: 600 -> 300, 50
-
     for _,button in pairs(lib.Buttons) do
         button.width = 150
         button.height = 50
-        button.x = 425
-        button.y = 300
+        button.x = SETTINGS.SCREEN.WIDTH / 2 - button.width / 2 
+        button.y = SETTINGS.SCREEN.HEIGHT / 2
         if button.text == "Quit" then
-            button.y = button.y + button.height   
+            button.y = button.y + button.height + 5   
         end
     end
 end
