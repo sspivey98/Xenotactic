@@ -71,9 +71,10 @@ function love.mousepressed(x, y, mouseButton)
                         --load level
                         (SOUNDS.library["button_press2"]):play()
                         game.level = index
+                        LEVEL.load(index)
                         game.state = GAME.STATES.GAME
-                        LEVEL.init(index)
                         print("Selected level: "..index)
+                        break
                 end
             end
         end

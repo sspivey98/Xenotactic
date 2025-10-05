@@ -17,4 +17,7 @@ for _, file in ipairs(files) do
     end
 end
 
+lib.icons = {}
+
+
 return lib

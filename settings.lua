@@ -20,9 +20,9 @@ function lib.load()
     }
 end
 
-lib.TILE_SIZE = 23 --size of tile in pixels
+lib.TILE_SIZE = 24 --size of tile in pixels
 lib.map = { --# of tiles
-    Width = 29,
+    Width = 33,
     Height = 30
 }
 

@@ -1,6 +1,7 @@
 --level metadata and functions
-local SETTINGS = require('settings')
 local lib = {}
+local IMAGES = require('lib.images')
+local SETTINGS = require('settings')
 
 local TILE_SIZE = SETTINGS.TILE_SIZE --size of tile in pixels
 local map = SETTINGS.map
@@ -22,11 +23,18 @@ local COLORS = {
 }
 
 local maps = require('level.maps')
-local mapData = {}
+local mapData = {} --tile map loads here
 local camera = {x = 0, y = 0}
 
---create level
-function lib.init(level_number)
+--ui buttons load here
+local UI = {
+    turrets = {},
+    sell = {},
+    upgrade = {},
+}
+
+--initialize level
+function lib.load(level_number)
     --load tiles
     level_number = tonumber(level_number) or 1
     mapData = maps["level_"..level_number]
@@ -38,6 +46,35 @@ function lib.init(level_number)
     else
         COLORS[0] = {0.7, 0.8, 0.7}
     end
+
+    --create UI
+    --turrets icons
+    for i=1, 6 do
+        local turret = {
+            img = IMAGES.library["icon_"..i]
+        }
+        turret.scale = {
+            x = 100 / turret.img:getWidth(), --200 / 50
+            y = 100 / turret.img:getHeight()
+        }
+        turret.width = turret.img:getWidth() * turret.scale.x
+        turret.height = turret.img:getHeight() * turret.scale.y
+
+        --split x into 3 columns
+        turret.x = SCREEN.MAP.WIDTH
+        if i % 3 == 1 then
+            turret.x = turret.x + (SCREEN.UI.WIDTH / 4)
+        elseif i % 3 == 2 then
+            turret.x = turret.x + (2 * SCREEN.UI.WIDTH / 4)
+        else
+            turret.x = turret.x + (3 * SCREEN.UI.WIDTH / 4)
+        end
+        --split y into 2 rows
+        turret.y = (math.ceil(i / 3) - 1) * (2*SCREEN.HEIGHT / 9) + turret.height / 2
+        table.insert(UI.turrets, turret)
+    end
+
+    --sell/upgrade buttons
 end
 
 --draw function
@@ -72,6 +109,12 @@ function lib.draw()
         SCREEN.HEIGHT
     )
 
+    --[[
+    --TODO
+    add enemy properties section
+    add next wave information
+    --]]
+
     --separate into thirds
     local third = SCREEN.HEIGHT / 3
     local padding = 40
@@ -83,24 +126,29 @@ function lib.draw()
         start_x = SCREEN.MAP.WIDTH + padding,
         start_y = 0 + padding
     }
-    for row = 1, 3 do
-        for col = 1, 3 do
-            local x = grid.start_x + (col - 1) * (grid.size + grid.spacing)
-            local y = grid.start_y + (row - 1) * (grid.size + grid.spacing)
+    -- for row = 1, 3 do
+    --     for col = 1, 3 do
+    --         local x = grid.start_x + (col - 1) * (grid.size + grid.spacing)
+    --         local y = grid.start_y + (row - 1) * (grid.size + grid.spacing)
 
-            --draw button background
-            love.graphics.setColor{0.3, 0.3, 0.3}
-            love.graphics.rectangle("fill", x, y, grid.size, grid.size)
+    --         --draw button background
+    --         love.graphics.setColor{0.3, 0.3, 0.3}
+    --         love.graphics.rectangle("fill", x, y, grid.size, grid.size)
 
-            --draw button border
-            love.graphics.setColor{0.6, 0.6, 0.6}
-            love.graphics.rectangle("line", x, y, grid.size, grid.size)
+    --         --draw button border
+    --         love.graphics.setColor{0.6, 0.6, 0.6}
+    --         love.graphics.rectangle("line", x, y, grid.size, grid.size)
 
-            --icons
-            love.graphics.setColor{1, 1, 1}
-            local text = "T" .. ((row-1) * 3 + col)
-            love.graphics.print(text, x + grid.size/2 - 8, y + grid.size/2 - 6)
-        end
+    --         --icons
+    --         love.graphics.setColor{1, 1, 1}
+    --         local text = "T" .. ((row-1) * 3 + col)
+    --         love.graphics.print(text, x + grid.size/2 - 8, y + grid.size/2 - 6)
+    --     end
+    -- end
+    --button icons
+    for _,turret in pairs(UI.turrets) do
+        love.graphics.setColor{1, 1, 1}
+        love.graphics.draw(turret.img, turret.x, turret.y, 0, turret.scale.x, turret.scale.y)
     end
 
     --sell menu
