@@ -1,6 +1,6 @@
 if os.getenv("LOCAL_LUA_DEBUGGER_VSCODE") == "1" then require("lldebugger").start() end
 local GAME = require('game')
-local DRAW = require('draw')
+local ENUMS = require('enums')
 local TURRET = require('turret')
 local MENU = require('menu')
 local LEVEL_SELECT = require('level.select')
@@ -41,15 +41,10 @@ function love.update()
 
 end
 
-local click = {
-    left = 1,
-    right = 2
-}
-
 --left or right mouse button is clicked
 function love.mousepressed(x, y, mouseButton)
     if game.state == GAME.STATES.MENU then
-        if mouseButton == click.left then
+        if mouseButton == ENUMS.CLICK.LEFT then
             --print("You left clicked at: ("..x..", "..y..")")
             if x >= MENU.Buttons.Play.x and x <= (MENU.Buttons.Play.x + MENU.Buttons.Play.width) and
                 y >= MENU.Buttons.Play.y and y <= (MENU.Buttons.Play.y + MENU.Buttons.Play.height) then
@@ -64,7 +59,7 @@ function love.mousepressed(x, y, mouseButton)
             end
         end
     elseif game.state == GAME.STATES.LEVEL_SELECT then
-        if mouseButton == click.left then
+        if mouseButton == ENUMS.CLICK.LEFT then
             for index,level in pairs(LEVEL_SELECT.Levels) do
                 if x >= level.x and x <= (level.x + level.width) and
                     y >= level.y and y <= (level.y + level.height) then
@@ -80,7 +75,7 @@ function love.mousepressed(x, y, mouseButton)
         end
     elseif game.state == GAME.STATES.GAME then
         --game logic
-        LEVEL.interact(game, x, y, mouseButton)
+        LEVEL.mousepressed(game, x, y, mouseButton)
     end
 end
 

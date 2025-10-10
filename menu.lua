@@ -5,19 +5,11 @@ local lib = {}
 
 lib.Buttons = {
     Play = {
-        -- width = 150,
-        -- height = 50,
-        -- x = 325,
-        -- y = 300,
         text = "Play",
         hovered = false,
         pressed = false
     },
     Quit = {
-        -- width = 150,
-        -- height = 50,
-        -- x = 325,
-        -- y = 350,
         text = "Quit",
         hovered = false,
         pressed = false

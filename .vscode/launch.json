@@ -6,7 +6,7 @@
       "request": "launch",
       "name": "Debug Love",
       "program": {
-          "command": "lovec"
+          "command": "love"
       },
       "args": [ "${workspaceFolder} "]
     }

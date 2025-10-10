@@ -9,8 +9,8 @@ lib.STATES = {
 
 function lib.newGame()
     local game = {
-        money = 100,
-        lives = 20,
+        money = 30,
+        lives = 10,
         level = 0,
         round = 1,
         state = lib.STATES.MENU,
