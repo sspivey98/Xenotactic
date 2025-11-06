@@ -14,6 +14,13 @@ local maps = require('level.maps')
 local mapData = {} --tile map loads here
 local camera = {x = 0, y = 0}
 
+local currentTile = {
+    inbounds = true, --in map or not
+    valid = true, --location is buildable
+    x = 0,
+    y = 0,
+}
+
 --ui buttons load here
 local UI = {
     turrets = {},
@@ -70,25 +77,25 @@ function lib.load(level_number)
 end
 
 --draw function
-function lib.draw()
+function lib.draw(game)
     --draw map
     for y=1, map.Height do
         for x = 1, map.Width do
             --print(x..", "..y)
             local tileType = mapData[y][x]
             love.graphics.setColor(ENUMS.COLORS[tileType])
-            love.graphics.rectangle("fill", 
-                (x-1) * TILE_SIZE, 
-                (y-1) * TILE_SIZE, 
-                TILE_SIZE, 
+            love.graphics.rectangle("fill",
+                (x-1) * TILE_SIZE,
+                (y-1) * TILE_SIZE,
+                TILE_SIZE,
                 TILE_SIZE)
-            
+
             -- Draw grid lines
             love.graphics.setColor{0, 0, 0, 0.3}
-            love.graphics.rectangle("line", 
-                (x-1) * TILE_SIZE, 
-                (y-1) * TILE_SIZE, 
-                TILE_SIZE, 
+            love.graphics.rectangle("line",
+                (x-1) * TILE_SIZE,
+                (y-1) * TILE_SIZE,
+                TILE_SIZE,
                 TILE_SIZE)
         end
     end
@@ -132,11 +139,39 @@ function lib.draw()
     local sellStartY = third + padding
     love.graphics.setColor{1, 1, 1}
     love.graphics.print("SELL", grid.start_x, sellStartY)
-    
+
     --upgrade menu
     local upgradeStartY = third*2 + padding
     love.graphics.setColor{1, 1, 1}
     love.graphics.print("Upgrade", grid.start_x, upgradeStartY)
+
+    --placementMode
+    --[[
+        get current mouse position
+        if its in the map
+            highlight top left
+            draw circle around cursor
+    --]]
+
+    if game.placementMode then
+        if currentTile.inbounds then
+            love.graphics.setColor{0.3, 1, 0.3, 0.5}
+            love.graphics.rectangle("fill",
+                currentTile.x,
+                currentTile.y,
+                TILE_SIZE*2,
+                TILE_SIZE*2
+            )
+            --draw circle
+            love.graphics.setColor{1, 0, 0.3} --bright red
+            love.graphics.circle("line",
+                currentTile.x + TILE_SIZE,
+                currentTile.y + TILE_SIZE,
+                100, --radius, should come from turret?
+                20
+            )
+        end
+    end
 end
 
 --translates to in-game coordinates
@@ -161,6 +196,7 @@ end
 function lib.mousepressed(game, x, y, mouseButton)
     if mouseButton == ENUMS.CLICK.LEFT then
         local tile = getTileAt(x, y)
+        if game.placementMode then end --TODO
         if tile then
             print(tile.x..", "..tile.y)
             print(tile.type)
@@ -171,14 +207,19 @@ function lib.mousepressed(game, x, y, mouseButton)
                     y >= turret.y and y <= turret.y + turret.height then
                     if game.money < turret.cost then
                         SOUNDS.library["invalid"]:play()
+                        --flash icon dark red?
                     else
                         SOUNDS.library["button_press"]:play()
-                        --TODO turret build logic
+                        --turret build logic
+                        game.selectedTurretType = ""
+                        game.placementMode = true
                     end
                 end
             end
         end
     elseif mouseButton == ENUMS.CLICK.RIGHT then
+        --deselect whatever
+        game.placementMode = false
     end
 end
 
@@ -194,6 +235,17 @@ function lib.update()
         if turret.hovered and not turret.wasHovered then
             (SOUNDS.library["button_hover"]):play()
         end
+    end
+
+    --updateMap
+    local tile = getTileAt(mouse.x, mouse.y)
+    if tile and tile.type ~= 1 then
+        currentTile.inbounds = true
+        --do backwards conversion for 'snap' feel
+        currentTile.x = (tile.x - 1) * TILE_SIZE
+        currentTile.y = (tile.y - 1) * TILE_SIZE
+    else
+        currentTile.inbounds = false
     end
 
 end

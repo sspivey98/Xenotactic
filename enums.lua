@@ -20,4 +20,8 @@ lib.COLORS = {
     [3] = {0.8, 0.2, 0.2} --red
 }
 
+lib.TURRET = {
+    [0] = "Wall"
+}
+
 return lib

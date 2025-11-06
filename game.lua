@@ -22,7 +22,9 @@ function lib.newGame()
         screen = {
 			w = love.graphics.getWidth(),
 			h = love.graphics.getHeight()
-		}	
+        },
+        selectedTurretType = nil,
+        placementMode = false
     }
 
     return game

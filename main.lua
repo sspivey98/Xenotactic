@@ -22,7 +22,7 @@ function love.load()
     MENU.load()
 end
 
---interactive function
+--update the state of the game every frame
 function love.update()
     if game.state == GAME.STATES.MENU then
         MENU.update()
@@ -79,14 +79,14 @@ function love.mousepressed(x, y, mouseButton)
     end
 end
 
---rendering
+--draw on the screen every frame
 function love.draw()
     if game.state == GAME.STATES.MENU then
         MENU.draw(game)
     elseif game.state == GAME.STATES.LEVEL_SELECT then
         LEVEL_SELECT.drawLevelSelect()
     elseif game.state == GAME.STATES.GAME then
-        LEVEL.draw()
+        LEVEL.draw(game)
     elseif game.state == GAME.STATES.GAME_OVER then
     else
         --error
