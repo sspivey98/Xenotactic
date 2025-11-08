@@ -21,10 +21,8 @@ function lib:new(o)
     o = o or {}
     setmetatable(self, o)
     self.__index = self
-    o.position = {
-        x = 0,
-        y = 0
-    }
+    assert(type(o.position) == "table")
+    assert(type(o.position.x) == "number" and type(o.position.y) == "number")
     o.cost = o.cost or 0
     o.sell = o.sell or 0
     o.range = o.range or 0
@@ -34,7 +32,7 @@ function lib:new(o)
     return o
 end
 
-function lib:set()
+function lib:set(name, cost)
     self.name = name
     self.cost = cost
 end

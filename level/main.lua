@@ -28,6 +28,50 @@ local UI = {
     upgrade = {},
 }
 
+--translates to in-game coordinates
+local function getTileAt(x, y)
+    local tileX = math.floor(x / TILE_SIZE) + 1
+    local tileY = math.floor(y / TILE_SIZE) + 1
+
+    --do bounds checks
+    if (tileX < 1 or tileX > map.Width) or (tileY < 1 or tileY > map.Height) then
+        return nil
+    end
+
+    local tile = {
+        x = tileX,
+        y = tileY,
+        type = mapData[tileY][tileX]
+    }
+    return tile
+end
+
+--check if tile is buildable, and if there is a turret already
+--x and y are in tile coordinates, not absolute coordinates
+local function isValidPlacement(game)
+    local tiles = {
+        [1] = getTileAt(currentTile.x, currentTile.y),
+        [2] = getTileAt(currentTile.x + TILE_SIZE, currentTile.y),
+        [3] = getTileAt(currentTile.x, currentTile.y + TILE_SIZE),
+        [4] = getTileAt(currentTile.x + TILE_SIZE, currentTile.y + TILE_SIZE)
+    }
+
+    --check four tiles -> tile type '0' is valid; make sure none are off the tilemap (returns nil)
+    --check if tile is of 
+    for _, tile in ipairs(tiles) do
+        if tile == nil then return false end
+        if tile.type ~= 0 then return false end
+    end
+
+    --check if tile already has turret
+    for _,turret in ipairs(game.turrets) do
+        --check turret coordinates
+        --if turret.position.x == 
+    end
+
+    return true
+end
+
 --initialize level
 function lib.load(level_number)
     --load tiles
@@ -107,9 +151,18 @@ function lib.draw(game)
         SCREEN.UI.WIDTH,
         SCREEN.HEIGHT
     )
+    --<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    --|          turrets           |
+    -->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    for _,turret in ipairs(game.turrets) do
+        
+    end
 
+    --<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    --|          UI                |
+    -->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     --[[
-    --TODO
+    --TODO for UI
     add enemy properties section
     add next wave information
     --]]
@@ -145,61 +198,66 @@ function lib.draw(game)
     love.graphics.setColor{1, 1, 1}
     love.graphics.print("Upgrade", grid.start_x, upgradeStartY)
 
-    --placementMode
+    --<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    --|        placementMode       |
+    -->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     --[[
         get current mouse position
         if its in the map
-            highlight top left
-            draw circle around cursor
+            highlight starting at top left
+            draw circle around center of four tiles
     --]]
 
     if game.placementMode then
         if currentTile.inbounds then
-            love.graphics.setColor{0.3, 1, 0.3, 0.5}
-            love.graphics.rectangle("fill",
-                currentTile.x,
-                currentTile.y,
-                TILE_SIZE*2,
-                TILE_SIZE*2
-            )
-            --draw circle
-            love.graphics.setColor{1, 0, 0.3} --bright red
-            love.graphics.circle("line",
-                currentTile.x + TILE_SIZE,
-                currentTile.y + TILE_SIZE,
-                100, --radius, should come from turret?
-                20
-            )
+            if isValidPlacement(game) then
+                love.graphics.setColor{0.3, 1, 0.3, 0.5}
+                love.graphics.rectangle("fill",
+                    currentTile.x,
+                    currentTile.y,
+                    TILE_SIZE*2,
+                    TILE_SIZE*2
+                )
+                --draw circle
+                love.graphics.setColor{1, 0, 0.3} --bright red
+                love.graphics.circle("line",
+                    currentTile.x + TILE_SIZE,
+                    currentTile.y + TILE_SIZE,
+                    100, --radius, should come from turret?
+                    20
+                )
+            else
+                love.graphics.setColor{1, 0.3, 0.3, 0.5}
+                love.graphics.rectangle("fill",
+                    currentTile.x,
+                    currentTile.y,
+                    TILE_SIZE*2,
+                    TILE_SIZE*2
+                )
+            end
         end
     end
-end
-
---translates to in-game coordinates
-local function getTileAt(x, y)
-    local tileX = math.floor(x / TILE_SIZE) + 1
-    local tileY = math.floor(y / TILE_SIZE) + 1
-
-    --do bounds checks
-    if (tileX < 1 or tileX > map.Width) or (tileY < 1 or tileY > map.Height) then
-        return nil
-    end
-
-    local tile = {
-        x = tileX,
-        y = tileY,
-        type = mapData[tileY][tileX]
-    }
-    return tile
 end
 
 --interact function
 function lib.mousepressed(game, x, y, mouseButton)
     if mouseButton == ENUMS.CLICK.LEFT then
         local tile = getTileAt(x, y)
-        if game.placementMode then end --TODO
+
         if tile then
-            print(tile.x..", "..tile.y)
-            print(tile.type)
+            print("("..tile.x..", "..tile.y..") :: "..tile.type)
+            if game.placementMode then--TODO
+                --check placement is valid
+                if isValidPlacement(game) == false then
+                    SOUNDS.library["invalid"]:play()
+                --turret is placed
+                else  
+                    --subtract cash
+                    --add to game.turrets
+                    game.placementMode = false
+                    SOUNDS.library["turret_build"]:play()
+                end
+            end 
         --select from UI
         else
             for _,turret in ipairs(UI.turrets) do
