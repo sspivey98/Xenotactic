@@ -4,15 +4,18 @@ local ENUMS = require('enums')
 local IMAGES = require('lib.images')
 local SOUNDS = require('lib.sounds')
 local SETTINGS = require('settings')
-local ENUMS = require('enums')
+local MAPS = require('level.maps')
+local TURRET = require('turret')
 
+--GLOBALS
 local TILE_SIZE = SETTINGS.TILE_SIZE --size of tile in pixels
 local map = SETTINGS.map
 local SCREEN = SETTINGS.SCREEN
 
-local maps = require('level.maps')
+--CLASS
 local mapData = {} --tile map loads here
 local camera = {x = 0, y = 0}
+local animate = false
 
 local currentTile = {
     inbounds = true, --in map or not
@@ -28,6 +31,7 @@ local UI = {
     upgrade = {},
 }
 
+--FUNCTIONS
 --translates to in-game coordinates
 local function getTileAt(x, y)
     local tileX = math.floor(x / TILE_SIZE) + 1
@@ -76,7 +80,7 @@ end
 function lib.load(level_number)
     --load tiles
     level_number = tonumber(level_number) or 1
-    mapData = maps["level_"..level_number]
+    mapData = MAPS["level_"..level_number]
 
     if level_number == 5 then
         ENUMS.COLORS[0] = {0.0, 0.2, 0.0}
@@ -90,6 +94,7 @@ function lib.load(level_number)
     --turrets icons
     for i=1, 6 do
         local turret = {
+            id = i,
             img = IMAGES.library["icon_"..i],
             hovered = false,
             wasHovered = false,
@@ -114,7 +119,7 @@ function lib.load(level_number)
         end
         --split y into 2 rows
         turret.y = (math.ceil(i / 3) - 1) * turret.height + SCREEN.HEIGHT/6 - turret.height
-        table.insert(UI.turrets, turret)
+        UI.turrets[i] = turret
     end
 
     --sell/upgrade menus
@@ -155,7 +160,9 @@ function lib.draw(game)
     --|          turrets           |
     -->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     for _,turret in ipairs(game.turrets) do
-        
+        if not turret.built then
+            turret:drawBuild()
+        end
     end
 
     --<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -251,13 +258,16 @@ function lib.mousepressed(game, x, y, mouseButton)
                 if isValidPlacement(game) == false then
                     SOUNDS.library["invalid"]:play()
                 --turret is placed
-                else  
+                else
                     --subtract cash
                     --add to game.turrets
+                    local turret = TURRET:new(game.selectedTurretType, tile.x, tile.y)
+                    table.insert(game.turrets, turret)
+                    game.money = game.money - turret.cost
                     game.placementMode = false
                     SOUNDS.library["turret_build"]:play()
                 end
-            end 
+            end
         --select from UI
         else
             for _,turret in ipairs(UI.turrets) do
@@ -269,7 +279,7 @@ function lib.mousepressed(game, x, y, mouseButton)
                     else
                         SOUNDS.library["button_press"]:play()
                         --turret build logic
-                        game.selectedTurretType = ""
+                        game.selectedTurretType = turret.id
                         game.placementMode = true
                     end
                 end
@@ -282,7 +292,7 @@ function lib.mousepressed(game, x, y, mouseButton)
 end
 
 --update function
-function lib.update()
+function lib.update(game, dt)
     --TODO camera movement?
     local mouse = { x=0, y=0 }
     mouse.x, mouse.y = love.mouse.getPosition()
@@ -306,6 +316,12 @@ function lib.update()
         currentTile.inbounds = false
     end
 
+    --animate
+    for _,turret in ipairs(game.turrets) do
+        if not turret.buildAnimation.built then
+            turret:updateBuild(dt)
+        end
+    end
 end
 
 return lib

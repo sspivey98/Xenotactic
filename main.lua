@@ -1,12 +1,10 @@
 if os.getenv("LOCAL_LUA_DEBUGGER_VSCODE") == "1" then require("lldebugger").start() end
 local GAME = require('game')
 local ENUMS = require('enums')
-local TURRET = require('turret')
 local MENU = require('menu')
 local LEVEL_SELECT = require('level.select')
 local LEVEL = require('level.main')
 local SOUNDS = require('lib.sounds')
-local IMAGES = require('lib.images')
 local SETTINGS = require('settings')
 
 local game
@@ -23,7 +21,7 @@ function love.load()
 end
 
 --update the state of the game every frame
-function love.update()
+function love.update(dt)
     if game.state == GAME.STATES.MENU then
         MENU.update()
     elseif game.state == GAME.STATES.LEVEL_SELECT then
@@ -35,7 +33,7 @@ function love.update()
         if love.keyboard.isDown("escape") then
             game.state = GAME.STATES.MENU
         end
-        LEVEL.update()
+        LEVEL.update(game, dt)
     elseif game.state == GAME.STATES.GAME_OVER then
     end
 
