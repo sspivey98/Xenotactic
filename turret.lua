@@ -40,8 +40,9 @@ local function turretBuildFrames()
         frames[i] = love.graphics.newQuad(
             i*SETTINGS.TILE_SIZE, --start x
             0, --start y
-            SETTINGS.TILE_SIZE, SETTINGS.TILE_SIZE, --width height
-            build_turret_sprite_sheet
+            SETTINGS.TILE_SIZE,--width
+            SETTINGS.TILE_SIZE,--height
+            build_turret_sprite_sheet:getDimensions()
         )
     end
     --add final turret sprite to stack?
@@ -49,16 +50,18 @@ local function turretBuildFrames()
 end
 
 function lib:new(id, x, y)
-    local o = turretType[id]
+    --copy turret
+    local o = {}
+    for k, v in pairs(turretType[id]) do o[k] = v end
     setmetatable(o, self)
     self.__index = self
-    o.position = {x=x, y=y}
+    o.position = {x=x, y=y} --top left
     assert(type(o.position) == "table")
     assert(type(o.position.x) == "number" and type(o.position.y) == "number")
     o.buildAnimation = {
         frames = turretBuildFrames(),
         currentFrame = 1,
-        frameTime = 0.08,
+        frameTime = 0.1,
         timer = 0,
         built = false
     }
@@ -83,16 +86,42 @@ function lib:updateBuild(dt)
     end
 end
 
---building animation
-function lib:drawBuild()
-    if self.buildAnimation.built then return end
+--turret logic
+function lib:update(dt)
+end
 
-    love.graphics.draw(
-        build_turret_sprite_sheet,
-        self.buildAnimation.frames[self.buildAnimation.currentFrame],
-        self.position.x,
-        self.position.y
-    )
+--draw turret
+function lib:draw()
+    if not self.buildAnimation.built then
+        love.graphics.setColor{0.7, 0.7, 0.7}
+        love.graphics.draw(
+            build_turret_sprite_sheet,
+            self.buildAnimation.frames[self.buildAnimation.currentFrame],
+            self.position.x,
+            self.position.y,
+            0,
+            2, --x scale
+            2  --y scale
+        )
+    else
+        love.graphics.setColor{0.8, 0.8, 0.8}
+        love.graphics.draw(
+            IMAGES.library["turret_action"],
+            self.position.x,
+            self.position.y,
+            0,
+            1.5, --x scale
+            1.5  --y scale
+        )
+        love.graphics.draw(
+            self.image,
+            self.position.x,
+            self.position.y,
+            0,
+            1.5, --x scale
+            1.5  --y scale
+        )
+    end
 end
 
 --selling logic and animation

@@ -15,7 +15,6 @@ local SCREEN = SETTINGS.SCREEN
 --CLASS
 local mapData = {} --tile map loads here
 local camera = {x = 0, y = 0}
-local animate = false
 
 local currentTile = {
     inbounds = true, --in map or not
@@ -61,7 +60,7 @@ local function isValidPlacement(game)
     }
 
     --check four tiles -> tile type '0' is valid; make sure none are off the tilemap (returns nil)
-    --check if tile is of 
+    --check if tile is of default type
     for _, tile in ipairs(tiles) do
         if tile == nil then return false end
         if tile.type ~= 0 then return false end
@@ -69,8 +68,12 @@ local function isValidPlacement(game)
 
     --check if tile already has turret
     for _,turret in ipairs(game.turrets) do
-        --check turret coordinates
-        --if turret.position.x == 
+        if not (currentTile.x + TILE_SIZE < turret.position.x or  -- new turret is completely to the left
+                currentTile.x > turret.position.x + TILE_SIZE or  -- new turret is completely to the right
+                currentTile.y + TILE_SIZE < turret.position.y or  -- new turret is completely above
+                currentTile.y > turret.position.y + TILE_SIZE) then -- new turret is completely below
+            return false
+        end
     end
 
     return true
@@ -160,9 +163,7 @@ function lib.draw(game)
     --|          turrets           |
     -->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     for _,turret in ipairs(game.turrets) do
-        if not turret.built then
-            turret:drawBuild()
-        end
+        turret:draw()
     end
 
     --<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -259,9 +260,7 @@ function lib.mousepressed(game, x, y, mouseButton)
                     SOUNDS.library["invalid"]:play()
                 --turret is placed
                 else
-                    --subtract cash
-                    --add to game.turrets
-                    local turret = TURRET:new(game.selectedTurretType, tile.x, tile.y)
+                    local turret = TURRET:new(game.selectedTurretType, currentTile.x, currentTile.y)
                     table.insert(game.turrets, turret)
                     game.money = game.money - turret.cost
                     game.placementMode = false
