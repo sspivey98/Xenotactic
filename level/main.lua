@@ -67,7 +67,7 @@ local function isValidPlacement(game)
     end
 
     --check if tile already has turret
-    for _,turret in ipairs(game.turrets) do
+    for _,turret in ipairs(game.gameState.turrets) do
         if not (currentTile.x + TILE_SIZE < turret.position.x or  -- new turret is completely to the left
                 currentTile.x > turret.position.x + TILE_SIZE or  -- new turret is completely to the right
                 currentTile.y + TILE_SIZE < turret.position.y or  -- new turret is completely above
@@ -95,13 +95,13 @@ function lib.load(level_number)
 
     --create UI
     --turrets icons
-    for i=1, 6 do
+    for i=1, 7 do
         local turret = {
             id = i,
             img = IMAGES.library["icon_"..i],
             hovered = false,
             wasHovered = false,
-            cost = 10
+            cost = ENUMS.TURRET_TYPE[i].cost
         }
         turret.scale = {
             x = 100 / turret.img:getWidth(), --80 / 50
@@ -118,7 +118,6 @@ function lib.load(level_number)
             turret.x = turret.x + (SCREEN.UI.WIDTH / 2) - turret.width / 2
         else
             turret.x = turret.x + (SCREEN.UI.WIDTH / 2) + turret.width / 2
-            turret.cost = turret.cost*4
         end
         --split y into 2 rows
         turret.y = (math.ceil(i / 3) - 1) * turret.height + SCREEN.HEIGHT/6 - turret.height
@@ -162,7 +161,7 @@ function lib.draw(game)
     --<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     --|          turrets           |
     -->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    for _,turret in ipairs(game.turrets) do
+    for _,turret in ipairs(game.gameState.turrets) do
         turret:draw()
     end
 
@@ -216,7 +215,7 @@ function lib.draw(game)
             draw circle around center of four tiles
     --]]
 
-    if game.placementMode then
+    if game.gameState.placementMode then
         if currentTile.inbounds then
             if isValidPlacement(game) then
                 love.graphics.setColor{0.3, 1, 0.3, 0.5}
@@ -254,16 +253,16 @@ function lib.mousepressed(game, x, y, mouseButton)
 
         if tile then
             print("("..tile.x..", "..tile.y..") :: "..tile.type)
-            if game.placementMode then--TODO
+            if game.gameState.placementMode then--TODO
                 --check placement is valid
                 if isValidPlacement(game) == false then
                     SOUNDS.library["invalid"]:play()
                 --turret is placed
                 else
-                    local turret = TURRET:new(game.selectedTurretType, currentTile.x, currentTile.y)
-                    table.insert(game.turrets, turret)
-                    game.money = game.money - turret.cost
-                    game.placementMode = false
+                    local turret = TURRET:new(game.gameState.selectedTurretType, currentTile.x, currentTile.y)
+                    table.insert(game.gameState.turrets, turret)
+                    game.gameState.money = game.gameState.money - turret.cost
+                    game.gameState.placementMode = false
                     SOUNDS.library["turret_build"]:play()
                 end
             end
@@ -272,21 +271,21 @@ function lib.mousepressed(game, x, y, mouseButton)
             for _,turret in ipairs(UI.turrets) do
                 if x >= turret.x and x <= turret.x + turret.width and
                     y >= turret.y and y <= turret.y + turret.height then
-                    if game.money < turret.cost then
+                    if game.gameState.money < turret.cost then
                         SOUNDS.library["invalid"]:play()
                         --flash icon dark red?
                     else
                         SOUNDS.library["button_press"]:play()
                         --turret build logic
-                        game.selectedTurretType = turret.id
-                        game.placementMode = true
+                        game.gameState.selectedTurretType = turret.id
+                        game.gameState.placementMode = true
                     end
                 end
             end
         end
     elseif mouseButton == ENUMS.CLICK.RIGHT then
         --deselect whatever
-        game.placementMode = false
+        game.gameState.placementMode = false
     end
 end
 
@@ -316,9 +315,9 @@ function lib.update(game, dt)
     end
 
     --animate
-    for _,turret in ipairs(game.turrets) do
+    for _,turret in ipairs(game.gameState.turrets) do
         if not turret.buildAnimation.built then
-            turret:updateBuild(dt)
+            turret:update(dt)
         end
     end
 end

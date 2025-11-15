@@ -7,22 +7,27 @@ lib.STATES = {
     GAME_OVER = 3
 }
 
-function lib.newGame()
+function lib.initGame()
     local game = {
-        money = 30,
-        lives = 10,
-        level = 0,
-        round = 1,
         state = lib.STATES.MENU,
-        turrets = {},
-        deployed = {},
-        selected = {0, 0},
-        gridShow = false,
-        grid = {},
         screen = {
-			w = love.graphics.getWidth(),
-			h = love.graphics.getHeight()
+            w = love.graphics.getWidth(),
+            h = love.graphics.getHeight()
         },
+        gameState = nil --newGame() goes here on level load
+    }
+
+    return game
+end
+
+function lib.newGame(o)
+    local game = {
+        money = o.money or 30,
+        lives = 10,
+        level = o.level or 1,
+        round = 0,
+        turrets = {},
+        selected = {0, 0},
         selectedTurretType = nil,
         placementMode = false
     }

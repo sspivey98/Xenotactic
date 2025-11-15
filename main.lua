@@ -14,7 +14,7 @@ function love.load()
     love.window.setTitle("Tower Defense")
     love.window.setMode(1280, 720)
 
-    game = GAME.newGame()
+    game = GAME.initGame()
     love.graphics.setNewFont("/assets/fonts/11_Visitor_TT1_BRK.ttf", 16)
     SETTINGS.load()
     MENU.load()
@@ -63,7 +63,7 @@ function love.mousepressed(x, y, mouseButton)
                     y >= level.y and y <= (level.y + level.height) then
                         --load level
                         (SOUNDS.library["button_press2"]):play()
-                        game.level = index
+                        game.gameState = GAME.newGame({level=index})
                         LEVEL.load(index)
                         game.state = GAME.STATES.GAME
                         print("Selected level: "..index)

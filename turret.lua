@@ -20,28 +20,18 @@ local SETTINGS = require('settings')
 --abstract interface for turret
 local lib = {}
 
---match number to enum
-local turretType = {
-    [1] = ENUMS.TURRET.WALL,
-    [2] = ENUMS.TURRET.GATLING,
-    [3] = ENUMS.TURRET.PLASMA,
-    [4] = ENUMS.TURRET.SAM,
-    [5] = ENUMS.TURRET.DCA,
-    [6] = ENUMS.TURRET.FREEZE,
-    [7] = ENUMS.TURRET.TESLA,
-}
-
 local build_turret_sprite_sheet = IMAGES.library["turret_build"]
 
 --return stack of frames as quads
 local function turretBuildFrames()
     local frames = {}
+    local spriteSize = 32
     for i=1,8 do
         frames[i] = love.graphics.newQuad(
-            i*SETTINGS.TILE_SIZE, --start x
+            (i-1)*spriteSize, --start x
             0, --start y
-            SETTINGS.TILE_SIZE,--width
-            SETTINGS.TILE_SIZE,--height
+            spriteSize,--width
+            spriteSize,--height
             build_turret_sprite_sheet:getDimensions()
         )
     end
@@ -52,7 +42,7 @@ end
 function lib:new(id, x, y)
     --copy turret
     local o = {}
-    for k, v in pairs(turretType[id]) do o[k] = v end
+    for k, v in pairs(ENUMS.TURRET_TYPE[id]) do o[k] = v end
     setmetatable(o, self)
     self.__index = self
     o.position = {x=x, y=y} --top left
@@ -68,26 +58,27 @@ function lib:new(id, x, y)
     return o
 end
 
---building logic 
-function lib:updateBuild(dt)
-    local animate = self.buildAnimation
-    if animate.built then return end
-
-    animate.timer = animate.timer + dt
-
-    if animate.timer >= animate.frameTime then
-        animate.timer = animate.timer - animate.frameTime
-        animate.currentFrame = animate.currentFrame + 1
-
-        if animate.currentFrame > #animate.frames then
-            animate.currentFrame = #animate.frames
-            animate.built = true
-        end
-    end
-end
-
 --turret logic
 function lib:update(dt)
+    --build animation
+    if not self.buildAnimation.built then
+        local animate = self.buildAnimation
+        if animate.built then return end
+
+        animate.timer = animate.timer + dt
+
+        if animate.timer >= animate.frameTime then
+            animate.timer = animate.timer - animate.frameTime
+            animate.currentFrame = animate.currentFrame + 1
+
+            if animate.currentFrame > #animate.frames then
+                animate.currentFrame = #animate.frames
+                animate.built = true
+            end
+        end
+    else
+        --turret targeting, reloading, and firing logic
+    end
 end
 
 --draw turret
@@ -100,8 +91,8 @@ function lib:draw()
             self.position.x,
             self.position.y,
             0,
-            2, --x scale
-            2  --y scale
+            1.5, --x scale
+            1.5  --y scale
         )
     else
         love.graphics.setColor{0.8, 0.8, 0.8}
@@ -126,6 +117,8 @@ end
 
 --selling logic and animation
 function lib:sell()
+    --refund money
+    --remove from game state turrets
 end
 
 function lib:select()

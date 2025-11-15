@@ -81,4 +81,15 @@ lib.TURRET = {
     }
 }
 
+--match number to enum
+lib.TURRET_TYPE = {
+    [1] = lib.TURRET.WALL,
+    [2] = lib.TURRET.GATLING,
+    [3] = lib.TURRET.PLASMA,
+    [4] = lib.TURRET.SAM,
+    [5] = lib.TURRET.DCA,
+    [6] = lib.TURRET.FREEZE,
+    [7] = lib.TURRET.TESLA,
+}
+
 return lib
