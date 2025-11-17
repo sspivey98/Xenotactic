@@ -259,9 +259,7 @@ function lib.mousepressed(game, x, y, mouseButton)
                     SOUNDS.library["invalid"]:play()
                 --turret is placed
                 else
-                    local turret = TURRET:new(game.gameState.selectedTurretType, currentTile.x, currentTile.y)
-                    table.insert(game.gameState.turrets, turret)
-                    game.gameState.money = game.gameState.money - turret.cost
+                    TURRET:new(game.gameState, currentTile.x, currentTile.y)
                     game.gameState.placementMode = false
                     SOUNDS.library["turret_build"]:play()
                 end

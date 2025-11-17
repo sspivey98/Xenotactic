@@ -39,10 +39,10 @@ local function turretBuildFrames()
     return frames
 end
 
-function lib:new(id, x, y)
+function lib:new(gameState, x, y)
     --copy turret
     local o = {}
-    for k, v in pairs(ENUMS.TURRET_TYPE[id]) do o[k] = v end
+    for k, v in pairs(ENUMS.TURRET_TYPE[gameState.selectedTurretType]) do o[k] = v end
     setmetatable(o, self)
     self.__index = self
     o.position = {x=x, y=y} --top left
@@ -55,6 +55,9 @@ function lib:new(id, x, y)
         timer = 0,
         built = false
     }
+    o.index = #gameState.turrets + 1 --index in game.gameState.turrets
+    table.insert(gameState.turrets, o)
+    gameState.money = gameState.money - o.cost
     return o
 end
 
@@ -96,6 +99,7 @@ function lib:draw()
         )
     else
         love.graphics.setColor{0.8, 0.8, 0.8}
+        --draw turret foundation
         love.graphics.draw(
             IMAGES.library["turret_action"],
             self.position.x,
@@ -104,6 +108,8 @@ function lib:draw()
             1.5, --x scale
             1.5  --y scale
         )
+        --draw turret sprite
+        --TODO more logic on rotation
         love.graphics.draw(
             self.image,
             self.position.x,
@@ -116,9 +122,11 @@ function lib:draw()
 end
 
 --selling logic and animation
-function lib:sell()
+function lib:sell(game)
     --refund money
+    game.money = game.money + self.sell
     --remove from game state turrets
+    table.remove(game.gameState.turrets, self.index)
 end
 
 function lib:select()

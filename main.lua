@@ -36,7 +36,6 @@ function love.update(dt)
         LEVEL.update(game, dt)
     elseif game.state == GAME.STATES.GAME_OVER then
     end
-
 end
 
 --left or right mouse button is clicked
@@ -46,28 +45,28 @@ function love.mousepressed(x, y, mouseButton)
             --print("You left clicked at: ("..x..", "..y..")")
             if x >= MENU.Buttons.Play.x and x <= (MENU.Buttons.Play.x + MENU.Buttons.Play.width) and
                 y >= MENU.Buttons.Play.y and y <= (MENU.Buttons.Play.y + MENU.Buttons.Play.height) then
-                    (SOUNDS.library["button_press"]):play()
-                    LEVEL_SELECT.load()
-                    game.state = GAME.STATES.LEVEL_SELECT
-                    print("Moving game state to level select")
+                (SOUNDS.library["button_press"]):play()
+                LEVEL_SELECT.load()
+                game.state = GAME.STATES.LEVEL_SELECT
+                print("Moving game state to level select")
             end
             if x >= MENU.Buttons.Quit.x and x <= (MENU.Buttons.Quit.x + MENU.Buttons.Quit.width) and
                 y >= MENU.Buttons.Quit.y and y <= (MENU.Buttons.Quit.y + MENU.Buttons.Quit.height) then
-                    love.event.quit()
+                love.event.quit()
             end
         end
     elseif game.state == GAME.STATES.LEVEL_SELECT then
         if mouseButton == ENUMS.CLICK.LEFT then
-            for index,level in pairs(LEVEL_SELECT.Levels) do
+            for index, level in pairs(LEVEL_SELECT.Levels) do
                 if x >= level.x and x <= (level.x + level.width) and
                     y >= level.y and y <= (level.y + level.height) then
-                        --load level
-                        (SOUNDS.library["button_press2"]):play()
-                        game.gameState = GAME.newGame({level=index})
-                        LEVEL.load(index)
-                        game.state = GAME.STATES.GAME
-                        print("Selected level: "..index)
-                        break
+                    --load level
+                    (SOUNDS.library["button_press2"]):play()
+                    game.gameState = GAME.newGame({ level = index })
+                    LEVEL.load(index)
+                    game.state = GAME.STATES.GAME
+                    print("Selected level: " .. index)
+                    break
                 end
             end
         end
