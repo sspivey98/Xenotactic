@@ -27,6 +27,7 @@ function lib.newGame(o)
         level = o.level or 1,
         round = 0,
         turrets = {},
+        enemies = {},
         selected = {0, 0},
         selectedTurretType = nil,
         placementMode = false

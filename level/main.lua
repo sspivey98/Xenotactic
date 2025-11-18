@@ -6,11 +6,13 @@ local SOUNDS = require('lib.sounds')
 local SETTINGS = require('settings')
 local MAPS = require('level.maps')
 local TURRET = require('turret')
+local ENEMY = require('enemy')
 
 --GLOBALS
 local TILE_SIZE = SETTINGS.TILE_SIZE --size of tile in pixels
 local map = SETTINGS.map
 local SCREEN = SETTINGS.SCREEN
+local random = love.math.random(15) --!DELETE
 
 --CLASS
 local mapData = {} --tile map loads here
@@ -166,6 +168,12 @@ function lib.draw(game)
     end
 
     --<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    --|          enemies           |
+    -->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    for _,enemy in ipairs(game.gameState.enemies) do
+        enemy:draw()
+    end
+    --<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     --|          UI                |
     -->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     --[[
@@ -312,11 +320,20 @@ function lib.update(game, dt)
         currentTile.inbounds = false
     end
 
-    --animate
+    --turrets
     for _,turret in ipairs(game.gameState.turrets) do
         if not turret.buildAnimation.built then
             turret:update(dt)
         end
+    end
+
+    --enemies
+    for _,enemy in ipairs(game.gameState.enemies) do
+        enemy:update(dt)
+    end
+
+    if #game.gameState.turrets == 1 then
+        ENEMY:new(game.gameState, random)
     end
 end
 
