@@ -4,19 +4,15 @@ local ENUMS = require('enums')
 local IMAGES = require('lib.images')
 local SOUNDS = require('lib.sounds')
 local SETTINGS = require('settings')
-local MAPS = require('level.maps')
 local TURRET = require('turret')
 local ENEMY = require('enemy')
+local UTIL = require('level.util')
 
 --GLOBALS
 local TILE_SIZE = SETTINGS.TILE_SIZE --size of tile in pixels
 local map = SETTINGS.map
 local SCREEN = SETTINGS.SCREEN
 local random = love.math.random(15) --!DELETE
-
---CLASS
-local mapData = {} --tile map loads here
-local camera = {x = 0, y = 0}
 
 local currentTile = {
     inbounds = true, --in map or not
@@ -32,60 +28,11 @@ local UI = {
     upgrade = {},
 }
 
---FUNCTIONS
---translates to in-game coordinates
-local function getTileAt(x, y)
-    local tileX = math.floor(x / TILE_SIZE) + 1
-    local tileY = math.floor(y / TILE_SIZE) + 1
-
-    --do bounds checks
-    if (tileX < 1 or tileX > map.Width) or (tileY < 1 or tileY > map.Height) then
-        return nil
-    end
-
-    local tile = {
-        x = tileX,
-        y = tileY,
-        type = mapData[tileY][tileX]
-    }
-    return tile
-end
-
---check if tile is buildable, and if there is a turret already
---x and y are in tile coordinates, not absolute coordinates
-local function isValidPlacement(game)
-    local tiles = {
-        [1] = getTileAt(currentTile.x, currentTile.y),
-        [2] = getTileAt(currentTile.x + TILE_SIZE, currentTile.y),
-        [3] = getTileAt(currentTile.x, currentTile.y + TILE_SIZE),
-        [4] = getTileAt(currentTile.x + TILE_SIZE, currentTile.y + TILE_SIZE)
-    }
-
-    --check four tiles -> tile type '0' is valid; make sure none are off the tilemap (returns nil)
-    --check if tile is of default type
-    for _, tile in ipairs(tiles) do
-        if tile == nil then return false end
-        if tile.type ~= 0 then return false end
-    end
-
-    --check if tile already has turret
-    for _,turret in ipairs(game.gameState.turrets) do
-        if not (currentTile.x + TILE_SIZE < turret.position.x or  -- new turret is completely to the left
-                currentTile.x > turret.position.x + TILE_SIZE or  -- new turret is completely to the right
-                currentTile.y + TILE_SIZE < turret.position.y or  -- new turret is completely above
-                currentTile.y > turret.position.y + TILE_SIZE) then -- new turret is completely below
-            return false
-        end
-    end
-
-    return true
-end
 
 --initialize level
 function lib.load(level_number)
     --load tiles
     level_number = tonumber(level_number) or 1
-    mapData = MAPS["level_"..level_number]
 
     if level_number == 5 then
         ENUMS.COLORS[0] = {0.0, 0.2, 0.0}
@@ -135,7 +82,7 @@ function lib.draw(game)
     for y=1, map.Height do
         for x = 1, map.Width do
             --print(x..", "..y)
-            local tileType = mapData[y][x]
+            local tileType = game.gameState.map[y][x]
             love.graphics.setColor(ENUMS.COLORS[tileType])
             love.graphics.rectangle("fill",
                 (x-1) * TILE_SIZE,
@@ -225,7 +172,7 @@ function lib.draw(game)
 
     if game.gameState.placementMode then
         if currentTile.inbounds then
-            if isValidPlacement(game) then
+            if UTIL:isValidPlacement(currentTile, game.gameState) then
                 love.graphics.setColor{0.3, 1, 0.3, 0.5}
                 love.graphics.rectangle("fill",
                     currentTile.x,
@@ -257,13 +204,13 @@ end
 --interact function
 function lib.mousepressed(game, x, y, mouseButton)
     if mouseButton == ENUMS.CLICK.LEFT then
-        local tile = getTileAt(x, y)
+        local tile = UTIL.getTileAt(game.gameState.map, x, y)
 
         if tile then
             print("("..tile.x..", "..tile.y..") :: "..tile.type)
             if game.gameState.placementMode then--TODO
                 --check placement is valid
-                if isValidPlacement(game) == false then
+                if UTIL:isValidPlacement(currentTile, game.gameState) == false then
                     SOUNDS.library["invalid"]:play()
                 --turret is placed
                 else
@@ -297,7 +244,6 @@ end
 
 --update function
 function lib.update(game, dt)
-    --TODO camera movement?
     local mouse = { x=0, y=0 }
     mouse.x, mouse.y = love.mouse.getPosition()
     for _,turret in ipairs(UI.turrets) do
@@ -310,7 +256,7 @@ function lib.update(game, dt)
     end
 
     --updateMap
-    local tile = getTileAt(mouse.x, mouse.y)
+    local tile = UTIL.getTileAt(game.gameState.map, mouse.x, mouse.y)
     if tile and tile.type ~= 1 then
         currentTile.inbounds = true
         --do backwards conversion for 'snap' feel
@@ -322,9 +268,7 @@ function lib.update(game, dt)
 
     --turrets
     for _,turret in ipairs(game.gameState.turrets) do
-        if not turret.buildAnimation.built then
-            turret:update(dt)
-        end
+        turret:update(dt)
     end
 
     --enemies
@@ -332,7 +276,7 @@ function lib.update(game, dt)
         enemy:update(dt)
     end
 
-    if #game.gameState.turrets == 1 then
+    if #game.gameState.turrets == 1 and #game.gameState.enemies == 0 then
         ENEMY:new(game.gameState, random)
     end
 end

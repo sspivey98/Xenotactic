@@ -6,6 +6,7 @@ local LEVEL_SELECT = require('level.select')
 local LEVEL = require('level.main')
 local SOUNDS = require('lib.sounds')
 local SETTINGS = require('settings')
+local MAPS = require('level.maps')
 
 local game
 
@@ -62,7 +63,10 @@ function love.mousepressed(x, y, mouseButton)
                     y >= level.y and y <= (level.y + level.height) then
                     --load level
                     (SOUNDS.library["button_press2"]):play()
-                    game.gameState = GAME.newGame({ level = index })
+                    game.gameState = GAME.newGame{ 
+                        level = index,
+                        map = MAPS["level_"..index]
+                    } --put map_data here
                     LEVEL.load(index)
                     game.state = GAME.STATES.GAME
                     print("Selected level: " .. index)

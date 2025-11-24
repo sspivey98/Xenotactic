@@ -4,12 +4,12 @@ local SETTINGS = require('settings')
 local lib = {}
 
 lib.Buttons = {
-    Play = {
+    {
         text = "Play",
         hovered = false,
         pressed = false
     },
-    Quit = {
+    {
         text = "Quit",
         hovered = false,
         pressed = false
@@ -40,7 +40,7 @@ end
 
 function lib.draw(game)
     -- Background
-    splash_screen = IMAGES.library["title_screen"]
+    local splash_screen = IMAGES.library["title_screen"]
     love.graphics.setColor(1, 1, 1)
 
     --center image
@@ -54,11 +54,10 @@ function lib.draw(game)
     local x = (SETTINGS.SCREEN.WIDTH - scaled.width) / 2
     local y = (SETTINGS.SCREEN.HEIGHT - scaled.height) / 2
 
-    --love.graphics.draw(splash_screen, 0, 0, 0, 800 / splash_screen:getWidth(), 600 / splash_screen:getHeight())
     love.graphics.draw(splash_screen, x, y, 0, scale, scale)
-    
+
     --draw buttons
-    for name,button in pairs(lib.Buttons) do
+    for _,button in ipairs(lib.Buttons) do
         -- Draw button rectangle
         local bgColor = {0.5, 0.5, 0.5}
 
@@ -69,7 +68,7 @@ function lib.draw(game)
         --button background
         love.graphics.setColor(bgColor)  -- Gray color
         love.graphics.rectangle("fill", button.x, button.y, button.width, button.height)
-        
+
         -- Draw button border
         love.graphics.setColor(0, 0, 0)  -- Black color
         love.graphics.rectangle("line", button.x, button.y, button.width, button.height)
@@ -78,7 +77,7 @@ function lib.draw(game)
         local font = love.graphics.getFont()
         local textWidth = font:getWidth(button.text)
         local textHeight = font:getHeight()
-        love.graphics.print(button.text, 
+        love.graphics.print(button.text,
                         button.x + (button.width - textWidth) / 2, 
                         button.y + (button.height - textHeight) / 2)
     end
