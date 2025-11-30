@@ -1,9 +1,18 @@
 local ENUMS = require('enums')
 local IMAGES = require('lib.images')
 
+--[[
+*ENEMY PATHING NOTES
+
+pathing only updates on turret buy/sell
+enemies will have different paths based on position and final
+
+--]]
+
 --enemy class
 local lib = {}
 
+local SETTINGS = require('settings')
 local enemies_sprite_sheet = IMAGES.library["enemies"]
 
 local function enemyMoveFrames(enemyType)
@@ -24,13 +33,15 @@ local function enemyMoveFrames(enemyType)
     return frames
 end
 
+
 function lib:new(gameState, enemyType)
     --copy turret
     local o = {}
     for k, v in pairs(ENUMS.ENEMY_TYPE[enemyType]) do o[k] = v end
     setmetatable(o, self)
     self.__index = self
-    o.position = {x=0, y=400} --TODO generate in starting zone
+    --between {0,12} and {0,20}
+    o.position = {x=0, y=SETTINGS.TILE_SIZE*math.random(12, 20)}
 
     o.moveAnimation = {
         frames = enemyMoveFrames(enemyType),

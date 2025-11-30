@@ -24,8 +24,8 @@ function lib.newGame(o)
     local game = {
         money = o.money or 30,
         map = o.map or {},
-        path1 = {}, --left to right
-        path2 = {}, --up to down
+        path1 = {}, --flowField left -> right
+        path2 = {}, --flowField up -> down
         lives = 10,
         level = o.level or 1,
         round = 0,
@@ -33,7 +33,8 @@ function lib.newGame(o)
         enemies = {},
         selected = {0, 0},
         selectedTurretType = nil,
-        placementMode = false
+        placementMode = false,
+        flowField = {}
     }
 
     return game

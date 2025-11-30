@@ -127,14 +127,26 @@ lib.ENEMY = {
         health = 58,
         value = 1,
     },
-    TURTLE = {},
+    TURTLE = {
+        speed = 1,
+        health = 10,
+        value = 2,
+    },
     REDCYBORG = {
         speed = 1,
         health = 73,
         value = 2,
     },
-    REDALIEN = {},
-    CYBORG = {},
+    REDALIEN = {
+        speed = 1,
+        health = 10,
+        value = 2,
+    },
+    CYBORG = {
+        speed = 1,
+        health = 10,
+        value = 2,
+    },
     ALIEN = {
         speed = 1,
         health = 26,

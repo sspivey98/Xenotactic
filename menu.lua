@@ -4,12 +4,12 @@ local SETTINGS = require('settings')
 local lib = {}
 
 lib.Buttons = {
-    {
+    Play = {
         text = "Play",
         hovered = false,
         pressed = false
     },
-    {
+    Quit = {
         text = "Quit",
         hovered = false,
         pressed = false
@@ -57,7 +57,7 @@ function lib.draw(game)
     love.graphics.draw(splash_screen, x, y, 0, scale, scale)
 
     --draw buttons
-    for _,button in ipairs(lib.Buttons) do
+    for _,button in pairs(lib.Buttons) do
         -- Draw button rectangle
         local bgColor = {0.5, 0.5, 0.5}
 

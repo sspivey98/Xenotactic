@@ -12,7 +12,7 @@ function lib.enemyHasPathing(gameState)
     return true
 end
 
---translates to in-game coordinates
+--translates pixels to in-game coordinates
 function lib.getTileAt(map, x, y)
     local tileX = math.floor(x / SETTINGS.TILE_SIZE) + 1
     local tileY = math.floor(y / SETTINGS.TILE_SIZE) + 1
@@ -29,6 +29,9 @@ function lib.getTileAt(map, x, y)
     }
     return tile
 end
+
+--convert map tile coordinate to center pixel
+function lib.getPixelAt(map, x, y) end
 
 --check if tile is buildable, if there is a turret already, or if it blocks the enemy pathing
 --currentTile needs {x,y}
