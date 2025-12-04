@@ -33,15 +33,19 @@ local function enemyMoveFrames(enemyType)
     return frames
 end
 
-
-function lib:new(gameState, enemyType)
+--[[
+@param1 gameState - from game.gameState, contains array of enemy objects
+@param2 enemyType - enums.ENEMY_TYPE specific enemy static variables to get
+@param3 direction - which flowField for the enemy to follow
+--]]
+function lib:new(gameState, enemyType, direction)
     --copy turret
     local o = {}
     for k, v in pairs(ENUMS.ENEMY_TYPE[enemyType]) do o[k] = v end
     setmetatable(o, self)
     self.__index = self
     --between {0,12} and {0,20}
-    o.position = {x=0, y=SETTINGS.TILE_SIZE*math.random(12, 20)}
+    o.position = {x=0, y=SETTINGS.TILE_SIZE*math.random(12, 20) - SETTINGS.TILE_SIZE/2}
 
     o.moveAnimation = {
         frames = enemyMoveFrames(enemyType),
@@ -53,7 +57,7 @@ function lib:new(gameState, enemyType)
         dead = false,
     }
     o.index = #gameState.enemies + 1 --index in game.gameState.turrets
-    o.nextNode = 0 --next turn to make
+    o.flowField = direction--!which flowField to follow
     table.insert(gameState.enemies, o)
     return o
 end

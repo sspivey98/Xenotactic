@@ -188,4 +188,16 @@ lib.ENEMY_TYPE = {
     [15] = lib.ENEMY.HELICOPTER
 }
 
+lib.FLOWFIELD = {
+    TILE = {
+        BLOCK = 0,
+        UP = 1,
+        DOWN = 2,
+        LEFT = 3,
+        RIGHT = 4
+    },
+    LONGITUDE = 1, --left -> right
+    LATITUDE = 2, --up -> down
+}
+
 return lib

@@ -1,0 +1,12 @@
+{
+    "Lua.workspace.library": [
+        "${addons}/love2d/module/library",
+        "${addons}/busted/module/library",
+        "${3rd}/luassert/library"
+    ],
+    "Lua.runtime.version": "LuaJIT",
+    "Lua.runtime.special": {
+        "love.filesystem.load": "loadfile"
+    },
+    "Lua.workspace.checkThirdParty": false
+}

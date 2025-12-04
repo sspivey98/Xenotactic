@@ -34,7 +34,6 @@ function lib.newGame(o)
         selected = {0, 0},
         selectedTurretType = nil,
         placementMode = false,
-        flowField = {}
     }
 
     return game
