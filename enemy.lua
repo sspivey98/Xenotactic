@@ -45,7 +45,7 @@ function lib:new(gameState, enemyType, direction)
     setmetatable(o, self)
     self.__index = self
     --between {0,12} and {0,20}
-    o.position = {x=0, y=SETTINGS.TILE_SIZE*math.random(12, 20) - SETTINGS.TILE_SIZE/2}
+    o.position = {x=0, y=SETTINGS.TILE_SIZE*love.math.random(12, 20) - SETTINGS.TILE_SIZE/2}
 
     o.moveAnimation = {
         frames = enemyMoveFrames(enemyType),
