@@ -13,12 +13,12 @@ initialize the grid
 @param1 map - 2D array of current map
 @param2 direction - ENUMS.FLOWFIELD latitude or longitude
 --]]
-function lib:new(level, direction)
+function lib:new(map, direction)
     local o = {}
     setmetatable(o, self)
     self.__index = self
-    o.level = level or {}  --2D array of map as flowField
-    o.map = {}
+    o.map = map or {}  --2D array of map as flowField
+    o.costmap = {}
     o.goal = {x=0,y=0} --goal coordinates
     if direction == ENUMS.FLOWFIELD.LATITUDE then
         o.goal.x = 17
@@ -27,6 +27,7 @@ function lib:new(level, direction)
         o.goal.x = 33
         o.goal.y = 15
     end
+    --TODO set default flowfield of straight right and down
     return o    --? maybe set in gameState without return o?
 end
 
@@ -49,7 +50,9 @@ end
 function lib:calculate()
     --initialize cost map
     local costMap =  {}
+    local open = {}
     local max = #self.map[1] * #self.map + 1 --l x w
+
     for x=1, #self.map do
         costMap[x] = {}
         for y=1, #self.map[1] do
@@ -58,14 +61,57 @@ function lib:calculate()
                 costMap[x][y] = max
             elseif self.map[x][y] == ENUMS.TILES.FINAL then
                 costMap[x][y] = 0
+                table.insert(open, {x=x, y=y, cost=0})
             else
                 costMap[x][y] = -1
             end
         end
     end
 
-    --Dijkstra from goal outward
+    local dirs = {
+        {x=0, y=-1}, --up
+        {x=0, y=1}, --down
+        {x=-1, y=0}, --left
+        {x=1, y=0} --right
+    }
 
+    local closed = {}--hashmap for completed tiles
+    --Dijkstra from goal outward
+    while #open > 0 do
+        local min = 1
+        for i=2, #open do
+            if open[i].cost < open[min].cost then
+                min = i
+            end
+        end
+        --remove node off of stack
+        local curr = table.remove(open, min)
+
+        local key = curr.y * 1000 + curr.x
+        if not closed[key] then
+            --check neighbors
+            for _,dir in ipairs(dirs) do
+                local nx = curr.x + dir.x
+                local ny = curr.y + dir.y
+                --bounds check
+                if nx >= 1 and nx <= #self.map and
+                ny >= 1 and ny <= #self.map[1] then
+                    --process tiles
+                    if costMap[nx][ny] ~= -1 then
+                        local newCost = costMap[nx][ny] + 1
+
+                        if newCost < costMap[nx][ny] then
+                            costMap[nx][ny] = newCost
+                            table.insert(open, {x=nx, y=ny, cost=newCost})
+                        end
+                    end
+                end
+            end
+            closed[key] = true
+        end
+    end
+
+    return costMap
     --[[
     Generate direction vectors from cost maps
     for each tile, find which neighbor has the LOWEST cost

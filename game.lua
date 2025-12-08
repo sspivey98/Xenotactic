@@ -24,8 +24,8 @@ function lib.newGame(o)
     local game = {
         money = o.money or 30,
         map = o.map or {},
-        path1 = {}, --flowField left -> right
-        path2 = {}, --flowField up -> down
+        path1 = o.path1 or {}, --flowField left -> right
+        path2 = o.path2 or {}, --flowField up -> down
         lives = 10,
         level = o.level or 1,
         round = 0,

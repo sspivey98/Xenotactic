@@ -217,6 +217,9 @@ function lib.mousepressed(game, x, y, mouseButton)
                     TURRET:new(game.gameState, currentTile.x, currentTile.y)
                     game.gameState.placementMode = false
                     SOUNDS.library["turret_build"]:play()
+                    --update enemy pathing
+                    game.gameState.path1:calculate()
+                    game.gameState.path2:calculate()
                 end
             end
         --select from UI

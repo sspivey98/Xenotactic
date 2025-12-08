@@ -7,7 +7,7 @@ local LEVEL = require('level.main')
 local SOUNDS = require('lib.sounds')
 local SETTINGS = require('settings')
 local MAPS = require('level.maps')
-local flowField = require('flowField')
+local FLOWFIELD = require('flowField')
 
 local game
 
@@ -68,8 +68,8 @@ function love.mousepressed(x, y, mouseButton)
                     game.gameState = GAME.newGame{
                         level = index,
                         map = map,
-                        path1 = flowField:new(map, ENUMS.FLOWFIELD.LONGITUDE),
-                        path2 = flowField:new(map, ENUMS.FLOWFIELD.LATITUDE)
+                        path1 = FLOWFIELD:new(map, ENUMS.FLOWFIELD.LONGITUDE),
+                        path2 = FLOWFIELD:new(map, ENUMS.FLOWFIELD.LATITUDE)
                     }
                     LEVEL.load(index)
                     game.state = GAME.STATES.GAME
