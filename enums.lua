@@ -7,19 +7,23 @@ lib.CLICK = {
     RIGHT = 2
 }
 
+--tiles meanings for level map 
 lib.TILES = {
     EMPTY = 0,
     WALL = 1,
     SPAWN = 2,
-    FINAL = 3,
-    TURRET = 4
+    GOAL = 3,
+    TURRET = 4,
+    PATHWAY = 5
 }
 
 lib.COLORS = {
     [0] = {0.7, 0.8, 0.7}, --green
     [1] = {0.7, 0.7, 0.7}, --grey
     [2] = {0.2, 0.2, 0.8}, --blue
-    [3] = {0.8, 0.2, 0.2} --red
+    [3] = {0.8, 0.2, 0.2}, --red
+    [4] = {0.7, 0.7, 0.7}, --grey
+    [5] = {0.7, 0.75, 0.7}, --green/grey
 }
 
 lib.TURRET = {
@@ -190,7 +194,8 @@ lib.ENEMY_TYPE = {
 
 lib.FLOWFIELD = {
     TILE = {
-        BLOCK = 0,
+        BLOCKED = -1,
+        GOAL = 0,
         UP = 1,
         DOWN = 2,
         LEFT = 3,

@@ -218,8 +218,8 @@ function lib.mousepressed(game, x, y, mouseButton)
                     game.gameState.placementMode = false
                     SOUNDS.library["turret_build"]:play()
                     --update enemy pathing
-                    game.gameState.path1:calculate()
-                    game.gameState.path2:calculate()
+                    game.gameState.path1:setBlocked(tile.x, tile.y)
+                    game.gameState.path2:setBlocked(tile.x, tile.y)
                 end
             end
         --select from UI
