@@ -1,13 +1,16 @@
 local IMAGES = require('lib.images')
 
+---@class ENUMS
 local lib = {}
 
+---@enum ENUMS.CLICK
 lib.CLICK = {
     LEFT = 1,
     RIGHT = 2
 }
 
 --tiles meanings for level map 
+---@enum ENUMS.TILES
 lib.TILES = {
     EMPTY = 0,
     WALL = 1,
@@ -17,6 +20,7 @@ lib.TILES = {
     PATHWAY = 5
 }
 
+---@enum ENUMS.COLORS
 lib.COLORS = {
     [0] = {0.7, 0.8, 0.7}, --green
     [1] = {0.7, 0.7, 0.7}, --grey
@@ -26,6 +30,15 @@ lib.COLORS = {
     [5] = {0.7, 0.75, 0.7}, --green/grey
 }
 
+---@class TurretData
+---@field cost number
+---@field sell number
+---@field range number
+---@field speed number
+---@field damage number
+---@field image any
+
+---@enum ENUMS.TURRET
 lib.TURRET = {
     WALL = {
         cost = 2,
@@ -85,6 +98,12 @@ lib.TURRET = {
     }
 }
 
+---@class EnemyData
+---@field speed number
+---@field health number
+---@field value number
+
+---@enum ENUMS.ENEMY
 lib.ENEMY = {
     BOSS1 = {
         speed = 20,
@@ -163,7 +182,8 @@ lib.ENEMY = {
     },
 }
 
---match number to enum
+---match number to turret enum
+---@enum ENUMS.TURRET_TYPE
 lib.TURRET_TYPE = {
     [1] = lib.TURRET.WALL,
     [2] = lib.TURRET.GATLING,
@@ -174,6 +194,8 @@ lib.TURRET_TYPE = {
     [7] = lib.TURRET.TESLA,
 }
 
+---match number to enemy enum
+---@enum ENUMS.ENEMY_TYPE
 lib.ENEMY_TYPE = {
     [1] = lib.ENEMY.BOSS1,
     [2] = lib.ENEMY.SCORPION,
@@ -192,15 +214,19 @@ lib.ENEMY_TYPE = {
     [15] = lib.ENEMY.HELICOPTER
 }
 
+---@enum ENUMS.FLOWFIELD.TILE
+local TILE = {
+    BLOCKED = -1,
+    GOAL = 0,
+    UP = 1,
+    DOWN = 2,
+    LEFT = 3,
+    RIGHT = 4
+}
+
+---@enum ENUMS.FLOWFIELD
 lib.FLOWFIELD = {
-    TILE = {
-        BLOCKED = -1,
-        GOAL = 0,
-        UP = 1,
-        DOWN = 2,
-        LEFT = 3,
-        RIGHT = 4
-    },
+    TILE = TILE,
     LONGITUDE = 1, --left -> right
     LATITUDE = 2, --up -> down
 }

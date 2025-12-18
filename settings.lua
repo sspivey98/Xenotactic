@@ -1,3 +1,8 @@
+---@alias dimension {WIDTH:number,HEIGHT:number}
+---@class SETTINGS
+---@field TILE_SIZE number size of a side of square tile in pixels
+---@field map {Width:number, Height:number} dimension in tiles
+---@field SCREEN {MAP:dimension,UI:dimension,WIDTH:number,HEIGHT:number}
 local lib = {}
 
 --[[
@@ -11,6 +16,7 @@ local lib = {}
     - 1920x1080
 --]]
 
+---load default window settings
 function lib.load()
     lib.SCREEN.WIDTH = love.graphics.getWidth()
     lib.SCREEN.HEIGHT = love.graphics.getHeight()
@@ -20,8 +26,8 @@ function lib.load()
     }
 end
 
-lib.TILE_SIZE = 24 --size of tile in pixels
-lib.map = { --# of tiles
+lib.TILE_SIZE = 24
+lib.map = {
     Width = 33,
     Height = 30
 }

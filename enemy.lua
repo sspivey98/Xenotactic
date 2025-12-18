@@ -9,7 +9,11 @@ enemies will have different paths based on position and final
 
 --]]
 
---enemy class
+---enemy class
+---@class ENEMY
+---@field position {x:number,y:number}
+---@field moveAnimation {frames:table[],currentFrame:number,frameTime:number,timer:number,loop:boolean,death:boolean,dead:boolean}
+
 local lib = {}
 
 local SETTINGS = require('settings')
@@ -33,11 +37,10 @@ local function enemyMoveFrames(enemyType)
     return frames
 end
 
---[[
-@param1 gameState - from game.gameState, contains array of enemy objects
-@param2 enemyType - enums.ENEMY_TYPE specific enemy static variables to get
-@param3 direction - which flowField for the enemy to follow
---]]
+
+---@param gameState state from game.gameState, contains array of enemy objects
+---@param enemyType ENUMS.ENEMY enums.ENEMY_TYPE specific enemy static variables to get
+---@param direction ENUMS.FLOWFIELD which flowField for the enemy to follow
 function lib:new(gameState, enemyType, direction)
     --copy turret
     local o = {}
@@ -62,6 +65,7 @@ function lib:new(gameState, enemyType, direction)
     return o
 end
 
+---draw the enemy frame
 function lib:draw()
     --love.graphics.setColor{0.7, 0.7, 0.7}
     love.graphics.draw(
@@ -76,6 +80,8 @@ function lib:draw()
     love.graphics.setColor{1,1,1}
 end
 
+---update the enemy state
+---@param dt number delta time between last frame and current frame
 function lib:update(dt)
     --check health
     if self.health <= 0 then
@@ -113,7 +119,8 @@ function lib:update(dt)
     end
 end
 
---Remove Entity
+---Remove entity from game state
+---@param gameState state
 function lib:kill(gameState)
     gameState.money = gameState.money + self.value
     table.remove(gameState.enemies, self.index)

@@ -16,7 +16,8 @@ draw function renders new type
 local ENUMS = require('enums')
 local IMAGES = require('lib.images')
 
---turret class
+---turret class
+---@class TURRET
 local lib = {}
 
 local build_turret_sprite_sheet = IMAGES.library["turret_build"]

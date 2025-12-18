@@ -6,45 +6,51 @@ flowField is a 2D array of directions (up, left, down, right), where the key is 
 When game in is session, there will always be two vector maps
 --]]
 local ENUMS = require('enums')
+local UTIL = require('level.util')
+---@class FLOWFIELD
+---@field level table[]
+---@field map table[]
 local lib = {}
 
---[[
-initialize the grid
-@param1 map - 2D array of current map
-@param2 direction - ENUMS.FLOWFIELD latitude or longitude
---]]
-function lib:new(map, direction)
+---initialize the grid
+---@param level table[] - 2D array of current map
+---@param direction ENUMS.FLOWFIELD - ENUMS.FLOWFIELD latitude or longitude
+function lib:new(level, direction)
     local o = {}
     setmetatable(o, self)
     self.__index = self
-    o.map = map or {}  --2D array of map as flowField
+    o.level = level or {}  --2D array of map as flowField
     if direction == ENUMS.FLOWFIELD.LATITUDE then
-        --only take up and down
+        --only take up and down (place X's along all left/right side)
     elseif direction == ENUMS.FLOWFIELD.LONGITUDE then
-        --only take left and right
+        --only take left and right (place X's along all top/bottom side)
     end
     return o --? maybe set in gameState without return o?
 end
 
---[[
-Mark tile blocked when turret placed. Given top left turret position
-@param1 x - x coordinate in tile coordinate
-@param2 y - y coordinate in tile coordinate
-@param3 direction - ENUMS.FLOWFIELD.TILE type
---]]
+
+---Mark tile blocked when turret placed. Given top left turret position
+---@param x number x coordinate in tile coordinate
+---@param y number y coordinate in tile coordinate
 function lib:setBlocked(x, y)
-    self.map[y][x] = ENUMS.TILES.TURRET
-    self.map[y+1][x] = ENUMS.TILES.TURRET
-    self.map[y][x+1] = ENUMS.TILES.TURRET
-    self.map[y+1][x+1] = ENUMS.TILES.TURRET
+    self.level[y][x] = ENUMS.TILES.TURRET
+    self.level[y+1][x] = ENUMS.TILES.TURRET
+    self.level[y][x+1] = ENUMS.TILES.TURRET
+    self.level[y+1][x+1] = ENUMS.TILES.TURRET
     self:calculate()
 end
 
---getter function
+---getter function
+---@param x number x coordinate in tile coordinates
+---@param y number y coordinate in tile coordinates
+---@return number
 function lib:getDirection(x, y)
     return self.map[x][y]
 end
 
+---debug function
+---@param map ENUMS.FLOWFIELD.TILE[][]
+---@param vector boolean If true print vector map, else print cost map
 local function printField(map, vector)
     local DIRS = {
         BLOCKED = "X",
@@ -96,42 +102,39 @@ local function printField(map, vector)
     end
 end
 
---main function to calc the flow field
-function lib:calculate()
-    --initialize cost map
-    local costMap = {}
+local DIRS = {
+    { x = 0, y = -1 }, --up
+    { x = 0, y = 1 }, --down
+    { x = -1, y = 0 }, --left
+    { x = 1, y = 0 } --right
+}
+---Dijkstra's algorithm
+---A: Find the tile with LOWEST cost in open list
+---B: Remove it from open list (we're processing it now)
+---C: Mark it as closed (so we don't process it again)
+---D: Look at all 4 neighbors (DIRS)
+---E: Update neighbor costs if we found a better path
+---@param level number[][] 2D array of map; return value overwrites this
+---@return table costMap 2D array of each tile's cost
+local function Dijkstra(level)
+    local map = {}
     local goal = {}
 
-    for x = 1, #self.map do
-        costMap[x] = {}
-        for y = 1, #self.map[1] do
-            if self.map[x][y] == ENUMS.TILES.EMPTY or
-                self.map[x][y] == ENUMS.TILES.SPAWN or
-                self.map[x][y] == ENUMS.TILES.PATHWAY then
-                costMap[x][y] = math.huge --inf
-            elseif self.map[x][y] == ENUMS.TILES.GOAL then
-                costMap[x][y] = ENUMS.FLOWFIELD.TILE.GOAL
+    for x = 1, #level do
+        map[x] = {}
+        for y = 1, #level[1] do
+            if level[x][y] == ENUMS.TILES.EMPTY or
+                level[x][y] == ENUMS.TILES.SPAWN or
+                level[x][y] == ENUMS.TILES.PATHWAY then
+                map[x][y] = math.huge --inf
+            elseif level[x][y] == ENUMS.TILES.GOAL then
+                map[x][y] = ENUMS.FLOWFIELD.TILE.GOAL
                 table.insert(goal, { x=x, y=y, cost=0 })
             else
-                costMap[x][y] = ENUMS.FLOWFIELD.TILE.BLOCKED
+                map[x][y] = ENUMS.FLOWFIELD.TILE.BLOCKED
             end
         end
     end
-
-    local DIRS = {
-        { x = 0, y = -1 }, --up
-        { x = 0, y = 1 }, --down
-        { x = -1, y = 0 }, --left
-        { x = 1, y = 0 } --right
-    }
-
-    --[[
-    A: Find the tile with LOWEST cost in open list
-    B: Remove it from open list (we're processing it now)
-    C: Mark it as closed (so we don't process it again)
-    D: Look at all 4 neighbors (DIRS)
-    E: Update neighbor costs if we found a better path
-    --]]
 
     local processed = {} --hashmap for completed tiles
     --Dijkstra from goal outward
@@ -152,14 +155,14 @@ function lib:calculate()
                 local nx = curr.x + DIR.x
                 local ny = curr.y + DIR.y
                 --bounds check
-                if nx >= 1 and nx <= #self.map and
-                ny >= 1 and ny <= #self.map[1] and
-                costMap[nx][ny] ~= ENUMS.FLOWFIELD.TILE.BLOCKED then
+                if nx >= 1 and nx <= #map and
+                ny >= 1 and ny <= #map[1] and
+                map[nx][ny] ~= ENUMS.FLOWFIELD.TILE.BLOCKED then
                     --add one for new direction explored
-                    local newCost = costMap[curr.x][curr.y] + 1
+                    local newCost = map[curr.x][curr.y] + 1
 
-                    if newCost < costMap[nx][ny] then
-                        costMap[nx][ny] = newCost
+                    if newCost < map[nx][ny] then
+                        map[nx][ny] = newCost
                         table.insert(goal, { x = nx, y = ny, cost = newCost })
                     end
                 end
@@ -167,7 +170,45 @@ function lib:calculate()
             processed[key] = true
         end
     end
+
     --printField(costMap, false)
+    return map
+end
+
+---check to make sure turret to be added doesn't block pathing
+---@param x number x coordinate in tile coordinates
+---@param y number y coordinate in tile coordinates
+---@return boolean
+function lib:checkPath(x,y)
+    --copy self.level
+    local map = UTIL:deepCopy(self.level)
+
+    --place new turret down on copy
+    map[y][x] = ENUMS.TILES.TURRET
+    map[y+1][x] = ENUMS.TILES.TURRET
+    map[y][x+1] = ENUMS.TILES.TURRET
+    map[y+1][x+1] = ENUMS.TILES.TURRET
+
+    --run Dijkstra's
+    local costMap = Dijkstra(map)
+
+    --if any tiles contain infinity, return false.
+    for x1=1,#costMap do
+        for y1=1,#costMap[1] do
+            if costMap[x1][y1] == math.huge then
+                return false
+            end
+        end
+    end
+    return true
+end
+
+---calc the flow field and save to self.map. Takes the self.level description and uses Dijkstra's to create a cost map.
+---From the cost map, we create a flow field map which is saved in self.map.
+function lib:calculate()
+    --generate costMap
+    local costMap = Dijkstra(self.level)
+
     --[[
     Generate direction vectors from cost maps
     for each tile, find which neighbor has the LOWEST cost
@@ -217,7 +258,8 @@ function lib:calculate()
     end
 
     printField(flowField, true)
-    return flowField
+    self.map = flowField
+    --return flowField
 end
 
 return lib

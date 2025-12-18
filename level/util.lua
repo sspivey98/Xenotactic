@@ -1,18 +1,12 @@
 local SETTINGS = require('settings')
 
+---@class UTIL
 local lib = {}
 
---finds shortest path
-function lib.shortestPath(gameState)
-    --append/modify gameState.path1 and gameState.path2
-end
-
---checks to see the enemy can make a path to end of level
-function lib.enemyHasPathing(gameState)
-    return true
-end
-
---translates pixels to in-game coordinates
+---translates pixels to in-game coordinates
+---@param map ENUMS.TILES[][]
+---@param x number
+---@param y number
 function lib.getTileAt(map, x, y)
     local tileX = math.floor(x / SETTINGS.TILE_SIZE) + 1
     local tileY = math.floor(y / SETTINGS.TILE_SIZE) + 1
@@ -30,15 +24,15 @@ function lib.getTileAt(map, x, y)
     return tile
 end
 
---convert map tile coordinate to center pixel
+---convert map tile coordinate to center pixel
 function lib.getPixelAt(map, x, y) end
 
---check if tile is buildable, if there is a turret already, or if it blocks the enemy pathing
---currentTile needs {x,y}
+---check if tile is buildable, if there is a turret already, or if it blocks the enemy pathing
+---currentTile needs {x,y}
+---@param currentTile {x:number,y:number}
+---@param gameState any
+---@return boolean valid
 function lib:isValidPlacement(currentTile, gameState)
-    if not self.enemyHasPathing(gameState) then
-        return false
-    end
     local tiles = {
         [1] = self.getTileAt(gameState.map, currentTile.x, currentTile.y),
         [2] = self.getTileAt(gameState.map, currentTile.x + SETTINGS.TILE_SIZE, currentTile.y),
@@ -63,7 +57,33 @@ function lib:isValidPlacement(currentTile, gameState)
         end
     end
 
-    return true
+    --check to make sure Dijkstra's doesn't fail
+    if gameState.path1:checkPath(tiles[1].x, tiles[1].y) and
+    gameState.path2:checkPath(tiles[1].x, tiles[1].y)
+    then
+        return true
+    else
+        return false
+    end
+end
+
+---make a deep copy of a table
+---!WARNING! Does not handle circular references
+---@param original table
+---@return table copy 
+function lib:deepCopy(original)
+    local copy
+    if type(original) == 'table' then
+        copy = {}
+        for key, value in next, original, nil do
+            copy[self:deepCopy(key)] = self:deepCopy(value)
+        end
+        setmetatable(copy, self:deepCopy(getmetatable(original)))
+    else
+        -- for non-tables (numbers, strings, booleans, etc.)
+        copy = original
+    end
+    return copy
 end
 
 return lib
