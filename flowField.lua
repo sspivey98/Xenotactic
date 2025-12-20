@@ -43,9 +43,9 @@ end
 ---getter function
 ---@param x number x coordinate in tile coordinates
 ---@param y number y coordinate in tile coordinates
----@return number
+---@return ENUMS.FLOWFIELD.TILE
 function lib:getDirection(x, y)
-    return self.map[x][y]
+    return self.map[y][x]
 end
 
 ---debug function

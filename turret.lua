@@ -18,6 +18,15 @@ local IMAGES = require('lib.images')
 
 ---turret class
 ---@class TURRET
+---@field cost number
+---@field sell number
+---@field range number
+---@field speed number
+---@field damage number
+---@field image any
+---@field position {x:number,y:number}
+---@field buildAnimation {frames:table,currentFrame:number,frameTime:number,timer:number,built:boolean}
+---@field index number index in game.gameState.turrets
 local lib = {}
 
 local build_turret_sprite_sheet = IMAGES.library["turret_build"]
@@ -122,9 +131,10 @@ function lib:draw()
 end
 
 --selling logic and animation
-function lib:sell(game)
+---@param game game
+function lib:delete(game)
     --refund money
-    game.money = game.money + self.sell
+    game.gameState.money = game.gameState.money + self.sell
     --remove from game state turrets
     table.remove(game.gameState.turrets, self.index)
 end

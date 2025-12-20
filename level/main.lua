@@ -280,7 +280,7 @@ function lib.update(game, dt)
     end
 
     if #game.gameState.turrets == 1 and #game.gameState.enemies == 0 then
-        ENEMY:new(game.gameState, random, ENUMS.FLOWFIELD.LONGITUDE)
+        ENEMY:new(game.gameState, random, game.gameState.path1)
     end
 end
 
