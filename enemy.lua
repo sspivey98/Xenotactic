@@ -16,11 +16,11 @@ enemies will have different paths based on position and final
 ---@field moveAnimation {frames:table[],currentFrame:number,frameTime:number,timer:number,loop:boolean,death:boolean,dead:boolean}
 ---@field index number index in game.gameState.turrets
 ---@field orientation ENUMS.FLOWFIELD.TILE orientation of current sprite
+---@field lastDirection ENUMS.FLOWFIELD.TILE
 ---@field flowField FLOWFIELD which flowField for the enemy to follow
 
 local lib = {}
 
-local UTIL = require('level.util')
 local SETTINGS = require('settings')
 local enemies_sprite_sheet = IMAGES.library["enemies"]
 
@@ -70,6 +70,7 @@ function lib:new(gameState, enemyType, flowField)
     o.index = #gameState.enemies + 1 --index in game.gameState.turrets
     o.flowField = flowField
     o.orientation = 0
+    o.lastDirection = ENUMS.FLOWFIELD.TILE.RIGHT --start either right or down
     table.insert(gameState.enemies, o)
     return o
 end
@@ -89,6 +90,21 @@ function lib:draw()
     love.graphics.setColor{1,1,1}
 end
 
+---logic to turn enemy from one direction to another
+---@private
+---@param dt number delta time between last frame and current frame
+function lib:turn(dt)
+    --turn first
+    self.orientation = self.orientation + dt
+
+    --check if hit direction; remove turn flag
+    if self.orientation == ENUMS.ORIENTATION.LEFT then
+    elseif self.orientation == ENUMS.ORIENTATION.UP then
+    elseif self.orientation == ENUMS.ORIENTATION.RIGHT then
+    elseif self.orientation == ENUMS.ORIENTATION.DOWN then
+    end
+end
+
 ---update the enemy state
 ---@param dt number delta time between last frame and current frame
 function lib:update(dt)
@@ -100,24 +116,40 @@ function lib:update(dt)
     --direction logic
     local direction = self.flowField:getDirection(self.coords.x, self.coords.y)
 
-    --TODO implement turn
-    local slower = 5
-    --move enemy
-    if direction == ENUMS.FLOWFIELD.TILE.UP then
-        self.position.y = self.position.y + self.speed / slower
-    elseif direction == ENUMS.FLOWFIELD.TILE.DOWN then
-        self.position.y = self.position.y - self.speed / slower
-    elseif direction == ENUMS.FLOWFIELD.TILE.LEFT then
-        self.position.x = self.position.x - self.speed / slower
-    elseif direction == ENUMS.FLOWFIELD.TILE.RIGHT then
-        self.position.x = self.position.x + self.speed / slower
+    local slow_rate = 6
+    --turning state machine
+    if not self.turning then
+        if direction ~= self.lastDirection then
+            self.turning = true
+        else
+            --move enemy
+            if direction == ENUMS.FLOWFIELD.TILE.UP then
+                self.position.y = self.position.y + self.speed / slow_rate
+                self.orientation = ENUMS.ORIENTATION.UP
+                self.lastDirection = ENUMS.FLOWFIELD.TILE.UP
+            elseif direction == ENUMS.FLOWFIELD.TILE.DOWN then
+                self.position.y = self.position.y - self.speed / slow_rate
+                self.orientation = ENUMS.ORIENTATION.DOWN
+                self.lastDirection = ENUMS.FLOWFIELD.TILE.DOWN
+            elseif direction == ENUMS.FLOWFIELD.TILE.LEFT then
+                self.position.x = self.position.x - self.speed / slow_rate
+                self.orientation = ENUMS.ORIENTATION.LEFT
+                self.lastDirection = ENUMS.FLOWFIELD.TILE.LEFT
+            elseif direction == ENUMS.FLOWFIELD.TILE.RIGHT then
+                self.position.x = self.position.x + self.speed / slow_rate
+                self.orientation = ENUMS.ORIENTATION.RIGHT
+                self.lastDirection = ENUMS.FLOWFIELD.TILE.RIGHT
+            end
+        end
+    else
+        self:turn(dt)
     end
 
     --calc tile position
     self.coords.x = math.floor(self.position.x / SETTINGS.TILE_SIZE)+1
     self.coords.y = math.floor(self.position.y / SETTINGS.TILE_SIZE)+1
 
-    --move animation
+    --sprite moving animation
     local animate = self.moveAnimation
     if not animate.death then
         animate.timer = animate.timer + dt

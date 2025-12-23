@@ -231,4 +231,14 @@ lib.FLOWFIELD = {
     LATITUDE = 2, --up -> down
 }
 
+
+local DTR = math.pi / 180 --degrees to Radians
+---@enum ENUMS.ORIENTATION
+lib.ORIENTATION = {
+    LEFT = 0,
+    UP = 90 * DTR,
+    RIGHT = 180 * DTR,
+    DOWN = 270 * DTR
+}
+
 return lib
