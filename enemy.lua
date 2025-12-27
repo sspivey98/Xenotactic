@@ -48,16 +48,26 @@ end
 ---@param gameState state from game.gameState, contains array of enemy objects
 ---@param enemyType ENUMS.ENEMY enums.ENEMY_TYPE specific enemy static variables to get
 ---@param flowField FLOWFIELD pointer to flowField for the enemy to follow
-function lib:new(gameState, enemyType, flowField)
+---@param direction ENUMS.FLOWFIELD
+function lib:new(gameState, enemyType, flowField, direction)
     --copy turret
     local o = {}
     for k, v in pairs(ENUMS.ENEMY_TYPE[enemyType]) do o[k] = v end
     setmetatable(o, self)
     self.__index = self
 
-    local rand = love.math.random(12, 20)
-    o.position = {x=0, y=SETTINGS.TILE_SIZE*rand - SETTINGS.TILE_SIZE/2}
-    o.coords = {x=1, y=rand}
+    local rand = 0
+    if direction == ENUMS.FLOWFIELD.LONGITUDE then
+        rand = love.math.random(11, 19)
+        o.position = {x=0, y=SETTINGS.TILE_SIZE*rand - SETTINGS.TILE_SIZE/2}
+        o.coords = {x=1, y=rand}
+        o.lastDirection = ENUMS.FLOWFIELD.TILE.RIGHT
+    elseif direction == ENUMS.FLOWFIELD.LATITUDE then
+        rand = love.math.random(13, 21)
+        o.position = {x=SETTINGS.TILE_SIZE*rand - SETTINGS.TILE_SIZE/2, y=0}
+        o.coords = {x=rand, y=1}
+        o.lastDirection = ENUMS.FLOWFIELD.TILE.DOWN
+    end
     o.moveAnimation = {
         frames = enemyMoveFrames(enemyType),
         currentFrame = 1,
@@ -70,22 +80,29 @@ function lib:new(gameState, enemyType, flowField)
     o.index = #gameState.enemies + 1 --index in game.gameState.turrets
     o.flowField = flowField
     o.orientation = 0
-    o.lastDirection = ENUMS.FLOWFIELD.TILE.RIGHT --start either right or down
+    o.turning = false
     table.insert(gameState.enemies, o)
     return o
 end
 
 ---draw the enemy frame
 function lib:draw()
-    --love.graphics.setColor{0.7, 0.7, 0.7}
+    --calc origin of monster frame
+    local frame = self.moveAnimation.frames[self.moveAnimation.currentFrame]
+    local _,_,w,h = frame:getViewport()
+    local ox = w / 2
+    local oy = h / 2
+
     love.graphics.draw(
         enemies_sprite_sheet,
-        self.moveAnimation.frames[self.moveAnimation.currentFrame],
+        frame,
         self.position.x,
         self.position.y,
         self.orientation, --orientation (radians)
         1.5, --x scale
-        1.5  --y scale
+        1.5,  --y scale
+        ox, --origin x for rotation
+        oy --origin y for rotation
     )
     love.graphics.setColor{1,1,1}
 end
@@ -93,15 +110,38 @@ end
 ---logic to turn enemy from one direction to another
 ---@private
 ---@param dt number delta time between last frame and current frame
-function lib:turn(dt)
-    --turn first
-    self.orientation = self.orientation + dt
+---@param newDirection ENUMS.FLOWFIELD.TILE
+function lib:turn(dt, newDirection)
+    --get radians of new direction
+    local radians = 0
+    if newDirection == ENUMS.FLOWFIELD.TILE.UP then
+        radians = ENUMS.ORIENTATION.UP
+    elseif newDirection == ENUMS.FLOWFIELD.TILE.LEFT then
+        radians = ENUMS.ORIENTATION.LEFT
+    elseif newDirection == ENUMS.FLOWFIELD.TILE.DOWN then
+        radians = ENUMS.ORIENTATION.DOWN
+    elseif newDirection == ENUMS.FLOWFIELD.TILE.RIGHT then
+        radians = ENUMS.ORIENTATION.RIGHT
+    else
+        error(newDirection..": Enemy pathing did not choose valid direction after turning.")
+    end
 
-    --check if hit direction; remove turn flag
-    if self.orientation == ENUMS.ORIENTATION.LEFT then
-    elseif self.orientation == ENUMS.ORIENTATION.UP then
-    elseif self.orientation == ENUMS.ORIENTATION.RIGHT then
-    elseif self.orientation == ENUMS.ORIENTATION.DOWN then
+    -- +/- diff of final - current
+    local diff = radians - self.orientation
+
+    --Normalize the difference to be between -pi and pi
+    while diff > math.pi do diff = diff - 2 * math.pi end
+    while diff < -math.pi do diff = diff + 2 * math.pi end
+
+    local turnAmount = math.pi * dt
+
+    --snap to direction if next frame gets us to right direction
+    if math.abs(diff) <= turnAmount then
+        self.orientation = radians
+        self.turning = false
+        self.lastDirection = newDirection
+    else
+        self.orientation = self.orientation + turnAmount * (diff > 0 and 1 or -1)
     end
 end
 
@@ -116,7 +156,7 @@ function lib:update(dt)
     --direction logic
     local direction = self.flowField:getDirection(self.coords.x, self.coords.y)
 
-    local slow_rate = 6
+    local slow_rate = 4
     --turning state machine
     if not self.turning then
         if direction ~= self.lastDirection then
@@ -124,11 +164,11 @@ function lib:update(dt)
         else
             --move enemy
             if direction == ENUMS.FLOWFIELD.TILE.UP then
-                self.position.y = self.position.y + self.speed / slow_rate
+                self.position.y = self.position.y - self.speed / slow_rate
                 self.orientation = ENUMS.ORIENTATION.UP
                 self.lastDirection = ENUMS.FLOWFIELD.TILE.UP
             elseif direction == ENUMS.FLOWFIELD.TILE.DOWN then
-                self.position.y = self.position.y - self.speed / slow_rate
+                self.position.y = self.position.y + self.speed / slow_rate
                 self.orientation = ENUMS.ORIENTATION.DOWN
                 self.lastDirection = ENUMS.FLOWFIELD.TILE.DOWN
             elseif direction == ENUMS.FLOWFIELD.TILE.LEFT then
@@ -142,7 +182,7 @@ function lib:update(dt)
             end
         end
     else
-        self:turn(dt)
+        self:turn(dt, direction)
     end
 
     --calc tile position
