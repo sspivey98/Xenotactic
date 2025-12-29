@@ -44,12 +44,16 @@ local function turretBuildFrames()
             build_turret_sprite_sheet:getDimensions()
         )
     end
-    --add final turret sprite to stack?
     return frames
 end
 
+---create new turret constuctor
+---@param gameState state
+---@param x number
+---@param y number
+---@return TURRET
 function lib:new(gameState, x, y)
-    --copy turret
+    --copy selected turret metadata
     local o = {}
     for k, v in pairs(ENUMS.TURRET_TYPE[gameState.selectedTurretType]) do o[k] = v end
     setmetatable(o, self)
@@ -70,7 +74,8 @@ function lib:new(gameState, x, y)
     return o
 end
 
---turret logic
+---turret logic
+---@param dt number delta between last frame and current
 function lib:update(dt)
     --build animation
     if not self.buildAnimation.built then
@@ -93,8 +98,9 @@ function lib:update(dt)
     end
 end
 
---draw turret
+---draw turret
 function lib:draw()
+    --build animation
     if not self.buildAnimation.built then
         love.graphics.setColor{0.7, 0.7, 0.7}
         love.graphics.draw(
@@ -106,6 +112,7 @@ function lib:draw()
             1.5, --x scale
             1.5  --y scale
         )
+    --other animations
     else
         love.graphics.setColor{0.8, 0.8, 0.8}
         --draw turret foundation
@@ -137,21 +144,6 @@ function lib:delete(game)
     game.gameState.money = game.gameState.money + self.sell
     --remove from game state turrets
     table.remove(game.gameState.turrets, self.index)
-end
-
-function lib:select()
-    local x = love.mouse.getX()
-    local y = love.mouse.getY()
-end
-
-function lib:hover()
-    local x = love.mouse.getX()
-    local y = love.mouse.getY()
-
-    if x > self.position.x and y < self.position.y then
-        return true
-    end
-    return false
 end
 
 return lib

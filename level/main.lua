@@ -29,7 +29,8 @@ local UI = {
 }
 
 
---initialize level
+---initialize level
+---@param level_number number level number selected (1-6)
 function lib.load(level_number)
     --load tiles
     level_number = tonumber(level_number) or 1
@@ -76,13 +77,14 @@ function lib.load(level_number)
     --sell/upgrade menus
 end
 
---draw function
-function lib.draw(game)
+---draw function
+---@param gameState state
+function lib.draw(gameState)
     --draw map
     for y=1, map.Height do
         for x = 1, map.Width do
             --print(x..", "..y)
-            local tileType = game.gameState.map[y][x]
+            local tileType = gameState.map[y][x]
             love.graphics.setColor(ENUMS.COLORS[tileType])
             love.graphics.rectangle("fill",
                 (x-1) * TILE_SIZE,
@@ -110,14 +112,14 @@ function lib.draw(game)
     --<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     --|          turrets           |
     -->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    for _,turret in ipairs(game.gameState.turrets) do
+    for _,turret in ipairs(gameState.turrets) do
         turret:draw()
     end
 
     --<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     --|          enemies           |
     -->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    for _,enemy in ipairs(game.gameState.enemies) do
+    for _,enemy in ipairs(gameState.enemies) do
         enemy:draw()
     end
     --<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -170,9 +172,9 @@ function lib.draw(game)
             draw circle around center of four tiles
     --]]
 
-    if game.gameState.placementMode then
+    if gameState.placementMode then
         if currentTile.inbounds then
-            if UTIL:isValidPlacement(currentTile, game.gameState) then
+            if UTIL:isValidPlacement(currentTile, gameState) then
                 love.graphics.setColor{0.3, 1, 0.3, 0.5}
                 love.graphics.rectangle("fill",
                     currentTile.x,
@@ -201,25 +203,29 @@ function lib.draw(game)
     end
 end
 
---interact function
-function lib.mousepressed(game, x, y, mouseButton)
+---interact function
+---@param gameState state
+---@param x number
+---@param y number
+---@param mouseButton ENUMS.CLICK
+function lib.mousepressed(gameState, x, y, mouseButton)
     if mouseButton == ENUMS.CLICK.LEFT then
-        local tile = UTIL.getTileAt(game.gameState.map, x, y)
+        local tile = UTIL.getTileAt(gameState.map, x, y)
 
         if tile then
             print("("..tile.x..", "..tile.y..") :: "..tile.type)
-            if game.gameState.placementMode then--TODO
+            if gameState.placementMode then--TODO
                 --check placement is valid
-                if UTIL:isValidPlacement(currentTile, game.gameState) == false then
+                if UTIL:isValidPlacement(currentTile, gameState) == false then
                     SOUNDS.library["invalid"]:play()
                 --turret is placed
                 else
-                    TURRET:new(game.gameState, currentTile.x, currentTile.y)
-                    game.gameState.placementMode = false
+                    TURRET:new(gameState, currentTile.x, currentTile.y)
+                    gameState.placementMode = false
                     SOUNDS.library["turret_build"]:play()
                     --update enemy pathing
-                    game.gameState.path1:setBlocked(tile.x, tile.y)
-                    game.gameState.path2:setBlocked(tile.x, tile.y)
+                    gameState.path1:setBlocked(tile.x, tile.y)
+                    gameState.path2:setBlocked(tile.x, tile.y)
                 end
             end
         --select from UI
@@ -227,26 +233,28 @@ function lib.mousepressed(game, x, y, mouseButton)
             for _,turret in ipairs(UI.turrets) do
                 if x >= turret.x and x <= turret.x + turret.width and
                     y >= turret.y and y <= turret.y + turret.height then
-                    if game.gameState.money < turret.cost then
+                    if gameState.money < turret.cost then
                         SOUNDS.library["invalid"]:play()
                         --flash icon dark red?
                     else
                         SOUNDS.library["button_press"]:play()
                         --turret build logic
-                        game.gameState.selectedTurretType = turret.id
-                        game.gameState.placementMode = true
+                        gameState.selectedTurretType = turret.id
+                        gameState.placementMode = true
                     end
                 end
             end
         end
     elseif mouseButton == ENUMS.CLICK.RIGHT then
         --deselect whatever
-        game.gameState.placementMode = false
+        gameState.placementMode = false
     end
 end
 
---update function
-function lib.update(game, dt)
+---update logic function
+---@param gameState state
+---@param dt number
+function lib.update(gameState, dt)
     local mouse = { x=0, y=0 }
     mouse.x, mouse.y = love.mouse.getPosition()
     for _,turret in ipairs(UI.turrets) do
@@ -259,7 +267,7 @@ function lib.update(game, dt)
     end
 
     --updateMap
-    local tile = UTIL.getTileAt(game.gameState.map, mouse.x, mouse.y)
+    local tile = UTIL.getTileAt(gameState.map, mouse.x, mouse.y)
     if tile and tile.type ~= 1 then
         currentTile.inbounds = true
         --do backwards conversion for 'snap' feel
@@ -270,17 +278,17 @@ function lib.update(game, dt)
     end
 
     --turrets
-    for _,turret in ipairs(game.gameState.turrets) do
+    for _,turret in ipairs(gameState.turrets) do
         turret:update(dt)
     end
 
     --enemies
-    for _,enemy in ipairs(game.gameState.enemies) do
+    for _,enemy in ipairs(gameState.enemies) do
         enemy:update(dt)
     end
 
-    if #game.gameState.turrets == 1 and #game.gameState.enemies == 0 then
-        ENEMY:new(game.gameState, random, game.gameState.path1, ENUMS.FLOWFIELD.LONGITUDE)
+    if #gameState.turrets == 1 and #gameState.enemies == 0 then
+        ENEMY:new(gameState, random, gameState.path1, ENUMS.FLOWFIELD.LONGITUDE)
     end
 end
 

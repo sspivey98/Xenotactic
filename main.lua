@@ -8,10 +8,11 @@ local SOUNDS = require('lib.sounds')
 local SETTINGS = require('settings')
 local MAPS = require('level.maps')
 local FLOWFIELD = require('flowField')
+local UTIL = require('level.util')
 
 local game
 
---initialize function
+---initialize function
 function love.load()
     love.window.setTitle("Tower Defense")
     love.window.setMode(1280, 720)
@@ -22,7 +23,8 @@ function love.load()
     MENU.load()
 end
 
---update the state of the game every frame
+---update the state of the game every frame
+---@param dt number delta between last frame and current
 function love.update(dt)
     if game.state == GAME.STATES.MENU then
         MENU.update()
@@ -35,12 +37,15 @@ function love.update(dt)
         if love.keyboard.isDown("escape") then
             game.state = GAME.STATES.MENU
         end
-        LEVEL.update(game, dt)
+        LEVEL.update(game.gameState, dt)
     elseif game.state == GAME.STATES.GAME_OVER then
     end
 end
 
---left or right mouse button is clicked
+---left or right mouse button is clicked
+---@param x number x coordinate
+---@param y number y coordinate
+---@param mouseButton ENUMS.CLICK
 function love.mousepressed(x, y, mouseButton)
     if game.state == GAME.STATES.MENU then
         if mouseButton == ENUMS.CLICK.LEFT then
@@ -65,11 +70,12 @@ function love.mousepressed(x, y, mouseButton)
                     --load level
                     (SOUNDS.library["button_press2"]):play()
                     local map = MAPS["level_"..index]
+                    local map_copy = UTIL:deepCopy(map)
                     game.gameState = GAME.newGame{
                         level = index,
-                        map = map,
-                        path1 = FLOWFIELD:new(map, ENUMS.FLOWFIELD.LONGITUDE),
-                        path2 = FLOWFIELD:new(map, ENUMS.FLOWFIELD.LATITUDE)
+                        map = map_copy,
+                        path1 = FLOWFIELD:new(map_copy, ENUMS.FLOWFIELD.LONGITUDE),
+                        path2 = FLOWFIELD:new(map_copy, ENUMS.FLOWFIELD.LATITUDE)
                     }
                     LEVEL.load(index)
                     game.state = GAME.STATES.GAME
@@ -80,18 +86,18 @@ function love.mousepressed(x, y, mouseButton)
         end
     elseif game.state == GAME.STATES.GAME then
         --game logic
-        LEVEL.mousepressed(game, x, y, mouseButton)
+        LEVEL.mousepressed(game.gameState, x, y, mouseButton)
     end
 end
 
---draw on the screen every frame
+---draw on the screen every frame
 function love.draw()
     if game.state == GAME.STATES.MENU then
-        MENU.draw(game)
+        MENU.draw()
     elseif game.state == GAME.STATES.LEVEL_SELECT then
         LEVEL_SELECT.drawLevelSelect()
     elseif game.state == GAME.STATES.GAME then
-        LEVEL.draw(game)
+        LEVEL.draw(game.gameState)
     elseif game.state == GAME.STATES.GAME_OVER then
     else
         --error

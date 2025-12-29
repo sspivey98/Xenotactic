@@ -1,6 +1,10 @@
 --main menu
 local IMAGES = require('lib.images')
 local SETTINGS = require('settings')
+
+---@alias MENU.button {text:string,hovered:boolean,pressed:boolean,x:number,y:number,width:number,height:number}
+---@class MENU
+---@field Buttons {Play:MENU.button,Quit:MENU.button}
 local lib = {}
 
 lib.Buttons = {
@@ -17,7 +21,7 @@ lib.Buttons = {
 
 }
 
---initialize buttons
+---initialize buttons
 function lib.load()
     for _,button in pairs(lib.Buttons) do
         button.width = 150
@@ -30,6 +34,7 @@ function lib.load()
     end
 end
 
+---update state logic
 function lib.update()
     local mouseX, mouseY = love.mouse.getPosition()
     lib.Buttons.Play.hovered = mouseX >= lib.Buttons.Play.x and mouseX <= (lib.Buttons.Play.x + lib.Buttons.Play.width) and
@@ -38,7 +43,8 @@ function lib.update()
             mouseY >= lib.Buttons.Quit.y and mouseY <= (lib.Buttons.Quit.y + lib.Buttons.Quit.height)
 end
 
-function lib.draw(game)
+---draw
+function lib.draw()
     -- Background
     local splash_screen = IMAGES.library["title_screen"]
     love.graphics.setColor(1, 1, 1)

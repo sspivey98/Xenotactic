@@ -1,3 +1,4 @@
+--Select Level UI
 local lib = {}
 local SOUNDS = require('lib.sounds')
 local IMAGES = require('lib.images')
@@ -5,6 +6,7 @@ local SETTINGS = require('settings')
 
 lib.Levels = {}
 
+---load level
 function lib.load()
     --add width and heights to level selections
     for i=1, 6 do
@@ -45,6 +47,7 @@ function lib.update()
     end
 end
 
+---draw levels
 function lib.drawLevelSelect()
     -- Background
     love.graphics.setColor(0.15, 0.25, 0.35)

@@ -1,3 +1,12 @@
+---@alias LEVEL.LEVEL {}[]
+---@class LEVEL.MAPS
+---@field level_1 LEVEL.LEVEL
+---@field level_2 LEVEL.LEVEL
+---@field level_3 LEVEL.LEVEL
+---@field level_4 LEVEL.LEVEL
+---@field level_5 LEVEL.LEVEL
+---@field level_6 LEVEL.LEVEL
+
 local lib = {}
 --TODO add 4 in horizontal
 lib.level_1 = {
