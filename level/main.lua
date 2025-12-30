@@ -78,7 +78,7 @@ function lib.load(level_number)
 end
 
 ---draw function
----@param gameState state
+---@param gameState GAME.GAMESTATE
 function lib.draw(gameState)
     --draw map
     for y=1, map.Height do
@@ -204,7 +204,7 @@ function lib.draw(gameState)
 end
 
 ---interact function
----@param gameState state
+---@param gameState GAME.GAMESTATE
 ---@param x number
 ---@param y number
 ---@param mouseButton ENUMS.CLICK
@@ -252,7 +252,7 @@ function lib.mousepressed(gameState, x, y, mouseButton)
 end
 
 ---update logic function
----@param gameState state
+---@param gameState GAME.GAMESTATE
 ---@param dt number
 function lib.update(gameState, dt)
     local mouse = { x=0, y=0 }

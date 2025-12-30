@@ -11,8 +11,8 @@ enemies will have different paths based on position and final
 
 ---enemy class
 ---@class ENEMY
----@field position {x:number,y:number}
----@field coords {x:number,y:number}
+---@field position {x:number,y:number} absolute coordinates
+---@field coords {x:number,y:number} tile coordinates
 ---@field moveAnimation {frames:table[],currentFrame:number,frameTime:number,timer:number,loop:boolean,death:boolean,dead:boolean}
 ---@field index number index in game.gameState.turrets
 ---@field orientation ENUMS.FLOWFIELD.TILE orientation of current sprite
@@ -45,7 +45,7 @@ local function enemyMoveFrames(enemyType)
 end
 
 
----@param gameState state from game.gameState, contains array of enemy objects
+---@param gameState GAME.GAMESTATE from game.gameState, contains array of enemy objects
 ---@param enemyType ENUMS.ENEMY enums.ENEMY_TYPE specific enemy static variables to get
 ---@param flowField FLOWFIELD pointer to flowField for the enemy to follow
 ---@param direction ENUMS.FLOWFIELD
@@ -148,6 +148,8 @@ end
 ---update the enemy state
 ---@param dt number delta time between last frame and current frame
 function lib:update(dt)
+    local slow_rate = 4
+
     --check health
     if self.health <= 0 then
         self.moveAnimation.death = true
@@ -156,30 +158,40 @@ function lib:update(dt)
     --direction logic
     local direction = self.flowField:getDirection(self.coords.x, self.coords.y)
 
-    local slow_rate = 4
+    --get to center of current tile before new direction logic
+    local center = {
+        x = (self.coords.x - 0.5) * SETTINGS.TILE_SIZE,
+        y = (self.coords.y - 0.5) * SETTINGS.TILE_SIZE
+    }
+    --check if we're close to center
+    local threshold = (self.speed / slow_rate) * 3 -- Make threshold larger to catch the center
+    local centerCheck = {
+        x = math.abs(self.position.x - center.x) <= threshold,
+        y = math.abs(self.position.y - center.y) <= threshold
+    }
+    local atCenter = centerCheck.x and centerCheck.y
+
     --turning state machine
     if not self.turning then
-        if direction ~= self.lastDirection then
+        --move enemy
+        if self.lastDirection == ENUMS.FLOWFIELD.TILE.UP then
+            self.position.y = self.position.y - self.speed / slow_rate
+            self.orientation = ENUMS.ORIENTATION.UP
+        elseif self.lastDirection == ENUMS.FLOWFIELD.TILE.DOWN then
+            self.position.y = self.position.y + self.speed / slow_rate
+            self.orientation = ENUMS.ORIENTATION.DOWN
+        elseif self.lastDirection == ENUMS.FLOWFIELD.TILE.LEFT then
+            self.position.x = self.position.x - self.speed / slow_rate
+            self.orientation = ENUMS.ORIENTATION.LEFT
+        elseif self.lastDirection == ENUMS.FLOWFIELD.TILE.RIGHT then
+            self.position.x = self.position.x + self.speed / slow_rate
+            self.orientation = ENUMS.ORIENTATION.RIGHT
+        end
+
+        if atCenter and direction ~= self.lastDirection then
+            self.position.x = center.x
+            self.position.y = center.y
             self.turning = true
-        else
-            --move enemy
-            if direction == ENUMS.FLOWFIELD.TILE.UP then
-                self.position.y = self.position.y - self.speed / slow_rate
-                self.orientation = ENUMS.ORIENTATION.UP
-                self.lastDirection = ENUMS.FLOWFIELD.TILE.UP
-            elseif direction == ENUMS.FLOWFIELD.TILE.DOWN then
-                self.position.y = self.position.y + self.speed / slow_rate
-                self.orientation = ENUMS.ORIENTATION.DOWN
-                self.lastDirection = ENUMS.FLOWFIELD.TILE.DOWN
-            elseif direction == ENUMS.FLOWFIELD.TILE.LEFT then
-                self.position.x = self.position.x - self.speed / slow_rate
-                self.orientation = ENUMS.ORIENTATION.LEFT
-                self.lastDirection = ENUMS.FLOWFIELD.TILE.LEFT
-            elseif direction == ENUMS.FLOWFIELD.TILE.RIGHT then
-                self.position.x = self.position.x + self.speed / slow_rate
-                self.orientation = ENUMS.ORIENTATION.RIGHT
-                self.lastDirection = ENUMS.FLOWFIELD.TILE.RIGHT
-            end
         end
     else
         self:turn(dt, direction)
@@ -217,7 +229,7 @@ function lib:update(dt)
 end
 
 ---Remove entity from game state
----@param gameState state
+---@param gameState GAME.GAMESTATE
 function lib:kill(gameState)
     gameState.money = gameState.money + self.value
     table.remove(gameState.enemies, self.index)

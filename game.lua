@@ -1,7 +1,7 @@
----@alias state {money:number,map:ENUMS.TILES[][],path1:ENUMS.FLOWFIELD.TILE[][],path2:ENUMS.FLOWFIELD.TILE[][],lives:number,level:number,round:number,turrets:table,enemies:table,selected:number[],selectedTurretType:number,placementMode:boolean}
----@alias game {state:GAME.STATES,screen:{x:number,y:number},gameState:state}
+---@alias GAME.GAMESTATE {money:number,map:ENUMS.TILES[][],path1:FLOWFIELD,path2:FLOWFIELD,lives:number,level:number,round:number,turrets:table,enemies:table,selected:number[],selectedTurretType:number,placementMode:boolean}
+---@alias game {state:GAME.STATES,screen:{x:number,y:number},gameState:GAME.GAMESTATE}
 ---@class GAME
----@field gameState state
+---@field gameState GAME.GAMESTATE
 local lib = {}
 
 ---@enum GAME.STATES
@@ -29,8 +29,8 @@ function lib.initGame()
 end
 
 ---create a new game state
----@param o state
----@return state
+---@param o GAME.GAMESTATE
+---@return GAME.GAMESTATE
 function lib.newGame(o)
     local game = {
         money = o.money or 30,
