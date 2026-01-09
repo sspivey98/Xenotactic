@@ -10,7 +10,7 @@ enemies will have different paths based on position and final
 --]]
 
 ---enemy class
----@class ENEMY
+---@class ENEMY : EnemyData inherit properties of EnemyData
 ---@field position {x:number,y:number} absolute coordinates
 ---@field coords {x:number,y:number} tile coordinates
 ---@field moveAnimation {frames:table[],currentFrame:number,frameTime:number,timer:number,loop:boolean,death:boolean,dead:boolean}
@@ -18,7 +18,7 @@ enemies will have different paths based on position and final
 ---@field orientation ENUMS.FLOWFIELD.TILE orientation of current sprite
 ---@field lastDirection ENUMS.FLOWFIELD.TILE
 ---@field flowField FLOWFIELD which flowField for the enemy to follow
-
+---@field goal boolean mark enemy got to goal
 local lib = {}
 
 local SETTINGS = require('settings')
@@ -44,9 +44,8 @@ local function enemyMoveFrames(enemyType)
     return frames
 end
 
-
 ---@param gameState GAME.GAMESTATE from game.gameState, contains array of enemy objects
----@param enemyType ENUMS.ENEMY enums.ENEMY_TYPE specific enemy static variables to get
+---@param enemyType number enums.ENEMY_TYPE specific enemy static variables to get
 ---@param flowField FLOWFIELD pointer to flowField for the enemy to follow
 ---@param direction ENUMS.FLOWFIELD
 function lib:new(gameState, enemyType, flowField, direction)
@@ -58,7 +57,7 @@ function lib:new(gameState, enemyType, flowField, direction)
 
     local rand = 0
     if direction == ENUMS.FLOWFIELD.LONGITUDE then
-        rand = love.math.random(11, 19)
+        rand = love.math.random(12, 19)
         o.position = {x=0, y=SETTINGS.TILE_SIZE*rand - SETTINGS.TILE_SIZE/2}
         o.coords = {x=1, y=rand}
         o.lastDirection = ENUMS.FLOWFIELD.TILE.RIGHT
@@ -81,6 +80,7 @@ function lib:new(gameState, enemyType, flowField, direction)
     o.flowField = flowField
     o.orientation = 0
     o.turning = false
+    o.goal = false
     table.insert(gameState.enemies, o)
     return o
 end
@@ -157,6 +157,11 @@ function lib:update(dt)
 
     --direction logic
     local direction = self.flowField:getDirection(self.coords.x, self.coords.y)
+
+    --check if at goal
+    if direction == ENUMS.FLOWFIELD.TILE.GOAL then
+        self.goal = true
+    end
 
     --get to center of current tile before new direction logic
     local center = {

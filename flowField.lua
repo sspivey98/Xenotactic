@@ -32,11 +32,40 @@ end
 ---Mark tile blocked when turret placed. Given top left turret position
 ---@param x number x coordinate in tile coordinate
 ---@param y number y coordinate in tile coordinate
-function lib:setBlocked(x, y)
+---@param isCoordinate? boolean optional flag to convert x,y into tile coordinates
+function lib:setBlocked(x, y, isCoordinate)
+    if isCoordinate then
+        local pos = UTIL.getTileAt(self.map, x,y)
+        if pos then
+            x = pos.x
+            y = pos.y
+        end
+    end
+
     self.level[y][x] = ENUMS.TILES.TURRET
     self.level[y+1][x] = ENUMS.TILES.TURRET
     self.level[y][x+1] = ENUMS.TILES.TURRET
     self.level[y+1][x+1] = ENUMS.TILES.TURRET
+    self:calculate()
+end
+
+---Mark tile unused after a turret is sold - given top left turret position
+---@param x number x coordinate in tile coordinate
+---@param y number y coordinate in tile coordinate
+---@param isCoordinate? boolean optional flag to convert x,y into tile coordinates
+function lib:setEmpty(x, y, isCoordinate)
+    if isCoordinate then
+        local pos = UTIL.getTileAt(self.map, x,y)
+        if pos then
+            x = pos.x
+            y = pos.y
+        end
+    end
+
+    self.level[y][x] = ENUMS.TILES.EMPTY
+    self.level[y+1][x] = ENUMS.TILES.EMPTY
+    self.level[y][x+1] = ENUMS.TILES.EMPTY
+    self.level[y+1][x+1] = ENUMS.TILES.EMPTY
     self:calculate()
 end
 

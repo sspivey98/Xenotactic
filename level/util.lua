@@ -7,6 +7,7 @@ local lib = {}
 ---@param map ENUMS.TILES[][]
 ---@param x number
 ---@param y number
+---@return {x:number,y:number,type:number}|nil
 function lib.getTileAt(map, x, y)
     local tileX = math.floor(x / SETTINGS.TILE_SIZE) + 1
     local tileY = math.floor(y / SETTINGS.TILE_SIZE) + 1

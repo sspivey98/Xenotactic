@@ -1,4 +1,5 @@
 local IMAGES = require('lib.images')
+local SOUNDS = require('lib.sounds')
 
 ---@class ENUMS
 local lib = {}
@@ -20,7 +21,9 @@ lib.TILES = {
     PATHWAY = 5
 }
 
----@enum ENUMS.COLORS
+---@alias Color number[] RGB or RGBA color array
+---coloring for map tiles
+---@type {[number]: Color}
 lib.COLORS = {
     [0] = {0.7, 0.8, 0.7}, --green
     [1] = {0.7, 0.7, 0.7}, --grey
@@ -32,69 +35,86 @@ lib.COLORS = {
 
 ---@class TurretData
 ---@field cost number
----@field sell number
+---@field value number
 ---@field range number
 ---@field speed number
 ---@field damage number
 ---@field image any
+---@field sound any
 
----@enum ENUMS.TURRET
+---@class ENUMS.TURRET
+---@field WALL TurretData
+---@field GATLING TurretData
+---@field PLASMA TurretData
+---@field SAM TurretData
+---@field DCA TurretData
+---@field FREEZE TurretData
+---@field TESLA TurretData
+
+---@type ENUMS.TURRET
 lib.TURRET = {
     WALL = {
         cost = 2,
-        sell = 1,
+        value = 1,
         range = 0,
         speed = 0,
         damage = 0,
-        image = IMAGES.library["turret_wall"]
+        image = IMAGES.library["turret_wall"],
+        sound = nil
     },
     GATLING = {
         cost = 5,
-        sell = 3,
-        range = 60,
+        value = 3,
+        range = 90,
         speed = 2,
         damage = 10,
-        image = IMAGES.library["turret_gatling"]
+        image = IMAGES.library["turret_gatling"],
+        sound = SOUNDS.library["shoot_gatling"]
     },
     PLASMA = {
         cost = 15,
-        sell = 8,
-        range = 70,
+        value = 8,
+        range = 100,
         speed = 4,
         damage = 5,
-        image = IMAGES.library["turret_plasma"]
+        image = IMAGES.library["turret_plasma"],
+        sound = SOUNDS.library["shoot_plasma"]
     },
     SAM = {
         cost = 20,
-        sell = 10,
-        range = 90,
+        value = 10,
+        range = 120,
         speed = 1,
         damage = 8,
-        image = IMAGES.library["turret_sam"]
+        image = IMAGES.library["turret_sam"],
+        sound = SOUNDS.library["shoot_missile"]
     },
     DCA = {
         cost = 50,
-        sell = 25,
-        range = 60,
+        value = 25,
+        range = 90,
         speed = 3,
         damage = 20,
-        image = IMAGES.library["turret_sam"]
+        image = IMAGES.library["turret_sam"],
+        sound = SOUNDS.library["shoot_missile"]
     },
     FREEZE = {
         cost = 50,
-        sell = 25,
-        range = 50,
+        value = 25,
+        range = 80,
         speed = 2,
         damage = 10,
-        image = IMAGES.library["turret_freeze"]
+        image = IMAGES.library["turret_freeze"],
+        sound = SOUNDS.library["shoot_freeze"]
     },
     TESLA = {
         cost = 30,
-        sell = 15,
-        range = 40,
+        value = 15,
+        range = 70,
         speed = 2,
         damage = 10,
-        image = IMAGES.library["turret_tesla"]
+        image = IMAGES.library["turret_tesla"],
+        sound = SOUNDS.library["shoot_tesla"]
     }
 }
 
@@ -183,7 +203,7 @@ lib.ENEMY = {
 }
 
 ---match number to turret enum
----@enum ENUMS.TURRET_TYPE
+---@type {[number]: TurretData}
 lib.TURRET_TYPE = {
     [1] = lib.TURRET.WALL,
     [2] = lib.TURRET.GATLING,
@@ -195,7 +215,7 @@ lib.TURRET_TYPE = {
 }
 
 ---match number to enemy enum
----@enum ENUMS.ENEMY_TYPE
+---@type {[number]: ENUMS.ENEMY}
 lib.ENEMY_TYPE = {
     [1] = lib.ENEMY.BOSS1,
     [2] = lib.ENEMY.SCORPION,
@@ -239,6 +259,38 @@ lib.ORIENTATION = {
     DOWN = 90 * DTR,
     LEFT = 180 * DTR,
     UP = 270 * DTR
+}
+
+---upgrade colors
+---@enum ENUMS.UPGRADE_COLORS
+lib.UPGRADE_COLORS = {
+    WHITE = {0.8, 0.8, 0.8},
+    PURPLE = {1.0, 0.0, 1.0},
+    YELLOW = {0.9, 0.8, 0.1},
+    GREEN = {0.3, 0.8, 0.4},
+    CYAN = {0, 1.0, 1.0},
+    RED = {0.7, 0.1, 0.1}
+}
+
+---color lookup table (index correlates to turret level)
+---@type {[number]: Color}
+lib.UPGRADE = {
+    [1] = lib.UPGRADE_COLORS.WHITE,
+    [2] = lib.UPGRADE_COLORS.PURPLE,
+    [3] = lib.UPGRADE_COLORS.YELLOW,
+    [4] = lib.UPGRADE_COLORS.GREEN,
+    [5] = lib.UPGRADE_COLORS.CYAN,
+    [6] = lib.UPGRADE_COLORS.RED,
+}
+
+---upgrade times in seconds; turrets start at level 1, so this is time taken to upgrade to key level
+---@enum ENUMS.UPGRADE_TIMES
+lib.UPGRADE_TIMES = {
+    LEVEL2 = 1,
+    LEVEL3 = 2,
+    LEVEL4 = 5,
+    LEVEL5 = 10,
+    LEVEL6 = 15
 }
 
 return lib

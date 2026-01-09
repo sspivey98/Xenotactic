@@ -28,7 +28,6 @@ local UI = {
     upgrade = {},
 }
 
-
 ---initialize level
 ---@param level_number number level number selected (1-6)
 function lib.load(level_number)
@@ -73,8 +72,6 @@ function lib.load(level_number)
         turret.y = (math.ceil(i / 3) - 1) * turret.height + SCREEN.HEIGHT/6 - turret.height
         UI.turrets[i] = turret
     end
-
-    --sell/upgrade menus
 end
 
 ---draw function
@@ -83,7 +80,6 @@ function lib.draw(gameState)
     --draw map
     for y=1, map.Height do
         for x = 1, map.Width do
-            --print(x..", "..y)
             local tileType = gameState.map[y][x]
             love.graphics.setColor(ENUMS.COLORS[tileType])
             love.graphics.rectangle("fill",
@@ -122,12 +118,14 @@ function lib.draw(gameState)
     for _,enemy in ipairs(gameState.enemies) do
         enemy:draw()
     end
+
     --<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     --|          UI                |
     -->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     --[[
     --TODO for UI
-    add enemy properties section
+    add current turret/enemy selected info
+    add upgrade/sell turret button
     add next wave information
     --]]
 
@@ -211,21 +209,25 @@ end
 function lib.mousepressed(gameState, x, y, mouseButton)
     if mouseButton == ENUMS.CLICK.LEFT then
         local tile = UTIL.getTileAt(gameState.map, x, y)
-
         if tile then
             print("("..tile.x..", "..tile.y..") :: "..tile.type)
             if gameState.placementMode then--TODO
                 --check placement is valid
                 if UTIL:isValidPlacement(currentTile, gameState) == false then
                     SOUNDS.library["invalid"]:play()
-                --turret is placed
-                else
+                else --turret is placed
                     TURRET:new(gameState, currentTile.x, currentTile.y)
                     gameState.placementMode = false
                     SOUNDS.library["turret_build"]:play()
                     --update enemy pathing
                     gameState.path1:setBlocked(tile.x, tile.y)
                     gameState.path2:setBlocked(tile.x, tile.y)
+                end
+            else
+                for _,turret in ipairs(gameState.turrets) do
+                    if turret:select(x, y) then
+                        gameState.selectedTurret = turret
+                    end
                 end
             end
         --select from UI
@@ -255,8 +257,14 @@ end
 ---@param gameState GAME.GAMESTATE
 ---@param dt number
 function lib.update(gameState, dt)
+    if gameState.lives == 0 then
+        SOUNDS.library["mission_failed"]:play()
+    end
+
     local mouse = { x=0, y=0 }
     mouse.x, mouse.y = love.mouse.getPosition()
+
+    --UI selection
     for _,turret in ipairs(UI.turrets) do
         turret.wasHovered = turret.hovered
         turret.hovered = mouse.x >= turret.x and mouse.x <= (turret.x + turret.width) and
@@ -277,18 +285,35 @@ function lib.update(gameState, dt)
         currentTile.inbounds = false
     end
 
+    --enemies
+    for _,enemy in ipairs(gameState.enemies) do
+        enemy:update(dt)
+        if enemy.goal then
+            SOUNDS.library["lose_life"]:play()
+            enemy:kill(gameState)
+        end
+    end
+
+    --[[
+        1.) Search for enemies within radius of turret
+        2.) Select far-most right enemy in radius
+        3.) give coordinates to turret
+        4.) turn turret to face coordinates
+        5.) turret shoot function
+        6.) remove health from enemy
+
+        delay search to not be every frame
+        ignore search if turret already has a target (and its still in range)
+        force research if enemy dies
+    --]]
     --turrets
     for _,turret in ipairs(gameState.turrets) do
         turret:update(dt)
     end
 
-    --enemies
-    for _,enemy in ipairs(gameState.enemies) do
-        enemy:update(dt)
-    end
-
     if #gameState.turrets == 1 and #gameState.enemies == 0 then
         ENEMY:new(gameState, random, gameState.path1, ENUMS.FLOWFIELD.LONGITUDE)
+        ENEMY:new(gameState, random+1, gameState.path1, ENUMS.FLOWFIELD.LONGITUDE)
     end
 end
 

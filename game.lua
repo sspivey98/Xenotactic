@@ -1,4 +1,18 @@
----@alias GAME.GAMESTATE {money:number,map:ENUMS.TILES[][],path1:FLOWFIELD,path2:FLOWFIELD,lives:number,level:number,round:number,turrets:table,enemies:table,selected:number[],selectedTurretType:number,placementMode:boolean}
+---@class GAME.GAMESTATE
+---@field money number
+---@field map ENUMS.TILES[][]
+---@field path1 FLOWFIELD
+---@field path2 FLOWFIELD
+---@field lives number
+---@field level number
+---@field round number
+---@field turrets TURRET[]
+---@field enemies ENEMY[]
+---@field selected number[]
+---@field selectedTurret TURRET|nil
+---@field selectedTurretType number
+---@field placementMode boolean
+
 ---@alias game {state:GAME.STATES,screen:{x:number,y:number},gameState:GAME.GAMESTATE}
 ---@class GAME
 ---@field gameState GAME.GAMESTATE
@@ -29,20 +43,25 @@ function lib.initGame()
 end
 
 ---create a new game state
----@param o GAME.GAMESTATE
+---@param money? number
+---@param level number level number
+---@param map {}[]
+---@param path1 FLOWFIELD
+---@param path2? FLOWFIELD
 ---@return GAME.GAMESTATE
-function lib.newGame(o)
+function lib.newGame(money, level, map, path1, path2)
     local game = {
-        money = o.money or 30,
-        map = o.map or {},
-        path1 = o.path1 or {}, --flowField left -> right
-        path2 = o.path2 or {}, --flowField up -> down
+        money = money or 30,
+        map = map or {},
+        path1 = path1 or {}, --flowField left -> right
+        path2 = path2 or {}, --flowField up -> down
         lives = 10,
-        level = o.level or 1,
+        level = level or 1,
         round = 0,
         turrets = {},
         enemies = {},
         selected = {0, 0},
+        selectedTurret = nil,
         selectedTurretType = nil,
         placementMode = false,
     }

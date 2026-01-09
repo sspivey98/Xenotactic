@@ -71,12 +71,13 @@ function love.mousepressed(x, y, mouseButton)
                     (SOUNDS.library["button_press2"]):play()
                     local map = MAPS["level_"..index]
                     local map_copy = UTIL:deepCopy(map)
-                    game.gameState = GAME.newGame{
-                        level = index,
-                        map = map_copy,
-                        path1 = FLOWFIELD:new(map_copy, ENUMS.FLOWFIELD.LONGITUDE),
-                        path2 = FLOWFIELD:new(map_copy, ENUMS.FLOWFIELD.LATITUDE)
-                    }
+                    game.gameState = GAME.newGame(
+                        30,
+                        index,
+                        map_copy,
+                        FLOWFIELD:new(map_copy, ENUMS.FLOWFIELD.LONGITUDE),
+                        FLOWFIELD:new(map_copy, ENUMS.FLOWFIELD.LATITUDE)
+                    )
                     LEVEL.load(index)
                     game.state = GAME.STATES.GAME
                     print("Selected level: " .. index)
