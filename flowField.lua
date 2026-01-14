@@ -10,7 +10,15 @@ local UTIL = require('level.util')
 ---@class FLOWFIELD
 ---@field level table[]
 ---@field map table[]
-local lib = {}
+---@overload fun(level: table[], direction: ENUMS.FLOWFIELD): FLOWFIELD
+local lib = setmetatable({},
+    {
+        __call = function(class, level, direction)
+            ---@cast class FLOWFIELD
+            return class:new(level, direction)
+        end
+    }
+)
 
 ---initialize the grid
 ---@param level table[] - 2D array of current map

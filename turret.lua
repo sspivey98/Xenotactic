@@ -14,7 +14,15 @@ local IMAGES = require('lib.images')
 ---@field height number
 ---@field level number turret upgrade level
 ---@field selected boolean
-local lib = {}
+---@overload fun(gameState: GAME.GAMESTATE, x:number, y:number): TURRET
+local lib = setmetatable({},
+    {
+        _call = function(class, gameState, x, y)
+            ---@cast class TURRET
+            return class:new(gameState, x, y)
+        end
+    }
+)
 
 local build_turret_sprite_sheet = IMAGES.library["turret_build"]
 
@@ -42,7 +50,8 @@ end
 function lib:new(gameState, x, y)
     --copy selected turret metadata
     local o = {}
-    for k, v in pairs(ENUMS.TURRET_TYPE[gameState.selectedTurretType]) do o[k] = v end
+    local turretType = ENUMS.TURRET_LOOKUP[gameState.selectedTurretType]
+    for k, v in pairs(ENUMS.TURRET[turretType]) do o[k] = v end
     setmetatable(o, self)
     self.__index = self
     o.position = {x=x, y=y} --top left

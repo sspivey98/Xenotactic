@@ -56,7 +56,7 @@ lib.TURRET = {
     WALL = {
         cost = 2,
         value = 1,
-        range = 0,
+        range = 5,
         speed = 0,
         damage = 0,
         image = IMAGES.library["turret_wall"],
@@ -202,16 +202,27 @@ lib.ENEMY = {
     },
 }
 
----match number to turret enum
----@type {[number]: TurretData}
+---@enum TURRET_TYPE
 lib.TURRET_TYPE = {
-    [1] = lib.TURRET.WALL,
-    [2] = lib.TURRET.GATLING,
-    [3] = lib.TURRET.PLASMA,
-    [4] = lib.TURRET.SAM,
-    [5] = lib.TURRET.DCA,
-    [6] = lib.TURRET.FREEZE,
-    [7] = lib.TURRET.TESLA,
+    WALL = 1,
+    GATLING = 2,
+    PLASMA = 3,
+    SAM = 4,
+    DCA = 5,
+    FREEZE = 6,
+    TESLA = 7
+}
+
+---reverse lookup match number to turret enum
+---@type {[number]: string}
+lib.TURRET_LOOKUP = {
+    [1] = "WALL",
+    [2] = "GATLING",
+    [3] = "PLASMA",
+    [4] = "SAM",
+    [5] = "DCA",
+    [6] = "FREEZE",
+    [7] = "TESLA",
 }
 
 ---match number to enemy enum
@@ -291,6 +302,59 @@ lib.UPGRADE_TIMES = {
     LEVEL4 = 5,
     LEVEL5 = 10,
     LEVEL6 = 15
+}
+
+---upgrade cost per turret
+---@enum ENUMS.UPGRADE_COST
+lib.UPGRADE_COST = {
+    ---@enum ENUMS.UPGRADE_COST.GATLING
+    GATLING = {
+        LEVEL2 = 5,
+        LEVEL3 = 10,
+        LEVEL4 = 15,
+        LEVEL5 = 30,
+        LEVEL6 = 60
+    },
+    ---@enum ENUMS.UPGRADE_COST.PLASMA
+    PLASMA = {
+        LEVEL2 = 1,
+        LEVEL3 = 2,
+        LEVEL4 = 5,
+        LEVEL5 = 10,
+        LEVEL6 = 15
+    },
+    ---@enum ENUMS.UPGRADE_COST.SAM
+    SAM = {
+        LEVEL2 = 1,
+        LEVEL3 = 2,
+        LEVEL4 = 5,
+        LEVEL5 = 10,
+        LEVEL6 = 15
+    },
+    ---@enum ENUMS.UPGRADE_COST.DCA
+    DCA = {
+        LEVEL2 = 1,
+        LEVEL3 = 2,
+        LEVEL4 = 5,
+        LEVEL5 = 10,
+        LEVEL6 = 15
+    },
+    ---@enum ENUMS.UPGRADE_COST.FREEZE
+    FREEZE = {
+        LEVEL2 = 1,
+        LEVEL3 = 2,
+        LEVEL4 = 5,
+        LEVEL5 = 10,
+        LEVEL6 = 15
+    },
+    ---@enum ENUMS.UPGRADE_COST.TESLA
+    TESLA = {
+        LEVEL2 = 1,
+        LEVEL3 = 2,
+        LEVEL4 = 5,
+        LEVEL5 = 10,
+        LEVEL6 = 15
+    }
 }
 
 return lib

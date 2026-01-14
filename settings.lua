@@ -16,16 +16,6 @@ local lib = {}
     - 1920x1080
 --]]
 
----load default window settings
-function lib.load()
-    lib.SCREEN.WIDTH = love.graphics.getWidth()
-    lib.SCREEN.HEIGHT = love.graphics.getHeight()
-    lib.SCREEN.UI = {
-        WIDTH = lib.SCREEN.WIDTH - lib.SCREEN.MAP.WIDTH,
-        HEIGHT = lib.SCREEN.HEIGHT - lib.SCREEN.MAP.HEIGHT
-    }
-end
-
 lib.TILE_SIZE = 24
 lib.map = {
     Width = 33,
@@ -38,5 +28,15 @@ lib.SCREEN = {
         HEIGHT = lib.map.Height * lib.TILE_SIZE
     }
 }
+
+---load default window settings
+function lib.load()
+    lib.SCREEN.WIDTH = love.graphics.getWidth()
+    lib.SCREEN.HEIGHT = love.graphics.getHeight()
+    lib.SCREEN.UI = {
+        WIDTH = lib.SCREEN.WIDTH - lib.SCREEN.MAP.WIDTH,
+        HEIGHT = lib.SCREEN.HEIGHT
+    }
+end
 
 return lib

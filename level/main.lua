@@ -7,6 +7,7 @@ local SETTINGS = require('settings')
 local TURRET = require('turret')
 local ENEMY = require('enemy')
 local UTIL = require('level.util')
+local BUTTON = require('lib.button')
 
 --GLOBALS
 local TILE_SIZE = SETTINGS.TILE_SIZE --size of tile in pixels
@@ -22,10 +23,10 @@ local currentTile = {
 }
 
 --ui buttons load here
+---@type {turrets:{[string]:button.image},buttons:{[string]:button.text}}
 local UI = {
     turrets = {},
-    sell = {},
-    upgrade = {},
+    buttons = {}
 }
 
 ---initialize level
@@ -45,33 +46,77 @@ function lib.load(level_number)
     --create UI
     --turrets icons
     for i=1, 7 do
-        local turret = {
-            id = i,
-            img = IMAGES.library["icon_"..i],
-            hovered = false,
-            wasHovered = false,
-            cost = ENUMS.TURRET_TYPE[i].cost
+        local key = ENUMS.TURRET_LOOKUP[i]
+        local img = IMAGES.library["icon_"..i]
+        local scale = {
+            x = 100 / img:getWidth(), --80 / 50
+            y = 100 / img:getHeight()
         }
-        turret.scale = {
-            x = 100 / turret.img:getWidth(), --80 / 50
-            y = 100 / turret.img:getHeight()
-        }
-        turret.width = turret.img:getWidth() * turret.scale.x
-        turret.height = turret.img:getHeight() * turret.scale.y
+        local width = img:getWidth() * scale.x
+        local height = img:getHeight() * scale.y
 
         --split x into 3 columns
-        turret.x = SCREEN.MAP.WIDTH
+        local x = SCREEN.MAP.WIDTH
         if i % 3 == 1 then
-            turret.x = turret.x + (SCREEN.UI.WIDTH / 2) - 3*turret.width / 2
+            x = x + (SCREEN.UI.WIDTH / 2) - 3*width / 2
         elseif i % 3 == 2 then
-            turret.x = turret.x + (SCREEN.UI.WIDTH / 2) - turret.width / 2
+            x = x + (SCREEN.UI.WIDTH / 2) - width / 2
         else
-            turret.x = turret.x + (SCREEN.UI.WIDTH / 2) + turret.width / 2
+            x = x + (SCREEN.UI.WIDTH / 2) + width / 2
         end
         --split y into 2 rows
-        turret.y = (math.ceil(i / 3) - 1) * turret.height + SCREEN.HEIGHT/6 - turret.height
-        UI.turrets[i] = turret
+        local y = (math.ceil(i / 3) - 1) * height + SCREEN.HEIGHT/6 - height
+
+        ---@type button.image
+        local turretButton = BUTTON:new(
+            BUTTON.type.IMAGE,
+            {
+                x = x,
+                y = y,
+                width = width,
+                height = height,
+                image = img,
+                color = {1,1,1},
+                hoveredColor = {1,0.7,0.7},
+                scale = {
+                    x = scale.x,
+                    y = scale.y
+                }
+            }
+        )
+
+        UI.turrets[key] = turretButton
     end
+
+    --sell button
+    local padding = 40
+    ---@type button.text
+    local sell_button = BUTTON:new(
+        BUTTON.type.TEXT,
+        {
+            x = SCREEN.MAP.WIDTH + padding,
+            y = 2 * SCREEN.HEIGHT / 5 + padding,
+            width = SCREEN.UI.WIDTH / 2 - padding,
+            height = SCREEN.UI.HEIGHT / 8 - padding,
+            color = {0.3, 0.3, 0.3},
+            text = "SELL"
+        }
+    )
+    ---@type button.text
+    local upgrade_button = BUTTON:new(
+        BUTTON.type.TEXT,
+        {
+            x = SCREEN.MAP.WIDTH + padding,
+            y = 3*SCREEN.HEIGHT / 5 + padding,
+            width = SCREEN.UI.WIDTH / 2 - padding,
+            height = SCREEN.UI.HEIGHT / 8 - padding,
+            color = {0.3, 0.3, 0.3},
+            text = "UPGRADE"
+        }
+    )
+    UI.buttons["sell"] = sell_button
+    UI.buttons["upgrade"] = upgrade_button
+    --upgrade information
 end
 
 ---draw function
@@ -129,36 +174,15 @@ function lib.draw(gameState)
     add next wave information
     --]]
 
-    --separate into thirds
-    local third = SCREEN.HEIGHT / 3
-    local padding = 40
-
-    --draw turret buttons
-    local grid = {
-        size = 64,
-        spacing = 8,
-        start_x = SCREEN.MAP.WIDTH + padding,
-        start_y = 0 + padding
-    }
-
+    --draw UI turret buttons
     for _,turret in pairs(UI.turrets) do
-        local bgColor = {1,1,1}
-        if turret.hovered then
-            bgColor = {1,0.7,0.7}
-        end
-        love.graphics.setColor(bgColor)
-        love.graphics.draw(turret.img, turret.x, turret.y, 0, turret.scale.x, turret.scale.y)
+        turret:draw()
     end
 
-    --sell menu
-    local sellStartY = third + padding
-    love.graphics.setColor{1, 1, 1}
-    love.graphics.print("SELL", grid.start_x, sellStartY)
-
-    --upgrade menu
-    local upgradeStartY = third*2 + padding
-    love.graphics.setColor{1, 1, 1}
-    love.graphics.print("Upgrade", grid.start_x, upgradeStartY)
+    --draw UI buttons
+    for _,button in pairs(UI.buttons) do
+        button:draw()
+    end
 
     --<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     --|        placementMode       |
@@ -210,8 +234,8 @@ function lib.mousepressed(gameState, x, y, mouseButton)
     if mouseButton == ENUMS.CLICK.LEFT then
         local tile = UTIL.getTileAt(gameState.map, x, y)
         if tile then
-            print("("..tile.x..", "..tile.y..") :: "..tile.type)
-            if gameState.placementMode then--TODO
+            --!print("("..tile.x..", "..tile.y..") :: "..tile.type)
+            if gameState.placementMode then
                 --check placement is valid
                 if UTIL:isValidPlacement(currentTile, gameState) == false then
                     SOUNDS.library["invalid"]:play()
@@ -224,31 +248,52 @@ function lib.mousepressed(gameState, x, y, mouseButton)
                     gameState.path2:setBlocked(tile.x, tile.y)
                 end
             else
+                local check = false
                 for _,turret in ipairs(gameState.turrets) do
                     if turret:select(x, y) then
+                        check = true
                         gameState.selectedTurret = turret
                     end
                 end
+                if not check then
+                    gameState.selectedTurret = nil
+                end
             end
-        --select from UI
-        else
-            for _,turret in ipairs(UI.turrets) do
-                if x >= turret.x and x <= turret.x + turret.width and
-                    y >= turret.y and y <= turret.y + turret.height then
-                    if gameState.money < turret.cost then
+        else --select from UI
+            for name,turret in pairs(UI.turrets) do
+                if turret:clicked(x,y,mouseButton) then
+                    if gameState.money < ENUMS.TURRET[name].cost then
                         SOUNDS.library["invalid"]:play()
                         --flash icon dark red?
                     else
                         SOUNDS.library["button_press"]:play()
                         --turret build logic
-                        gameState.selectedTurretType = turret.id
+                        gameState.selectedTurretType = ENUMS.TURRET_TYPE[name]
                         gameState.placementMode = true
+                    end
+                end
+            end
+
+            if gameState.selectedTurret then
+                for name,button in pairs(UI.buttons) do
+                    if button:clicked(x, y, mouseButton) then
+                        --* custom logic
+                        if name == "upgrade" then
+                            --check cost
+                            SOUNDS.library["upgrading"]:play()
+                        elseif name == "sell" then
+                            SOUNDS.library["turret_sold"]:play()
+                            gameState.selectedTurret:sell(gameState)
+                            gameState.selectedTurret = nil
+                        end
+                        --*custom logic
                     end
                 end
             end
         end
     elseif mouseButton == ENUMS.CLICK.RIGHT then
         --deselect whatever
+        gameState.selectedTurret = nil
         gameState.placementMode = false
     end
 end
@@ -265,13 +310,12 @@ function lib.update(gameState, dt)
     mouse.x, mouse.y = love.mouse.getPosition()
 
     --UI selection
-    for _,turret in ipairs(UI.turrets) do
-        turret.wasHovered = turret.hovered
-        turret.hovered = mouse.x >= turret.x and mouse.x <= (turret.x + turret.width) and
-            mouse.y >= turret.y and mouse.y <= (turret.y + turret.height)
-        if turret.hovered and not turret.wasHovered then
-            (SOUNDS.library["button_hover"]):play()
-        end
+    for _,turret in pairs(UI.turrets) do
+        turret:isHovered(mouse.x, mouse.y)
+    end
+
+    for _,button in pairs(UI.buttons) do
+        button:isHovered(mouse.x, mouse.y)
     end
 
     --updateMap

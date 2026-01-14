@@ -19,7 +19,15 @@ enemies will have different paths based on position and final
 ---@field lastDirection ENUMS.FLOWFIELD.TILE
 ---@field flowField FLOWFIELD which flowField for the enemy to follow
 ---@field goal boolean mark enemy got to goal
-local lib = {}
+---@overload fun(gameState: GAME.GAMESTATE, enemyType: number, flowField: FLOWFIELD, direction: ENUMS.FLOWFIELD): ENEMY
+local lib = setmetatable({},
+    {
+        __call = function(class, gameState, enemyType, flowField, direction)
+            ---@cast class ENEMY
+            return class:new(gameState, enemyType, flowField, direction)
+        end
+    }
+)
 
 local SETTINGS = require('settings')
 local enemies_sprite_sheet = IMAGES.library["enemies"]

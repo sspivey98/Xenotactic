@@ -9,7 +9,7 @@
 ---@field turrets TURRET[]
 ---@field enemies ENEMY[]
 ---@field selected number[]
----@field selectedTurret TURRET|nil
+---@field selectedTurret TURRET|nil index of selected turret in turrets array
 ---@field selectedTurretType number
 ---@field placementMode boolean
 
