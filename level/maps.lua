@@ -151,4 +151,44 @@ lib.level_4 = {
 lib.level_5 = lib.level_2
 lib.level_6 = lib.level_2
 
+---@class LEVEL.MAPS.METADATA
+---@field CATEGORY string
+---@field DESCRIPTION string
+---@field LENGTH string
+
+---level descriptions
+---@type {[string]:LEVEL.MAPS.METADATA}  
+lib.METADATA = {
+    level_1 = {
+        CATEGORY = "BEGINNER.",
+        DESCRIPTION = "1 LINE OF ALIENS.",
+        LENGTH = "20 WAVES TO BEAT."
+    },
+    level_2 = {
+        CATEGORY = "NORMAL.",
+        DESCRIPTION = "2 LINES OF ALIENS.",
+        LENGTH = "20 WAVES TO BEAT."
+    },
+    level_3 = {
+        CATEGORY = "NORMAL.",
+        DESCRIPTION = "2 LINES OF ALIENS.",
+        LENGTH = "30 WAVES TO BEAT."
+    },
+    level_4 = {
+        CATEGORY = "NORMAL.",
+        DESCRIPTION = "2 LINES OF ALIENS.",
+        LENGTH = "40 WAVES TO BEAT."
+    },
+    level_5 = {
+        CATEGORY = "HARD.",
+        DESCRIPTION = "2 LINES OF ALIENS.",
+        LENGTH = "50 WAVES TO BEAT."
+    },
+    level_6 = {
+        CATEGORY = "EXPERT.",
+        DESCRIPTION = "2 LINES OF ALIENS.",
+        LENGTH = "20 WAVES TO BEAT."
+    },
+}
+
 return lib

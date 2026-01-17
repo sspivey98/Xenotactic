@@ -14,6 +14,9 @@ local IMAGES = require('lib.images')
 ---@field height number
 ---@field level number turret upgrade level
 ---@field selected boolean
+---@field upgradeCost integer cost of next upgrade
+---@field targeting ENEMY|nil
+---@field protected turretType string
 ---@overload fun(gameState: GAME.GAMESTATE, x:number, y:number): TURRET
 local lib = setmetatable({},
     {
@@ -50,8 +53,8 @@ end
 function lib:new(gameState, x, y)
     --copy selected turret metadata
     local o = {}
-    local turretType = ENUMS.TURRET_LOOKUP[gameState.selectedTurretType]
-    for k, v in pairs(ENUMS.TURRET[turretType]) do o[k] = v end
+    o.turretType = ENUMS.TURRET_LOOKUP[gameState.selectedTurretType]
+    for k, v in pairs(ENUMS.TURRET[o.turretType]) do o[k] = v end
     setmetatable(o, self)
     self.__index = self
     o.position = {x=x, y=y} --top left
@@ -69,6 +72,7 @@ function lib:new(gameState, x, y)
     o.index = #gameState.turrets + 1 --index in game.gameState.turrets
     o.orientation = 0
     o.upgrading = false
+    o.upgradeCost = 5
     o.upgradeTimer = 0
     o.level = 1 --upgrade level
     o.selected = false
@@ -107,9 +111,37 @@ function lib:update(dt)
             self.upgrading = false
             self.upgradeTimer = 0
         end
+    else
+    --turret targeting, reloading, firing
+        --[[
+        LOGIC
+            1.) Search for enemies within radius of turret -> target()
+            2.) Select enemy closest to goal in radius -> target()
+            3.) updated targeting coordinates for turret -> target() -> self.targeting
+            4.) turn turret to face coordinates -> draw() <- self.targeting
+            5.) turret shoot function -> update()
+            6.) remove health from enemy
+
+        delay search to not be every frame
+        ignore search if turret already has a target (and its still in range)
+        force research if enemy dies
+        --]]
+        --targeting logic
+        if self.targeting then
+            -- Calculate center of turret
+            local turretCenter = {
+                x = self.position.x + SETTINGS.TILE_SIZE / 2,
+                y = self.position.y + SETTINGS.TILE_SIZE / 2
+            }
+
+            -- Calculate angle to target
+            local dx = self.targeting.position.x - turretCenter.x
+            local dy = self.targeting.position.y - turretCenter.y
+            self.orientation = math.atan2(dy, dx) + math.pi / 2
+        end
     end
 
-    --turret targeting, reloading, firing
+    
 end
 
 ---draw turret
@@ -144,18 +176,37 @@ function lib:draw()
             1.5  --y scale
         )
         --draw turret sprite
-        --TODO more logic on rotation
-        love.graphics.setColor(ENUMS.UPGRADE[self.level])
-        love.graphics.draw(
-            self.image,
-            self.position.x + (ox * 1.5),
-            self.position.y + (oy * 1.5),
-            self.orientation, --r
-            1.5, --x scale
-            1.5, --y scale
-            ox,
-            oy
-        )
+        if not self.upgrading then
+            --TODO more logic on rotation
+            love.graphics.setColor(ENUMS.UPGRADE[self.level])
+            love.graphics.draw(
+                self.image,
+                self.position.x + (ox * 1.5),
+                self.position.y + (oy * 1.5),
+                self.orientation, --r
+                1.5, --x scale
+                1.5, --y scale
+                ox,
+                oy
+            )
+        else
+            --Progress bar
+            local barWidth = w * 1.5
+            local barHeight = 6
+            local barX = self.position.x
+            local barY = self.position.y + (h * 1.5) - 5 -- Below the turret
+
+            --Calculate progress (0 to 100)
+            local progress = self.upgradeTimer / ENUMS.UPGRADE_TIMES["LEVEL"..self.level+1]
+
+             --Draw progress (green)
+            love.graphics.setColor(0.2, 0.8, 0.2)
+            love.graphics.rectangle("fill", barX, barY, barWidth * progress, barHeight)
+
+            --Draw bar border
+            love.graphics.setColor(0, 0, 0)
+            love.graphics.rectangle("line", barX, barY, barWidth, barHeight)
+        end
 
         --draw selected range range
         if self.selected then
@@ -185,10 +236,32 @@ end
 
 ---find enemy to target
 ---@param enemies ENEMY[]
----@return ENEMY
 function lib:target(enemies)
-    --TODO
-    return enemies[1]
+    -- 1.) Search for enemies within radius of turret -> target()
+    -- 2.) Select enemy closest to goal in radius -> target()
+    -- 3.) updated targeting coordinates for turret -> target() -> self.targeting
+
+    local center = {
+        x = self.position.x + SETTINGS.TILE_SIZE,
+        y = self.position.y + SETTINGS.TILE_SIZE
+    }
+    local target = nil
+    local closest = math.huge
+
+    for _,enemy in ipairs(enemies) do
+        local dx = enemy.position.x - center.x
+        local dy = enemy.position.y - center.y
+        local distance = math.sqrt(dx*dx + dy*dy)
+        if distance <= self.range then
+            local progress = enemy.flowField.costMap[enemy.coords.y][enemy.coords.x]
+            if progress < closest then
+                closest = progress
+                target = enemy
+            end
+        end
+    end
+
+    self.targeting = target
 end
 
 ---Check if enemy is in range
@@ -216,16 +289,22 @@ function lib:select(x,y)
 end
 
 ---upgrade turret setter
----@param money number
+---@param gameState GAME.GAMESTATE
 ---@return boolean
-function lib:upgrade(money)
-    if money < self.cost then
+function lib:upgrade(gameState)
+    --max level
+    if self.level == 6 then
+        return false
+    end
+
+    if gameState.money < self.cost then
         return false
     end
 
     --do upgrade logic
-    money = money - self.cost
+    gameState.money = gameState.money - self.cost
     self.upgrading = true
+    self.upgradeCost = ENUMS.UPGRADE_COST[self.turretType]["LEVEL"..self.level]
     return true
 end
 

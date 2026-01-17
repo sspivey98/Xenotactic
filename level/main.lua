@@ -90,7 +90,6 @@ function lib.load(level_number)
 
     --sell button
     local padding = 40
-    ---@type button.text
     local sell_button = BUTTON:new(
         BUTTON.type.TEXT,
         {
@@ -102,7 +101,7 @@ function lib.load(level_number)
             text = "SELL"
         }
     )
-    ---@type button.text
+    ---@cast sell_button button.text
     local upgrade_button = BUTTON:new(
         BUTTON.type.TEXT,
         {
@@ -114,9 +113,9 @@ function lib.load(level_number)
             text = "UPGRADE"
         }
     )
+     ---@cast upgrade_button button.text
     UI.buttons["sell"] = sell_button
     UI.buttons["upgrade"] = upgrade_button
-    --upgrade information
 end
 
 ---draw function
@@ -280,7 +279,11 @@ function lib.mousepressed(gameState, x, y, mouseButton)
                         --* custom logic
                         if name == "upgrade" then
                             --check cost
-                            SOUNDS.library["upgrading"]:play()
+                            if gameState.selectedTurret:upgrade(gameState) then
+                                SOUNDS.library["upgrading"]:play()
+                            else
+                                SOUNDS.library["invalid"]:play()
+                            end
                         elseif name == "sell" then
                             SOUNDS.library["turret_sold"]:play()
                             gameState.selectedTurret:sell(gameState)
@@ -353,6 +356,7 @@ function lib.update(gameState, dt)
     --turrets
     for _,turret in ipairs(gameState.turrets) do
         turret:update(dt)
+        turret:target(gameState.enemies)
     end
 
     if #gameState.turrets == 1 and #gameState.enemies == 0 then

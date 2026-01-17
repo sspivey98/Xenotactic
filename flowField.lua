@@ -10,6 +10,7 @@ local UTIL = require('level.util')
 ---@class FLOWFIELD
 ---@field level table[]
 ---@field map table[]
+---@field costMap table[]
 ---@overload fun(level: table[], direction: ENUMS.FLOWFIELD): FLOWFIELD
 local lib = setmetatable({},
     {
@@ -33,6 +34,7 @@ function lib:new(level, direction)
     elseif direction == ENUMS.FLOWFIELD.LONGITUDE then
         --only take left and right (place X's along all top/bottom side)
     end
+    o.costMap = {}
     return o --? maybe set in gameState without return o?
 end
 
@@ -244,7 +246,7 @@ end
 ---From the cost map, we create a flow field map which is saved in self.map.
 function lib:calculate()
     --generate costMap
-    local costMap = Dijkstra(self.level)
+    self.costMap = Dijkstra(self.level)
 
     --[[
     Generate direction vectors from cost maps
@@ -253,12 +255,12 @@ function lib:calculate()
     --]]
 
     local flowField = {}
-    for x=1, #costMap do
+    for x=1, #self.costMap do
         flowField[x] = {}
-        for y=1, #costMap[1] do
-            if costMap[x][y] == ENUMS.FLOWFIELD.TILE.BLOCKED then
+        for y=1, #self.costMap[1] do
+            if self.costMap[x][y] == ENUMS.FLOWFIELD.TILE.BLOCKED then
                 flowField[x][y] = ENUMS.FLOWFIELD.TILE.BLOCKED
-            elseif costMap[x][y] == ENUMS.FLOWFIELD.TILE.GOAL then
+            elseif self.costMap[x][y] == ENUMS.FLOWFIELD.TILE.GOAL then
                 flowField[x][y] = ENUMS.FLOWFIELD.TILE.GOAL
             else
                 local MIN_COST = math.huge
@@ -268,11 +270,11 @@ function lib:calculate()
                     local nx = x + DIR.x
                     local ny = y + DIR.y
 
-                    if (nx >= 1 and nx <= #costMap) and
-                       (ny >= 1 and ny <= #costMap[1]) and
-                       costMap[nx][ny] ~= ENUMS.FLOWFIELD.TILE.BLOCKED then
-                        if costMap[nx][ny] < MIN_COST then
-                            MIN_COST = costMap[nx][ny]
+                    if (nx >= 1 and nx <= #self.costMap) and
+                       (ny >= 1 and ny <= #self.costMap[1]) and
+                       self.costMap[nx][ny] ~= ENUMS.FLOWFIELD.TILE.BLOCKED then
+                        if self.costMap[nx][ny] < MIN_COST then
+                            MIN_COST = self.costMap[nx][ny]
                             DIRECTION = {x=DIR.x, y=DIR.y}
                         end
                     end
@@ -294,9 +296,8 @@ function lib:calculate()
         end
     end
 
-    printField(flowField, true)
+    --printField(flowField, true)
     self.map = flowField
-    --return flowField
 end
 
 return lib
