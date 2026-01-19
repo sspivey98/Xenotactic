@@ -1,5 +1,6 @@
 local lib = {}
 
+---@type {[string]: love.Source[]}
 lib.library = {}
 --load all the filepaths
 local path = "/assets/sounds"

@@ -334,11 +334,7 @@ function lib.update(gameState, dt)
 
     --enemies
     for _,enemy in ipairs(gameState.enemies) do
-        enemy:update(dt)
-        if enemy.goal then
-            SOUNDS.library["lose_life"]:play()
-            enemy:kill(gameState)
-        end
+        enemy:update(dt, gameState)
     end
 
     --[[

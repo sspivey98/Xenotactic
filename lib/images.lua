@@ -1,5 +1,6 @@
 local lib = {}
 
+---@type {[string]: love.Image[]}
 lib.library = {}
 --load all the filepaths
 local path = "/assets/images"
@@ -17,7 +18,7 @@ for _, file in ipairs(files) do
     end
 end
 
-lib.icons = {}
 
+lib.icons = {}
 
 return lib

@@ -16,6 +16,8 @@ local IMAGES = require('lib.images')
 ---@field selected boolean
 ---@field upgradeCost integer cost of next upgrade
 ---@field targeting ENEMY|nil
+---@field shootAnimation {cooldown: number, muzzle: number, image:any}
+---@field protected upgradeBar {width:number,height:number,x:number,y:number,value:number}
 ---@field protected turretType string
 ---@overload fun(gameState: GAME.GAMESTATE, x:number, y:number): TURRET
 local lib = setmetatable({},
@@ -76,6 +78,15 @@ function lib:new(gameState, x, y)
     o.upgradeTimer = 0
     o.level = 1 --upgrade level
     o.selected = false
+    o.shootAnimation = {cooldown = 0, muzzle = 0}
+    local w,h = o.image:getDimensions()
+    o.upgradeBar = {
+        width = w*1.5,
+        height = h/6,
+        x = o.position.x,
+        y = o.position.y+h,
+        value = 0
+    }
     table.insert(gameState.turrets, o)
     gameState.money = gameState.money - o.cost
     return o
@@ -104,6 +115,8 @@ function lib:update(dt)
 
     --upgrade animation
     if self.upgrading then
+        --upgrade progress bar
+        self.upgradeBar.value = self.upgradeTimer / ENUMS.UPGRADE_TIMES["LEVEL"..self.level+1]
         self.upgradeTimer = self.upgradeTimer + dt
 
         if self.upgradeTimer >= ENUMS.UPGRADE_TIMES["LEVEL"..self.level+1] then
@@ -112,7 +125,7 @@ function lib:update(dt)
             self.upgradeTimer = 0
         end
     else
-    --turret targeting, reloading, firing
+    
         --[[
         LOGIC
             1.) Search for enemies within radius of turret -> target()
@@ -126,18 +139,31 @@ function lib:update(dt)
         ignore search if turret already has a target (and its still in range)
         force research if enemy dies
         --]]
-        --targeting logic
+
+        --turret targeting, reloading, firing
         if self.targeting then
-            -- Calculate center of turret
+            --center of turret
             local turretCenter = {
                 x = self.position.x + SETTINGS.TILE_SIZE / 2,
                 y = self.position.y + SETTINGS.TILE_SIZE / 2
             }
 
-            -- Calculate angle to target
+            --targeting logic
             local dx = self.targeting.position.x - turretCenter.x
             local dy = self.targeting.position.y - turretCenter.y
             self.orientation = math.atan2(dy, dx) + math.pi / 2
+
+            --shooting logic
+            self.shootAnimation.cooldown = self.shootAnimation.cooldown - dt
+            if self.shootAnimation.muzzle > 0 then
+                self.shootAnimation.muzzle = self.shootAnimation.muzzle - dt
+            end
+
+            if self.shootAnimation.cooldown <= 0 then
+                self:shoot()
+                self.shootAnimation.cooldown = 1 / self.speed
+                self.shootAnimation.muzzle = 0.1
+            end
         end
     end
 
@@ -177,7 +203,6 @@ function lib:draw()
         )
         --draw turret sprite
         if not self.upgrading then
-            --TODO more logic on rotation
             love.graphics.setColor(ENUMS.UPGRADE[self.level])
             love.graphics.draw(
                 self.image,
@@ -189,23 +214,35 @@ function lib:draw()
                 ox,
                 oy
             )
+            if self.shootAnimation.muzzle > 0 then
+                local flash_distance = oy * 1.5
+                local flash = {
+                    x = self.position.x + (ox*1.5) + math.cos(self.orientation - math.pi/2) * flash_distance,
+                    y = self.position.y + (oy*1.5) + math.sin(self.orientation - math.pi/2) * flash_distance
+                }
+                local flashW, flashH = self.shootImg:getDimensions()
+
+                love.graphics.setColor{1, 1, 1, self.shootAnimation.muzzle / 0.1}
+                love.graphics.draw(
+                    self.shootImg,
+                    flash.x,
+                    flash.y,
+                    self.orientation,
+                    1.5,
+                    1.5,
+                    flashW / 2,
+                    flashH / 2
+                )
+                love.graphics.setColor(1, 1, 1)
+            end
         else
-            --Progress bar
-            local barWidth = w * 1.5
-            local barHeight = 6
-            local barX = self.position.x
-            local barY = self.position.y + (h * 1.5) - 5 -- Below the turret
-
-            --Calculate progress (0 to 100)
-            local progress = self.upgradeTimer / ENUMS.UPGRADE_TIMES["LEVEL"..self.level+1]
-
              --Draw progress (green)
             love.graphics.setColor(0.2, 0.8, 0.2)
-            love.graphics.rectangle("fill", barX, barY, barWidth * progress, barHeight)
+            love.graphics.rectangle("fill", self.upgradeBar.x, self.upgradeBar.y, self.upgradeBar.width * self.upgradeBar.value, self.upgradeBar.height)
 
             --Draw bar border
             love.graphics.setColor(0, 0, 0)
-            love.graphics.rectangle("line", barX, barY, barWidth, barHeight)
+            love.graphics.rectangle("line", self.upgradeBar.x, self.upgradeBar.y, self.upgradeBar.width, self.upgradeBar.height)
         end
 
         --draw selected range range
@@ -272,6 +309,15 @@ function lib:inRange(enemy)
     local dy = enemy.position.y - self.position.y
     local distance = math.sqrt(dx * dx + dy * dy)
     return distance <= self.range
+end
+
+---shoot at enemy
+function lib:shoot()
+    --instant damage
+    if self.targeting.health > 0 then
+        self.sound:play()
+        self.targeting.health = self.targeting.health - self.damage
+    end
 end
 
 ---turret clicked on check

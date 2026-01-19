@@ -1,5 +1,6 @@
 local ENUMS = require('enums')
 local IMAGES = require('lib.images')
+local SOUNDS = require('lib.sounds')
 
 --[[
 *ENEMY PATHING NOTES
@@ -13,12 +14,16 @@ enemies will have different paths based on position and final
 ---@class ENEMY : EnemyData inherit properties of EnemyData
 ---@field position {x:number,y:number} absolute coordinates
 ---@field coords {x:number,y:number} tile coordinates
----@field moveAnimation {frames:table[],currentFrame:number,frameTime:number,timer:number,loop:boolean,death:boolean,dead:boolean}
+---@field protected moveAnimation {frames:table[],currentFrame:number,frameTime:number,timer:number,loop:boolean,death:boolean,dead:boolean}
+---@field protected deathAnimation {frames:table[],currentFrame:number,frameTime:number,timer:number,origin:{x:number,y:number}}
 ---@field index number index in game.gameState.turrets
 ---@field orientation ENUMS.FLOWFIELD.TILE orientation of current sprite
----@field lastDirection ENUMS.FLOWFIELD.TILE
----@field flowField FLOWFIELD which flowField for the enemy to follow
----@field goal boolean mark enemy got to goal
+---@field protected lastDirection ENUMS.FLOWFIELD.TILE
+---@field protected flowField FLOWFIELD which flowField for the enemy to follow
+---@field protected dying boolean mark enemy is dying or not
+---@field protected fullHealth number enemy's health when full
+---@field protected healthBar {width:number,height:number,x:number,y:number,value:number}
+---@field protected origin {x:number,y:number} origin x,y for rotation
 ---@overload fun(gameState: GAME.GAMESTATE, enemyType: number, flowField: FLOWFIELD, direction: ENUMS.FLOWFIELD): ENEMY
 local lib = setmetatable({},
     {
@@ -34,6 +39,7 @@ local enemies_sprite_sheet = IMAGES.library["enemies"]
 
 ---creates array of sprites for the enemy
 ---@private
+---@return love.Quad[]
 local function enemyMoveFrames(enemyType)
     --480x128 -> 32x32
     local frames = {}
@@ -81,38 +87,75 @@ function lib:new(gameState, enemyType, flowField, direction)
         frameTime = 0.1,
         timer = 0,
         loop = true,
-        death = false,
-        dead = false,
     }
+    o.deathAnimation = {
+        frames = ENUMS.AlienDeathFrames,
+        currentFrame = 1,
+        frameTime = 0.03,
+        timer = 0,
+    }
+    local frameW, frameH = o.deathAnimation.frames[o.deathAnimation.currentFrame]:getDimensions()
+    o.deathAnimation.origin = {x = frameW / 2, y = frameH / 2}
+    o.dying = false
     o.index = #gameState.enemies + 1 --index in game.gameState.turrets
     o.flowField = flowField
     o.orientation = 0
+    local _,_,w,h = o.moveAnimation.frames[o.moveAnimation.currentFrame]:getViewport()
+    o.origin = {
+        x = w/2,
+        y = h/2
+    }
     o.turning = false
     o.goal = false
+    o.fullHealth = o.health
+    o.healthBar = {
+        width = 2*w/3,
+        height = h/5,
+        x = 0,
+        y = 0,
+        value = o.fullHealth
+    }
     table.insert(gameState.enemies, o)
     return o
 end
 
 ---draw the enemy frame
 function lib:draw()
-    --calc origin of monster frame
-    local frame = self.moveAnimation.frames[self.moveAnimation.currentFrame]
-    local _,_,w,h = frame:getViewport()
-    local ox = w / 2
-    local oy = h / 2
+    if self.dying then
+        love.graphics.draw(
+            self.deathAnimation.frames[self.deathAnimation.currentFrame],
+            self.position.x,
+            self.position.y,
+            0, --orientation (radians)
+            0.5, --x scale
+            0.5,  --y scale
+            self.deathAnimation.origin.x,
+            self.deathAnimation.origin.y
+        )
+    else
+        love.graphics.draw(
+            enemies_sprite_sheet,
+            self.moveAnimation.frames[self.moveAnimation.currentFrame],
+            self.position.x,
+            self.position.y,
+            self.orientation, --orientation (radians)
+            1.5, --x scale
+            1.5,  --y scale
+            self.origin.x, --origin x for rotation
+            self.origin.y --origin y for rotation
+        )
 
-    love.graphics.draw(
-        enemies_sprite_sheet,
-        frame,
-        self.position.x,
-        self.position.y,
-        self.orientation, --orientation (radians)
-        1.5, --x scale
-        1.5,  --y scale
-        ox, --origin x for rotation
-        oy --origin y for rotation
-    )
-    love.graphics.setColor{1,1,1}
+        --%
+        love.graphics.setColor{0.2, 0.8, 0.2}
+        love.graphics.rectangle("fill", self.healthBar.x, self.healthBar.y, self.healthBar.width*self.healthBar.value, self.healthBar.height)
+
+        --bar border
+        love.graphics.setColor{0,0,0}
+        love.graphics.rectangle("line", self.healthBar.x, self.healthBar.y, self.healthBar.width, self.healthBar.height)
+
+        --reset color
+        love.graphics.setColor{1,1,1}
+    end
 end
 
 ---logic to turn enemy from one direction to another
@@ -131,6 +174,7 @@ function lib:turn(dt, newDirection)
     elseif newDirection == ENUMS.FLOWFIELD.TILE.RIGHT then
         radians = ENUMS.ORIENTATION.RIGHT
     else
+        --TODO snap to the middle of the closest tile?
         error(newDirection..": Enemy pathing did not choose valid direction after turning.")
     end
 
@@ -155,20 +199,26 @@ end
 
 ---update the enemy state
 ---@param dt number delta time between last frame and current frame
-function lib:update(dt)
+---@param gameState GAME.GAMESTATE
+function lib:update(dt, gameState)
     local slow_rate = 4
 
     --check health
-    if self.health <= 0 then
-        self.moveAnimation.death = true
+    if self.health <= 0 and not self.dying then
+        self.dying = true
     end
+
+    --update healthBar position & health
+    self.healthBar.x = self.position.x
+    self.healthBar.y = self.position.y
+    self.healthBar.value = self.health / self.fullHealth
 
     --direction logic
     local direction = self.flowField:getDirection(self.coords.x, self.coords.y)
 
     --check if at goal
     if direction == ENUMS.FLOWFIELD.TILE.GOAL then
-        self.goal = true
+        return self:finished(gameState)
     end
 
     --get to center of current tile before new direction logic
@@ -176,7 +226,7 @@ function lib:update(dt)
         x = (self.coords.x - 0.5) * SETTINGS.TILE_SIZE,
         y = (self.coords.y - 0.5) * SETTINGS.TILE_SIZE
     }
-    --check if we're close to center
+    --check if we're close to center of tile
     local threshold = (self.speed / slow_rate) * 3 -- Make threshold larger to catch the center
     local centerCheck = {
         x = math.abs(self.position.x - center.x) <= threshold,
@@ -185,7 +235,7 @@ function lib:update(dt)
     local atCenter = centerCheck.x and centerCheck.y
 
     --turning state machine
-    if not self.turning then
+    if not self.turning and not self.dying then
         --move enemy
         if self.lastDirection == ENUMS.FLOWFIELD.TILE.UP then
             self.position.y = self.position.y - self.speed / slow_rate
@@ -216,7 +266,7 @@ function lib:update(dt)
 
     --sprite moving animation
     local animate = self.moveAnimation
-    if not animate.death then
+    if not self.dying then
         animate.timer = animate.timer + dt
 
         if animate.timer >= animate.frameTime then
@@ -232,19 +282,33 @@ function lib:update(dt)
             end
         end
     else --death animation
+        self.deathAnimation.timer = self.deathAnimation.timer + dt
         --reset animation timers
-        if animate.timer >= animate.frameTime then
-            if animate.currentFrame > #animate.frames then
-                self.moveAnimation.dead = true
+        if self.deathAnimation.timer >= self.deathAnimation.frameTime then
+            self.deathAnimation.timer = self.deathAnimation.timer - self.deathAnimation.frameTime
+            self.deathAnimation.currentFrame = self.deathAnimation.currentFrame + 1
+
+            if self.deathAnimation.currentFrame > #self.deathAnimation.frames then
+                self.deathAnimation.currentFrame = #self.deathAnimation.frames
+                return self:kill(gameState)
             end
         end
     end
 end
 
----Remove entity from game state
+---Remove entity from game state and award money
 ---@param gameState GAME.GAMESTATE
 function lib:kill(gameState)
+    SOUNDS.library["enemy_kill"]:play()
     gameState.money = gameState.money + self.value
+    table.remove(gameState.enemies, self.index)
+end
+
+---Remove entity from game state and lose life
+---@param gameState GAME.GAMESTATE
+function lib:finished(gameState)
+    SOUNDS.library["lose_life"]:play()
+    gameState.lives = gameState.lives - 1
     table.remove(gameState.enemies, self.index)
 end
 
