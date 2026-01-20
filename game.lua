@@ -6,8 +6,8 @@
 ---@field lives number
 ---@field level number
 ---@field round number
----@field turrets TURRET[]
----@field enemies ENEMY[]
+---@field turrets {[string]:TURRET}
+---@field enemies {[string]:ENEMY}
 ---@field selected number[]
 ---@field selectedTurret TURRET|nil index of selected turret in turrets array
 ---@field selectedTurretType number

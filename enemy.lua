@@ -1,6 +1,7 @@
 local ENUMS = require('enums')
 local IMAGES = require('lib.images')
 local SOUNDS = require('lib.sounds')
+local UTIL = require('level.util')
 
 --[[
 *ENEMY PATHING NOTES
@@ -16,7 +17,7 @@ enemies will have different paths based on position and final
 ---@field coords {x:number,y:number} tile coordinates
 ---@field protected moveAnimation {frames:table[],currentFrame:number,frameTime:number,timer:number,loop:boolean,death:boolean,dead:boolean}
 ---@field protected deathAnimation {frames:table[],currentFrame:number,frameTime:number,timer:number,origin:{x:number,y:number}}
----@field index number index in game.gameState.turrets
+---@field index string uuid key for game.gameState.enemies
 ---@field orientation ENUMS.FLOWFIELD.TILE orientation of current sprite
 ---@field protected lastDirection ENUMS.FLOWFIELD.TILE
 ---@field protected flowField FLOWFIELD which flowField for the enemy to follow
@@ -97,7 +98,7 @@ function lib:new(gameState, enemyType, flowField, direction)
     local frameW, frameH = o.deathAnimation.frames[o.deathAnimation.currentFrame]:getDimensions()
     o.deathAnimation.origin = {x = frameW / 2, y = frameH / 2}
     o.dying = false
-    o.index = #gameState.enemies + 1 --index in game.gameState.turrets
+    o.index = UTIL.uuid()
     o.flowField = flowField
     o.orientation = 0
     local _,_,w,h = o.moveAnimation.frames[o.moveAnimation.currentFrame]:getViewport()
@@ -115,7 +116,7 @@ function lib:new(gameState, enemyType, flowField, direction)
         y = 0,
         value = o.fullHealth
     }
-    table.insert(gameState.enemies, o)
+    gameState.enemies[o.index] = o
     return o
 end
 
@@ -301,7 +302,7 @@ end
 function lib:kill(gameState)
     SOUNDS.library["enemy_kill"]:play()
     gameState.money = gameState.money + self.value
-    table.remove(gameState.enemies, self.index)
+    gameState.enemies[self.index] = nil
 end
 
 ---Remove entity from game state and lose life
@@ -309,7 +310,7 @@ end
 function lib:finished(gameState)
     SOUNDS.library["lose_life"]:play()
     gameState.lives = gameState.lives - 1
-    table.remove(gameState.enemies, self.index)
+    gameState.enemies[self.index] = nil
 end
 
 return lib

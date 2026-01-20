@@ -152,14 +152,14 @@ function lib.draw(gameState)
     --<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     --|          turrets           |
     -->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    for _,turret in ipairs(gameState.turrets) do
+    for _,turret in pairs(gameState.turrets) do
         turret:draw()
     end
 
     --<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     --|          enemies           |
     -->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    for _,enemy in ipairs(gameState.enemies) do
+    for _,enemy in pairs(gameState.enemies) do
         enemy:draw()
     end
 
@@ -248,7 +248,7 @@ function lib.mousepressed(gameState, x, y, mouseButton)
                 end
             else
                 local check = false
-                for _,turret in ipairs(gameState.turrets) do
+                for _,turret in pairs(gameState.turrets) do
                     if turret:select(x, y) then
                         check = true
                         gameState.selectedTurret = turret
@@ -333,7 +333,7 @@ function lib.update(gameState, dt)
     end
 
     --enemies
-    for _,enemy in ipairs(gameState.enemies) do
+    for _,enemy in pairs(gameState.enemies) do
         enemy:update(dt, gameState)
     end
 
@@ -350,12 +350,12 @@ function lib.update(gameState, dt)
         force research if enemy dies
     --]]
     --turrets
-    for _,turret in ipairs(gameState.turrets) do
+    for _,turret in pairs(gameState.turrets) do
         turret:update(dt)
         turret:target(gameState.enemies)
     end
 
-    if #gameState.turrets == 1 and #gameState.enemies == 0 then
+    if UTIL.tableLength(gameState.turrets) >= 1 and UTIL.tableLength(gameState.enemies) == 0 then
         ENEMY:new(gameState, random, gameState.path1, ENUMS.FLOWFIELD.LONGITUDE)
         ENEMY:new(gameState, random+1, gameState.path1, ENUMS.FLOWFIELD.LONGITUDE)
     end

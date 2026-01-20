@@ -87,4 +87,27 @@ function lib:deepCopy(original)
     return copy
 end
 
+---returns length of table, not sub-tables
+---@param t table
+---@return integer
+function lib.tableLength(t)
+    local counter = 0
+    for k,v in pairs(t) do
+        counter = counter+1
+    end
+    return counter
+end
+
+---generate a simple uuid
+---@return string
+function lib.uuid()
+    local template ='xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
+    local s = string.gsub(template, '[xy]', function (c)
+        local v = (c == 'x') and math.random(0, 0xf) or math.random(8, 0xb)
+        return string.format('%x', v)
+    end)
+
+    return s
+end
+
 return lib

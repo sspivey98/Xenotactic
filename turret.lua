@@ -1,6 +1,7 @@
 local ENUMS = require('enums')
 local SETTINGS = require('settings')
 local IMAGES = require('lib.images')
+local UTIL = require('level.util')
 
 ---turret class
 ---@class TURRET : TurretData
@@ -9,7 +10,7 @@ local IMAGES = require('lib.images')
 ---@field upgradeTimer number
 ---@field position {x:number,y:number} top left coordinate
 ---@field buildAnimation {frames:table,currentFrame:number,frameTime:number,timer:number,built:boolean}
----@field index number index in game.gameState.turrets
+---@field index string uuid key for game.gameState.turrets
 ---@field width number
 ---@field height number
 ---@field level number turret upgrade level
@@ -51,7 +52,6 @@ end
 ---@param gameState GAME.GAMESTATE
 ---@param x number
 ---@param y number
----@return TURRET
 function lib:new(gameState, x, y)
     --copy selected turret metadata
     local o = {}
@@ -71,7 +71,7 @@ function lib:new(gameState, x, y)
         timer = 0,
         built = false
     }
-    o.index = #gameState.turrets + 1 --index in game.gameState.turrets
+    o.index = UTIL.uuid()
     o.orientation = 0
     o.upgrading = false
     o.upgradeCost = 5
@@ -87,9 +87,8 @@ function lib:new(gameState, x, y)
         y = o.position.y+h,
         value = 0
     }
-    table.insert(gameState.turrets, o)
+    gameState.turrets[o.index] = o
     gameState.money = gameState.money - o.cost
-    return o
 end
 
 ---turret logic
@@ -125,7 +124,7 @@ function lib:update(dt)
             self.upgradeTimer = 0
         end
     else
-    
+
         --[[
         LOGIC
             1.) Search for enemies within radius of turret -> target()
@@ -214,6 +213,7 @@ function lib:draw()
                 ox,
                 oy
             )
+            --shooting
             if self.shootAnimation.muzzle > 0 then
                 local flash_distance = oy * 1.5
                 local flash = {
@@ -227,7 +227,7 @@ function lib:draw()
                     self.shootImg,
                     flash.x,
                     flash.y,
-                    self.orientation,
+                    self.orientation - 90,
                     1.5,
                     1.5,
                     flashW / 2,
@@ -268,7 +268,7 @@ function lib:sell(gameState)
     --refund money
     gameState.money = gameState.money + self.value
     --remove from game state turrets
-    table.remove(gameState.turrets, self.index)
+    gameState.turrets[self.index] = nil
 end
 
 ---find enemy to target
@@ -285,7 +285,7 @@ function lib:target(enemies)
     local target = nil
     local closest = math.huge
 
-    for _,enemy in ipairs(enemies) do
+    for _,enemy in pairs(enemies) do
         local dx = enemy.position.x - center.x
         local dy = enemy.position.y - center.y
         local distance = math.sqrt(dx*dx + dy*dy)
