@@ -20,7 +20,7 @@ enemies will have different paths based on position and final
 ---@field index string uuid key for game.gameState.enemies
 ---@field orientation ENUMS.FLOWFIELD.TILE orientation of current sprite
 ---@field protected lastDirection ENUMS.FLOWFIELD.TILE
----@field protected flowField FLOWFIELD which flowField for the enemy to follow
+---@field flowField FLOWFIELD which flowField for the enemy to follow
 ---@field protected dying boolean mark enemy is dying or not
 ---@field protected fullHealth number enemy's health when full
 ---@field protected healthBar {width:number,height:number,x:number,y:number,value:number}

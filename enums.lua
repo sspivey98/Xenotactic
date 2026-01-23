@@ -40,8 +40,10 @@ lib.COLORS = {
 ---@field speed number
 ---@field damage number
 ---@field image love.Image
----@field sound love.sound|nil
+---@field sound love.Source|nil
 ---@field shootImg love.Image|nil
+---@field projectile boolean
+---@field slow integer % to slow enemy speed
 
 ---@class ENUMS.TURRET
 ---@field WALL TurretData
@@ -62,7 +64,9 @@ lib.TURRET = {
         damage = 0,
         image = IMAGES.library["turret_wall"],
         sound = nil,
-        shootImg = nil
+        shootImg = nil,
+        projectile = false,
+        slow = 0
     },
     GATLING = {
         cost = 5,
@@ -72,7 +76,9 @@ lib.TURRET = {
         damage = 10,
         image = IMAGES.library["turret_gatling"],
         sound = SOUNDS.library["shoot_gatling"],
-        shootImg = IMAGES.library["turret_gatling_shoot"]
+        shootImg = IMAGES.library["turret_gatling_shoot"],
+        projectile = false,
+        slow = 0
     },
     PLASMA = {
         cost = 15,
@@ -82,7 +88,9 @@ lib.TURRET = {
         damage = 5,
         image = IMAGES.library["turret_plasma"],
         sound = SOUNDS.library["shoot_plasma"],
-        shootImg = IMAGES.library["turret_plasma_shoot"]
+        shootImg = IMAGES.library["turret_plasma_shoot"],
+        projectile = true,
+        slow = 0
     },
     SAM = {
         cost = 20,
@@ -92,7 +100,9 @@ lib.TURRET = {
         damage = 8,
         image = IMAGES.library["turret_sam"],
         sound = SOUNDS.library["shoot_missile"],
-        shootImg = IMAGES.library["turret_rocket_shoot"]
+        shootImg = IMAGES.library["turret_rocket_shoot"],
+        projectile = true,
+        slow = 0
     },
     DCA = {
         cost = 50,
@@ -102,7 +112,9 @@ lib.TURRET = {
         damage = 20,
         image = IMAGES.library["turret_sam"],
         sound = SOUNDS.library["shoot_missile"],
-        shootImg = IMAGES.library["turret_rocket_shoot"]
+        shootImg = IMAGES.library["turret_rocket_shoot"],
+        projectile = true,
+        slow = 0
     },
     FREEZE = {
         cost = 50,
@@ -112,7 +124,9 @@ lib.TURRET = {
         damage = 10,
         image = IMAGES.library["turret_freeze"],
         sound = SOUNDS.library["shoot_freeze"],
-        shootImg = IMAGES.library["turret_freeze_shoot"]
+        shootImg = IMAGES.library["turret_freeze_shoot"],
+        projectile = true,
+        slow = 20
     },
     TESLA = {
         cost = 30,
@@ -122,7 +136,9 @@ lib.TURRET = {
         damage = 10,
         image = IMAGES.library["turret_tesla"],
         sound = SOUNDS.library["shoot_tesla"],
-        shootImg = nil --TODO
+        shootImg = nil, --TODO
+        projectile = false,
+        slow = 90
     }
 }
 

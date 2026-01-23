@@ -1,6 +1,6 @@
 local lib = {}
 
----@type {[string]: love.Image[]}
+---@type {[string]: love.Image}
 lib.library = {}
 --load all the filepaths
 local path = "/assets/images"
