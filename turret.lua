@@ -9,15 +9,15 @@ local UTIL = require('level.util')
 ---@field upgrading boolean
 ---@field upgradeTimer number
 ---@field position {x:number,y:number} top left coordinate
----@field buildAnimation {frames:table,currentFrame:number,frameTime:number,timer:number,built:boolean}
+---@field protected buildAnimation {frames:table,currentFrame:number,frameTime:number,timer:number,built:boolean}
 ---@field index string uuid key for game.gameState.turrets
 ---@field width number
 ---@field height number
 ---@field level number turret upgrade level
 ---@field selected boolean
 ---@field upgradeCost integer cost of next upgrade
----@field targeting ENEMY|nil
----@field shootAnimation {cooldown: number, muzzle: number, image:any}
+---@field targeting ENEMY|ENEMY[]|nil
+---@field protected shootAnimation {cooldown:number, muzzle:number, currentFrame:integer, timer:number, frameTime:number}
 ---@field protected bullet? {x:number,y:number,angle:number}
 ---@field protected upgradeBar {width:number,height:number,x:number,y:number,value:number}
 ---@field protected turretType string
@@ -79,7 +79,13 @@ function lib:new(gameState, x, y)
     o.upgradeTimer = 0
     o.level = 1 --upgrade level
     o.selected = false
-    o.shootAnimation = {cooldown = 0, muzzle = 0}
+    o.shootAnimation = {
+        cooldown = 0,
+        muzzle = 0,
+        currentFrame = 1, --only needed for tesla
+        frameTime = 0.1, --only needed for tesla
+        timer = 0 --only needed for tesla
+    }
     local w,h = o.image:getDimensions()
     o.upgradeBar = {
         width = w*1.5,
@@ -146,52 +152,80 @@ function lib:update(dt)
         --turret targeting, reloading, firing
         if self.targeting then
             --shooting logic
-            if self.bullet then
-                if self.targeting.health > 0 then
-                    local dx = self.targeting.position.x - self.bullet.x
-                    local dy = self.targeting.position.y - self.bullet.y
-                    local distance = math.sqrt(dx*dx + dy*dy)
+            if self.targetOne then
+                if self.bullet then --shooting projectile
+                    if self.targeting.health > 0 then
+                        local dx = self.targeting.position.x - self.bullet.x
+                        local dy = self.targeting.position.y - self.bullet.y
+                        local distance = math.sqrt(dx*dx + dy*dy)
 
-                    if distance < 5 then --consider it a hit
-                        self.targeting.health = self.targeting.health - self.damage
+                        if distance < 5 then --consider it a hit
+                            self.targeting.health = self.targeting.health - self.damage
+                            self.targeting:slow(self.slow)
+                            self.bullet = nil
+                        else --move
+                            local speed = 300
+                            self.bullet.x = self.bullet.x + (dx / distance) * speed * dt
+                            self.bullet.y = self.bullet.y + (dy / distance) * speed * dt
+                            self.bullet.angle = math.atan2(dy, dx)
+                        end
+                    else
+                        --target died, bullet disappears
                         self.bullet = nil
-                    else --move
-                        local speed = 300
-                        self.bullet.x = self.bullet.x + (dx / distance) * speed * dt
-                        self.bullet.y = self.bullet.y + (dy / distance) * speed * dt
-                        self.bullet.angle = math.atan2(dy, dx)
                     end
                 else
-                    --target died, bullet disappears
-                    self.bullet = nil
+                    --center of turret
+                    local turretCenter = {
+                        x = self.position.x + SETTINGS.TILE_SIZE / 2,
+                        y = self.position.y + SETTINGS.TILE_SIZE / 2
+                    }
+
+                    --targeting logic
+                    local dx = self.targeting.position.x - turretCenter.x
+                    local dy = self.targeting.position.y - turretCenter.y
+                    self.orientation = math.atan2(dy, dx) + math.pi / 2
+
+                    self.shootAnimation.cooldown = self.shootAnimation.cooldown - dt
+                    if self.shootAnimation.muzzle > 0 then
+                        self.shootAnimation.muzzle = self.shootAnimation.muzzle - dt
+                    end
+
+                    if self.shootAnimation.cooldown <= 0 then
+                        self:shoot()
+                        self.shootAnimation.cooldown = 1 / self.speed
+                        self.shootAnimation.muzzle = 0.1
+                    end
                 end
             else
-                --center of turret
-                local turretCenter = {
-                    x = self.position.x + SETTINGS.TILE_SIZE / 2,
-                    y = self.position.y + SETTINGS.TILE_SIZE / 2
-                }
-
-                --targeting logic
-                local dx = self.targeting.position.x - turretCenter.x
-                local dy = self.targeting.position.y - turretCenter.y
-                self.orientation = math.atan2(dy, dx) + math.pi / 2
-
+                --animation from turret center, hit everyone in ranges
                 self.shootAnimation.cooldown = self.shootAnimation.cooldown - dt
+
                 if self.shootAnimation.muzzle > 0 then
-                    self.shootAnimation.muzzle = self.shootAnimation.muzzle - dt
+                    self.shootAnimation.timer = self.shootAnimation.timer + dt
+
+                    if self.shootAnimation.timer >= self.shootAnimation.frameTime then
+                        self.shootAnimation.timer = self.shootAnimation.timer - self.shootAnimation.frameTime
+                        self.shootAnimation.currentFrame = self.shootAnimation.currentFrame + 1
+
+                        --loop if frames finish
+                        if self.shootAnimation.currentFrame > #self.shootImg then
+                            self.shootAnimation.muzzle = 0
+                            self.shootAnimation.currentFrame = 1
+                            self.shootAnimation.timer = 0
+                        end
+                    end
                 end
 
                 if self.shootAnimation.cooldown <= 0 then
                     self:shoot()
-                    self.shootAnimation.cooldown = 1 / self.speed
-                    self.shootAnimation.muzzle = 0.1
+                    self.shootAnimation.cooldown = self.speed
+                    self.shootAnimation.muzzle = 1
+                    self.shootAnimation.currentFrame = 1
+                    self.shootAnimation.timer = 0
                 end
             end
         end
     end
-
-    
 end
 
 ---draw turret
@@ -253,58 +287,75 @@ function lib:draw()
                 )
             else --shoot immediately
                 if self.shootAnimation.muzzle > 0 then
-                    local flash_distance = oy * 1.5
-                    local flash = {
-                        x = self.position.x + (ox*1.5) + math.cos(self.orientation - math.pi/2) * flash_distance,
-                        y = self.position.y + (oy*1.5) + math.sin(self.orientation - math.pi/2) * flash_distance
-                    }
-                    local flashW, flashH = self.shootImg:getDimensions()
-
-                    love.graphics.setColor{1, 1, 1, self.shootAnimation.muzzle / 0.1}
-
-                    if ENUMS.TURRET_TYPE[self.turretType] == ENUMS.TURRET_TYPE.GATLING then --draw double muzzle
-                        local offset = w/2
-                        local perpendicular = {
-                            x = -math.sin(self.orientation - math.pi/2) * offset,
-                            y = math.cos(self.orientation - math.pi/2) * offset
+                    if self.targetOne then
+                        local flash_distance = oy * 1.5
+                        local flash = {
+                            x = self.position.x + (ox*1.5) + math.cos(self.orientation - math.pi/2) * flash_distance,
+                            y = self.position.y + (oy*1.5) + math.sin(self.orientation - math.pi/2) * flash_distance
                         }
-                        --left
-                        love.graphics.draw(
-                            self.shootImg,
-                            flash.x + perpendicular.x,
-                            flash.y + perpendicular.y,
-                            self.orientation - math.pi/2,
-                            1.5,
-                            1.5,
-                            flashW / 2,
-                            flashH / 2
-                        )
-                        --right
-                        love.graphics.draw(
-                            self.shootImg,
-                            flash.x - perpendicular.x,
-                            flash.y - perpendicular.y,
-                            self.orientation - math.pi/2,
-                            1.5,
-                            1.5,
-                            flashW / 2,
-                            flashH / 2
-                        )
-                    else --single barrel
-                        love.graphics.draw(
-                            self.shootImg,
-                            flash.x,
-                            flash.y,
-                            self.orientation - math.pi/2,
-                            1.5,
-                            1.5,
-                            flashW / 2,
-                            flashH / 2
-                        )
+                        local flashW, flashH = self.shootImg:getDimensions()
+
+                        love.graphics.setColor{1, 1, 1, self.shootAnimation.muzzle / 0.1}
+
+                        if ENUMS.TURRET_TYPE[self.turretType] == ENUMS.TURRET_TYPE.GATLING then --draw double muzzle
+                            local offset = w/2
+                            local perpendicular = {
+                                x = -math.sin(self.orientation - math.pi/2) * offset,
+                                y = math.cos(self.orientation - math.pi/2) * offset
+                            }
+                            --left
+                            love.graphics.draw(
+                                self.shootImg,
+                                flash.x + perpendicular.x,
+                                flash.y + perpendicular.y,
+                                self.orientation - math.pi/2,
+                                1.5,
+                                1.5,
+                                flashW / 2,
+                                flashH / 2
+                            )
+                            --right
+                            love.graphics.draw(
+                                self.shootImg,
+                                flash.x - perpendicular.x,
+                                flash.y - perpendicular.y,
+                                self.orientation - math.pi/2,
+                                1.5,
+                                1.5,
+                                flashW / 2,
+                                flashH / 2
+                            )
+                        else --single barrel
+                            love.graphics.draw(
+                                self.shootImg,
+                                flash.x,
+                                flash.y,
+                                self.orientation - math.pi/2,
+                                1.5,
+                                1.5,
+                                flashW / 2,
+                                flashH / 2
+                            )
+                        end
+                    else
+                        --shoot all in range
+                        if #self.targeting > 0 then
+                            local flashW, flashH = self.shootImg[1]:getDimensions()
+                            love.graphics.draw(
+                                self.shootImg[self.shootAnimation.currentFrame],
+                                self.position.x + SETTINGS.TILE_SIZE,
+                                self.position.y + SETTINGS.TILE_SIZE,
+                                0,
+                                1.5,
+                                1.5,
+                                flashW / 2,
+                                flashH / 2
+                            )
+                        end
                     end
-                    love.graphics.setColor(1, 1, 1)
                 end
             end
+            love.graphics.setColor(1, 1, 1)
         else
              --Draw progress (green)
             love.graphics.setColor(0.2, 0.8, 0.2)
@@ -355,20 +406,33 @@ function lib:target(enemies)
     local target = nil
     local closest = math.huge
 
-    for _,enemy in pairs(enemies) do
-        local dx = enemy.position.x - center.x
-        local dy = enemy.position.y - center.y
-        local distance = math.sqrt(dx*dx + dy*dy)
-        if distance <= self.range then
-            local progress = enemy.flowField.costMap[enemy.coords.y][enemy.coords.x]
-            if progress < closest then
-                closest = progress
-                target = enemy
+    if self.targetOne then
+        for _,enemy in pairs(enemies) do
+            local dx = enemy.position.x - center.x
+            local dy = enemy.position.y - center.y
+            local distance = math.sqrt(dx*dx + dy*dy)
+            if distance <= self.range then
+                local progress = enemy.flowField.costMap[enemy.coords.y][enemy.coords.x]
+                if progress < closest then
+                    closest = progress
+                    target = enemy
+                end
             end
         end
-    end
 
-    self.targeting = target
+        self.targeting = target
+    else
+        local ret = {}
+        for _,enemy in pairs(enemies) do
+            local dx = enemy.position.x - center.x
+            local dy = enemy.position.y - center.y
+            local distance = math.sqrt(dx*dx + dy*dy)
+            if distance <= self.range then
+                table.insert(ret, enemy)
+            end
+        end
+        self.targeting = ret
+    end
 end
 
 ---Check if enemy is in range
@@ -383,18 +447,30 @@ end
 
 ---shoot at enemy
 function lib:shoot()
-    if self.targeting.health > 0 then
+    if self.targetOne then
+        if self.targeting.health > 0 then
+            self.sound:play()
+            --spawn projectile
+            if self.projectile then
+                self.bullet = {
+                    x = self.position.x + SETTINGS.TILE_SIZE,
+                    y = self.position.y + SETTINGS.TILE_SIZE,
+                    angle = self.orientation - math.pi/2
+                }
+            else
+                --instant damage
+                self.targeting.health = self.targeting.health - self.damage
+                self.targeting:slow(self.slow)
+            end
+        end
+    else
+        --blindly shoot all enemies in range
         self.sound:play()
-        --spawn projectile
-        if self.projectile then
-            self.bullet = {
-                x = self.position.x + SETTINGS.TILE_SIZE,
-                y = self.position.y + SETTINGS.TILE_SIZE,
-                angle = self.orientation - math.pi/2
-            }
-        else
-            --instant damage
-            self.targeting.health = self.targeting.health - self.damage
+        if #self.targeting > 0 then
+            for _,enemy in pairs(self.targeting) do
+                enemy.health = enemy.health - self.damage
+                enemy:slow(self.slow)
+            end
         end
     end
 end

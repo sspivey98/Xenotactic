@@ -71,7 +71,7 @@ function love.mousepressed(x, y, mouseButton)
                     local map = MAPS["level_"..index]
                     local map_copy = UTIL:deepCopy(map)
                     game.gameState = GAME.newGame(
-                        30,
+                        60,
                         index,
                         map_copy,
                         FLOWFIELD:new(map_copy, ENUMS.FLOWFIELD.LONGITUDE),

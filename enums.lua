@@ -41,9 +41,12 @@ lib.COLORS = {
 ---@field damage number
 ---@field image love.Image
 ---@field sound love.Source|nil
----@field shootImg love.Image|nil
+---@field shootImg love.Image|love.Image[]|nil
 ---@field projectile boolean
 ---@field slow integer % to slow enemy speed
+---@field air boolean target air enemies?
+---@field splash boolean does splash damage
+---@field targetOne boolean targets specific enemies or not
 
 ---@class ENUMS.TURRET
 ---@field WALL TurretData
@@ -53,6 +56,33 @@ lib.COLORS = {
 ---@field DCA TurretData
 ---@field FREEZE TurretData
 ---@field TESLA TurretData
+
+---@type love.Image[]
+lib.TeslaShootAnimation = {
+    [1] = IMAGES.library["tesla_shoot_1"],
+    [2] = IMAGES.library["tesla_shoot_2"],
+    [3] = IMAGES.library["tesla_shoot_3"],
+    [4] = IMAGES.library["tesla_shoot_4"],
+    [5] = IMAGES.library["tesla_shoot_5"],
+    [6] = IMAGES.library["tesla_shoot_6"],
+    [7] = IMAGES.library["tesla_shoot_7"],
+    [8] = IMAGES.library["tesla_shoot_8"],
+    [9] = IMAGES.library["tesla_shoot_9"],
+    [10] = IMAGES.library["tesla_shoot_10"],
+    [11] = IMAGES.library["tesla_shoot_11"],
+    [12] = IMAGES.library["tesla_shoot_12"],
+    [13] = IMAGES.library["tesla_shoot_13"],
+    [14] = IMAGES.library["tesla_shoot_14"],
+    [15] = IMAGES.library["tesla_shoot_15"],
+    [16] = IMAGES.library["tesla_shoot_16"],
+    [17] = IMAGES.library["tesla_shoot_17"],
+    [18] = IMAGES.library["tesla_shoot_18"],
+    [19] = IMAGES.library["tesla_shoot_19"],
+    [20] = IMAGES.library["tesla_shoot_20"],
+    [21] = IMAGES.library["tesla_shoot_21"],
+    [22] = IMAGES.library["tesla_shoot_22"],
+    [23] = IMAGES.library["tesla_shoot_23"],
+}
 
 ---@type ENUMS.TURRET
 lib.TURRET = {
@@ -66,7 +96,10 @@ lib.TURRET = {
         sound = nil,
         shootImg = nil,
         projectile = false,
-        slow = 0
+        slow = 0,
+        air = false,
+        splash = false,
+        targetOne = true
     },
     GATLING = {
         cost = 5,
@@ -78,7 +111,10 @@ lib.TURRET = {
         sound = SOUNDS.library["shoot_gatling"],
         shootImg = IMAGES.library["turret_gatling_shoot"],
         projectile = false,
-        slow = 0
+        slow = 0,
+        air = false,
+        splash = false,
+        targetOne = true
     },
     PLASMA = {
         cost = 15,
@@ -90,7 +126,10 @@ lib.TURRET = {
         sound = SOUNDS.library["shoot_plasma"],
         shootImg = IMAGES.library["turret_plasma_shoot"],
         projectile = true,
-        slow = 0
+        slow = 0,
+        air = false,
+        splash = false,
+        targetOne = true
     },
     SAM = {
         cost = 20,
@@ -102,7 +141,10 @@ lib.TURRET = {
         sound = SOUNDS.library["shoot_missile"],
         shootImg = IMAGES.library["turret_rocket_shoot"],
         projectile = true,
-        slow = 0
+        slow = 0,
+        air = false,
+        splash = true,
+        targetOne = true
     },
     DCA = {
         cost = 50,
@@ -114,7 +156,10 @@ lib.TURRET = {
         sound = SOUNDS.library["shoot_missile"],
         shootImg = IMAGES.library["turret_rocket_shoot"],
         projectile = true,
-        slow = 0
+        slow = 0,
+        air = true,
+        splash = true,
+        targetOne = true
     },
     FREEZE = {
         cost = 50,
@@ -126,7 +171,10 @@ lib.TURRET = {
         sound = SOUNDS.library["shoot_freeze"],
         shootImg = IMAGES.library["turret_freeze_shoot"],
         projectile = true,
-        slow = 20
+        slow = 20,
+        air = false,
+        splash = true,
+        targetOne = true
     },
     TESLA = {
         cost = 30,
@@ -136,9 +184,12 @@ lib.TURRET = {
         damage = 10,
         image = IMAGES.library["turret_tesla"],
         sound = SOUNDS.library["shoot_tesla"],
-        shootImg = nil, --TODO
+        shootImg = lib.TeslaShootAnimation,
         projectile = false,
-        slow = 90
+        slow = 90,
+        air = false,
+        splash = false,
+        targetOne = false
     }
 }
 
@@ -146,83 +197,99 @@ lib.TURRET = {
 ---@field speed number
 ---@field health number
 ---@field value number
+---@field air boolean
 
 ---@enum ENUMS.ENEMY
 lib.ENEMY = {
     BOSS1 = {
         speed = 20,
         health = 100,
-        value = 20
+        value = 20,
+        air = false,
     },
     SCORPION = {
         speed = 1,
         health = 10,
         value = 1,
+        air = false,
     },
     BOSS2 = {
         speed = 1,
         health = 30,
         value = 1,
+        air = false,
     },
     GOBLIN = {
         speed = 1,
         health = 33,
         value = 1,
+        air = false,
     },
     TERMITE = {
         speed = 1,
         health = 36,
         value = 1,
+        air = false,
     },
     SLIME = {
         speed = 1,
         health = 60,
         value = 3,
+        air = false,
     },
     SPIDER = {
         speed = 1,
         health = 40,
         value = 1,
+        air = false,
     },
     QUEEN = {
         speed = 1,
         health = 500,
         value = 40,
+        air = false,
     },
     WENDIGO = {
         speed = 1,
         health = 58,
         value = 1,
+        air = false,
     },
     TURTLE = {
         speed = 1,
         health = 10,
         value = 2,
+        air = false,
     },
     REDCYBORG = {
         speed = 1,
         health = 73,
         value = 2,
+        air = false,
     },
     REDALIEN = {
         speed = 1,
         health = 10,
         value = 2,
+        air = false,
     },
     CYBORG = {
         speed = 1,
         health = 10,
         value = 2,
+        air = false,
     },
     ALIEN = {
         speed = 1,
         health = 26,
-        value = 1
+        value = 1,
+        air = false,
     },
     HELICOPTER = {
         speed = 2,
         health = 44,
         value = 3,
+        air = true,
     },
 }
 

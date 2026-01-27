@@ -19,6 +19,7 @@ enemies will have different paths based on position and final
 ---@field protected deathAnimation {frames:table[],currentFrame:number,frameTime:number,timer:number,origin:{x:number,y:number}}
 ---@field index string uuid key for game.gameState.enemies
 ---@field orientation ENUMS.FLOWFIELD.TILE orientation of current sprite
+---@field slow_rate number `Range: 0-1` slow % (0.21) caused by turret with slow attribute
 ---@field protected lastDirection ENUMS.FLOWFIELD.TILE
 ---@field flowField FLOWFIELD which flowField for the enemy to follow
 ---@field protected dying boolean mark enemy is dying or not
@@ -101,6 +102,7 @@ function lib:new(gameState, enemyType, flowField, direction)
     o.index = UTIL.uuid()
     o.flowField = flowField
     o.orientation = 0
+    o.slow_rate = 1
     local _,_,w,h = o.moveAnimation.frames[o.moveAnimation.currentFrame]:getViewport()
     o.origin = {
         x = w/2,
@@ -175,7 +177,7 @@ function lib:turn(dt, newDirection)
     elseif newDirection == ENUMS.FLOWFIELD.TILE.RIGHT then
         radians = ENUMS.ORIENTATION.RIGHT
     else
-        --TODO snap to the middle of the closest tile?
+        --TODO snap to the middle of the closest tile? perhaps just kill?
         error(newDirection..": Enemy pathing did not choose valid direction after turning.")
     end
 
@@ -202,8 +204,6 @@ end
 ---@param dt number delta time between last frame and current frame
 ---@param gameState GAME.GAMESTATE
 function lib:update(dt, gameState)
-    local slow_rate = 4
-
     --check health
     if self.health <= 0 and not self.dying then
         self.dying = true
@@ -228,27 +228,33 @@ function lib:update(dt, gameState)
         y = (self.coords.y - 0.5) * SETTINGS.TILE_SIZE
     }
     --check if we're close to center of tile
-    local threshold = (self.speed / slow_rate) * 3 -- Make threshold larger to catch the center
+    local threshold = (self.slow_rate*(self.speed / 4)) * 3 -- Make threshold larger to catch the center
     local centerCheck = {
         x = math.abs(self.position.x - center.x) <= threshold,
         y = math.abs(self.position.y - center.y) <= threshold
     }
     local atCenter = centerCheck.x and centerCheck.y
 
+    --reduce slow rate
+    if self.slow_rate < 1 then
+        self.slow_rate = self.slow_rate + dt
+        if self.slow_rate > 1 then self.slow_rate = 1 end
+    end
+
     --turning state machine
     if not self.turning and not self.dying then
         --move enemy
         if self.lastDirection == ENUMS.FLOWFIELD.TILE.UP then
-            self.position.y = self.position.y - self.speed / slow_rate
+            self.position.y = self.position.y - self.slow_rate*(self.speed / 4)
             self.orientation = ENUMS.ORIENTATION.UP
         elseif self.lastDirection == ENUMS.FLOWFIELD.TILE.DOWN then
-            self.position.y = self.position.y + self.speed / slow_rate
+            self.position.y = self.position.y + self.slow_rate*(self.speed / 4)
             self.orientation = ENUMS.ORIENTATION.DOWN
         elseif self.lastDirection == ENUMS.FLOWFIELD.TILE.LEFT then
-            self.position.x = self.position.x - self.speed / slow_rate
+            self.position.x = self.position.x - self.slow_rate*(self.speed / 4)
             self.orientation = ENUMS.ORIENTATION.LEFT
         elseif self.lastDirection == ENUMS.FLOWFIELD.TILE.RIGHT then
-            self.position.x = self.position.x + self.speed / slow_rate
+            self.position.x = self.position.x + self.slow_rate*(self.speed / 4)
             self.orientation = ENUMS.ORIENTATION.RIGHT
         end
 
@@ -311,6 +317,12 @@ function lib:finished(gameState)
     SOUNDS.library["lose_life"]:play()
     gameState.lives = gameState.lives - 1
     gameState.enemies[self.index] = nil
+end
+
+---slow down movement for a time period
+---@param percent integer
+function lib:slow(percent)
+    self.slow_rate = 1 - percent/100
 end
 
 return lib
