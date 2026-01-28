@@ -16,7 +16,7 @@ local UTIL = require('level.util')
 ---@field level number turret upgrade level
 ---@field selected boolean
 ---@field upgradeCost integer cost of next upgrade
----@field targeting ENEMY|ENEMY[]|nil
+---@field protected targeting ENEMY[]|nil
 ---@field protected shootAnimation {cooldown:number, muzzle:number, currentFrame:integer, timer:number, frameTime:number}
 ---@field protected bullet? {x:number,y:number,angle:number}
 ---@field protected upgradeBar {width:number,height:number,x:number,y:number,value:number}
@@ -77,6 +77,7 @@ function lib:new(gameState, x, y)
     o.upgrading = false
     o.upgradeCost = 5
     o.upgradeTimer = 0
+    o.targeting = {}
     o.level = 1 --upgrade level
     o.selected = false
     o.shootAnimation = {
@@ -150,21 +151,21 @@ function lib:update(dt)
         --]]
 
         --turret targeting, reloading, firing
-        if self.targeting then
+        if self.targeting[1] then
+            local target = self.targeting[1]
             --shooting logic
             if self.targetOne then
                 if self.bullet then --shooting projectile
-                    if self.targeting.health > 0 then
-                        local dx = self.targeting.position.x - self.bullet.x
-                        local dy = self.targeting.position.y - self.bullet.y
+                    if target.health > 0 then
+                        local dx = target.position.x - self.bullet.x
+                        local dy = target.position.y - self.bullet.y
                         local distance = math.sqrt(dx*dx + dy*dy)
 
                         if distance < 5 then --consider it a hit
-                            self.targeting.health = self.targeting.health - self.damage
-                            self.targeting:slow(self.slow)
+                            self:doDamage()
                             self.bullet = nil
                         else --move
-                            local speed = 300
+                            local speed = 400
                             self.bullet.x = self.bullet.x + (dx / distance) * speed * dt
                             self.bullet.y = self.bullet.y + (dy / distance) * speed * dt
                             self.bullet.angle = math.atan2(dy, dx)
@@ -181,8 +182,8 @@ function lib:update(dt)
                     }
 
                     --targeting logic
-                    local dx = self.targeting.position.x - turretCenter.x
-                    local dy = self.targeting.position.y - turretCenter.y
+                    local dx = target.position.x - turretCenter.x
+                    local dy = target.position.y - turretCenter.y
                     self.orientation = math.atan2(dy, dx) + math.pi / 2
 
                     self.shootAnimation.cooldown = self.shootAnimation.cooldown - dt
@@ -392,7 +393,8 @@ function lib:sell(gameState)
     gameState.turrets[self.index] = nil
 end
 
----find enemy to target
+---find enemy to target. Always returns an array of enemies in range
+---The first enemy in the array is the closest to the goal 
 ---@param enemies ENEMY[]
 function lib:target(enemies)
     -- 1.) Search for enemies within radius of turret -> target()
@@ -406,33 +408,32 @@ function lib:target(enemies)
     local target = nil
     local closest = math.huge
 
-    if self.targetOne then
-        for _,enemy in pairs(enemies) do
-            local dx = enemy.position.x - center.x
-            local dy = enemy.position.y - center.y
-            local distance = math.sqrt(dx*dx + dy*dy)
-            if distance <= self.range then
-                local progress = enemy.flowField.costMap[enemy.coords.y][enemy.coords.x]
-                if progress < closest then
-                    closest = progress
-                    target = enemy
-                end
-            end
-        end
+    local ret = {}
 
-        self.targeting = target
-    else
-        local ret = {}
-        for _,enemy in pairs(enemies) do
-            local dx = enemy.position.x - center.x
-            local dy = enemy.position.y - center.y
-            local distance = math.sqrt(dx*dx + dy*dy)
-            if distance <= self.range then
-                table.insert(ret, enemy)
+    for guid,enemy in pairs(enemies) do
+        local dx = enemy.position.x - center.x
+        local dy = enemy.position.y - center.y
+        local distance = math.sqrt(dx*dx + dy*dy)
+        if distance <= self.range then
+            local progress = enemy.flowField.costMap[enemy.coords.y][enemy.coords.x]
+            if progress < closest then
+                closest = progress
+                target = guid
             end
         end
-        self.targeting = ret
     end
+
+    --add the enemy closest to the goal first
+    table.insert(ret, enemies[target])
+
+    --add other enemies in the list later
+    for _,enemy in pairs(enemies) do
+        if enemies[target] ~= target then
+            table.insert(ret, enemy)
+        end
+    end
+
+    self.targeting = ret
 end
 
 ---Check if enemy is in range
@@ -445,22 +446,34 @@ function lib:inRange(enemy)
     return distance <= self.range
 end
 
+---check if enemies are within 1 tile of each other
+---@param enemy1 ENEMY
+---@param enemy2 ENEMY
+---@return boolean
+function lib:inProximity(enemy1, enemy2)
+    local dx = enemy1.position.x - enemy2.position.x
+    local dy = enemy1.position.y - enemy2.position.y
+    local distance = math.sqrt(dx * dx + dy * dy)
+    return distance <= SETTINGS.TILE_SIZE
+end
+
 ---shoot at enemy
 function lib:shoot()
     if self.targetOne then
-        if self.targeting.health > 0 then
-            self.sound:play()
-            --spawn projectile
-            if self.projectile then
-                self.bullet = {
-                    x = self.position.x + SETTINGS.TILE_SIZE,
-                    y = self.position.y + SETTINGS.TILE_SIZE,
-                    angle = self.orientation - math.pi/2
-                }
-            else
-                --instant damage
-                self.targeting.health = self.targeting.health - self.damage
-                self.targeting:slow(self.slow)
+        if self.targeting[1] then
+            if self.targeting[1].health > 0 then
+                self.sound:play()
+                --spawn projectile
+                if self.projectile then
+                    self.bullet = {
+                        x = self.position.x + SETTINGS.TILE_SIZE,
+                        y = self.position.y + SETTINGS.TILE_SIZE,
+                        angle = self.orientation - math.pi/2
+                    }
+                else
+                    --instant damage
+                    self:doDamage()
+                end
             end
         end
     else
@@ -507,6 +520,22 @@ function lib:upgrade(gameState)
     self.upgrading = true
     self.upgradeCost = ENUMS.UPGRADE_COST[self.turretType]["LEVEL"..self.level]
     return true
+end
+
+---inflict damage on enemy/enemies
+function lib:doDamage()
+    local target = self.targeting[1]
+    target.health = target.health - self.damage
+    if self.splash > 0 then
+        for _,enemy in ipairs(self.targeting) do
+            if enemy ~= target then
+                if self:inProximity(target, enemy) then
+                    enemy.health = enemy.health - (self.splash/100)*self.damage
+                    enemy:slow(self.slow)
+                end
+            end
+        end
+    end
 end
 
 return lib

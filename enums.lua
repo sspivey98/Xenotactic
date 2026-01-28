@@ -45,7 +45,7 @@ lib.COLORS = {
 ---@field projectile boolean
 ---@field slow integer % to slow enemy speed
 ---@field air boolean target air enemies?
----@field splash boolean does splash damage
+---@field splash integer percent splash damage
 ---@field targetOne boolean targets specific enemies or not
 
 ---@class ENUMS.TURRET
@@ -98,7 +98,7 @@ lib.TURRET = {
         projectile = false,
         slow = 0,
         air = false,
-        splash = false,
+        splash = 0,
         targetOne = true
     },
     GATLING = {
@@ -113,7 +113,7 @@ lib.TURRET = {
         projectile = false,
         slow = 0,
         air = false,
-        splash = false,
+        splash = 0,
         targetOne = true
     },
     PLASMA = {
@@ -128,7 +128,7 @@ lib.TURRET = {
         projectile = true,
         slow = 0,
         air = false,
-        splash = false,
+        splash = 0,
         targetOne = true
     },
     SAM = {
@@ -143,7 +143,7 @@ lib.TURRET = {
         projectile = true,
         slow = 0,
         air = false,
-        splash = true,
+        splash = 20,
         targetOne = true
     },
     DCA = {
@@ -158,7 +158,7 @@ lib.TURRET = {
         projectile = true,
         slow = 0,
         air = true,
-        splash = true,
+        splash = 25,
         targetOne = true
     },
     FREEZE = {
@@ -173,7 +173,7 @@ lib.TURRET = {
         projectile = true,
         slow = 20,
         air = false,
-        splash = true,
+        splash = 50,
         targetOne = true
     },
     TESLA = {
@@ -188,7 +188,7 @@ lib.TURRET = {
         projectile = false,
         slow = 90,
         air = false,
-        splash = false,
+        splash = 0,
         targetOne = false
     }
 }
