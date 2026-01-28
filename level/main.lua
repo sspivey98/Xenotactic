@@ -358,6 +358,7 @@ function lib.update(gameState, dt)
     if UTIL.tableLength(gameState.turrets) >= 1 and UTIL.tableLength(gameState.enemies) == 0 then
         ENEMY:new(gameState, random, gameState.path1, ENUMS.FLOWFIELD.LONGITUDE)
         ENEMY:new(gameState, random+1, gameState.path1, ENUMS.FLOWFIELD.LONGITUDE)
+        ENEMY:new(gameState, 15, gameState.path1, ENUMS.FLOWFIELD.LONGITUDE)
     end
 end
 

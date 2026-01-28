@@ -242,7 +242,7 @@ function lib:update(dt, gameState)
     end
 
     --turning state machine
-    if not self.turning and not self.dying then
+    if (not self.turning and not self.dying) or self.air then
         --move enemy
         if self.lastDirection == ENUMS.FLOWFIELD.TILE.UP then
             self.position.y = self.position.y - self.slow_rate*(self.speed / 4)
@@ -258,7 +258,7 @@ function lib:update(dt, gameState)
             self.orientation = ENUMS.ORIENTATION.RIGHT
         end
 
-        if atCenter and direction ~= self.lastDirection then
+        if (atCenter) and (direction ~= self.lastDirection) and (not self.air) then
             self.position.x = center.x
             self.position.y = center.y
             self.turning = true

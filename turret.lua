@@ -287,7 +287,7 @@ function lib:draw()
                     projH / 2
                 )
             else --shoot immediately
-                if self.shootAnimation.muzzle > 0 then
+                if (self.shootAnimation.muzzle > 0) and (#self.targeting > 0) then
                     if self.targetOne then
                         local flash_distance = oy * 1.5
                         local flash = {
@@ -340,19 +340,17 @@ function lib:draw()
                         end
                     else
                         --shoot all in range
-                        if #self.targeting > 0 then
-                            local flashW, flashH = self.shootImg[1]:getDimensions()
-                            love.graphics.draw(
-                                self.shootImg[self.shootAnimation.currentFrame],
-                                self.position.x + SETTINGS.TILE_SIZE,
-                                self.position.y + SETTINGS.TILE_SIZE,
-                                0,
-                                1.5,
-                                1.5,
-                                flashW / 2,
-                                flashH / 2
-                            )
-                        end
+                        local flashW, flashH = self.shootImg[1]:getDimensions()
+                        love.graphics.draw(
+                            self.shootImg[self.shootAnimation.currentFrame],
+                            self.position.x + SETTINGS.TILE_SIZE,
+                            self.position.y + SETTINGS.TILE_SIZE,
+                            0,
+                            1.5,
+                            1.5,
+                            flashW / 2,
+                            flashH / 2
+                        )
                     end
                 end
             end
@@ -414,7 +412,7 @@ function lib:target(enemies)
         local dx = enemy.position.x - center.x
         local dy = enemy.position.y - center.y
         local distance = math.sqrt(dx*dx + dy*dy)
-        if distance <= self.range then
+        if (distance <= self.range) and (self.air == enemy.air) then
             local progress = enemy.flowField.costMap[enemy.coords.y][enemy.coords.x]
             if progress < closest then
                 closest = progress
@@ -428,7 +426,7 @@ function lib:target(enemies)
 
     --add other enemies in the list later
     for _,enemy in pairs(enemies) do
-        if enemies[target] ~= target then
+        if enemies[target] ~= target and (self.air == enemy.air) then
             table.insert(ret, enemy)
         end
     end

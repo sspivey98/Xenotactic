@@ -1,8 +1,3 @@
-- implement turret logic
-    - implement slow enemy feature
-    - implement splash damage
-    - implement ground/air enemies
-
 - add to UI menu
     - entity selected (turret/enemy) menu
     - upgrade/sell button for turret
