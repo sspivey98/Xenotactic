@@ -77,7 +77,8 @@ function love.mousepressed(x, y, mouseButton)
                         FLOWFIELD:new(map_copy, ENUMS.FLOWFIELD.LONGITUDE),
                         FLOWFIELD:new(map_copy, ENUMS.FLOWFIELD.LATITUDE)
                     )
-                    LEVEL.load(index)
+                    local TILE_SET = MAPS.VISUAL_MAP["level_"..index]
+                    LEVEL.load(index, TILE_SET)
                     game.state = GAME.STATES.GAME
                     print("Selected level: " .. index)
                     break

@@ -10,7 +10,7 @@ lib.CLICK = {
     RIGHT = 2
 }
 
---tiles meanings for level map 
+---tiles meanings for level map 
 ---@enum ENUMS.TILES
 lib.TILES = {
     EMPTY = 0,
@@ -19,6 +19,33 @@ lib.TILES = {
     GOAL = 3,
     TURRET = 4,
     PATHWAY = 5
+}
+
+---visual tiles (230x230) @ 1000%
+---@type love.Image[]
+lib.VISUAL_TILES = {
+    [0] = {
+        [0] = IMAGES.library["tile_default_0"],
+        [1] = IMAGES.library["tile_default_1"],
+        [2] = IMAGES.library["tile_default_2"],
+        [3] = IMAGES.library["tile_default_3"],
+    },
+    [1] = IMAGES.library["tile_default_4"],
+    [2] = IMAGES.library["tile_V_entry"],
+    [3] = IMAGES.library["tile_H_entry"],
+    [4] = IMAGES.library["tile_V_wall_L"],
+    [5] = IMAGES.library["tile_V_wall_R"],
+    [6] = IMAGES.library["tile_H_wall_U"],
+    [7] = IMAGES.library["tile_H_wall_D"],
+    [8] = IMAGES.library["tile_wall"],
+    [9] = IMAGES.library["tile_corner_BL"],
+    [10] = IMAGES.library["tile_corner_BR"],
+    [11] = IMAGES.library["tile_corner_TL"],
+    [12] = IMAGES.library["tile_corner_TR"],
+    [13] = IMAGES.library["tile_corner_wall_DL"],
+    [14] = IMAGES.library["tile_corner_wall_UL"],
+    [15] = IMAGES.library["tile_corner_wall_DR"],
+    [16] = IMAGES.library["tile_corner_wall_UR"],
 }
 
 ---@alias Color number[] RGB or RGBA color array
@@ -202,7 +229,7 @@ lib.TURRET = {
 ---@enum ENUMS.ENEMY
 lib.ENEMY = {
     BOSS1 = {
-        speed = 20,
+        speed = 2,
         health = 100,
         value = 20,
         air = false,

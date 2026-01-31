@@ -12,6 +12,7 @@ local BUTTON = require('lib.button')
 --GLOBALS
 local TILE_SIZE = SETTINGS.TILE_SIZE --size of tile in pixels
 local map = SETTINGS.map
+local VISUAL_TILE_MAP
 local SCREEN = SETTINGS.SCREEN
 local random = love.math.random(15) --!DELETE
 
@@ -31,7 +32,12 @@ local UI = {
 
 ---initialize level
 ---@param level_number number level number selected (1-6)
-function lib.load(level_number)
+---@param TILES number[][] visual tilemap to use 
+function lib.load(level_number, TILES)
+    if TILES then
+        VISUAL_TILE_MAP = TILES
+    end
+
     --load tiles
     level_number = tonumber(level_number) or 1
 
@@ -116,29 +122,60 @@ function lib.load(level_number)
      ---@cast upgrade_button button.text
     UI.buttons["sell"] = sell_button
     UI.buttons["upgrade"] = upgrade_button
+    SOUNDS.library["next_menu"]:play()
 end
 
 ---draw function
 ---@param gameState GAME.GAMESTATE
 function lib.draw(gameState)
     --draw map
-    for y=1, map.Height do
-        for x = 1, map.Width do
-            local tileType = gameState.map[y][x]
-            love.graphics.setColor(ENUMS.COLORS[tileType])
-            love.graphics.rectangle("fill",
-                (x-1) * TILE_SIZE,
-                (y-1) * TILE_SIZE,
-                TILE_SIZE,
-                TILE_SIZE)
+    if VISUAL_TILE_MAP then
+        local scale = TILE_SIZE / 230
+        for y=1, map.Height do
+            for x = 1, map.Width do
+                local tileType = VISUAL_TILE_MAP[y][x]
+                local img = ENUMS.VISUAL_TILES[tileType]
+                if tileType == 0 then
+                    if (y % 2 == 0) and (x % 2 == 0) then
+                        img = ENUMS.VISUAL_TILES[tileType][0]
+                    elseif (y % 2 == 0) and (x % 2 == 1) then
+                        img = ENUMS.VISUAL_TILES[tileType][1]
+                    elseif (y % 2 == 1) and (x % 2 == 0) then
+                        img = ENUMS.VISUAL_TILES[tileType][2]
+                    elseif (y % 2 == 1) and (x % 2 == 1) then
+                        img = ENUMS.VISUAL_TILES[tileType][3]
+                    end
+                end
+                love.graphics.setColor{1,1,1}
+                love.graphics.draw(
+                    img,
+                    (x-1) * TILE_SIZE,
+                    (y-1) * TILE_SIZE,
+                    0,
+                    scale,
+                    scale
+                )
+            end
+        end
+    else
+        for y=1, map.Height do
+            for x = 1, map.Width do
+                local tileType = gameState.map[y][x]
+                love.graphics.setColor(ENUMS.COLORS[tileType])
+                love.graphics.rectangle("fill",
+                    (x-1) * TILE_SIZE,
+                    (y-1) * TILE_SIZE,
+                    TILE_SIZE,
+                    TILE_SIZE)
 
-            -- Draw grid lines
-            love.graphics.setColor{0, 0, 0, 0.3}
-            love.graphics.rectangle("line",
-                (x-1) * TILE_SIZE,
-                (y-1) * TILE_SIZE,
-                TILE_SIZE,
-                TILE_SIZE)
+                -- Draw grid lines
+                love.graphics.setColor{0, 0, 0, 0.3}
+                love.graphics.rectangle("line",
+                    (x-1) * TILE_SIZE,
+                    (y-1) * TILE_SIZE,
+                    TILE_SIZE,
+                    TILE_SIZE)
+            end
         end
     end
     --draw ui box

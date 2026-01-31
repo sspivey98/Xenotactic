@@ -1,6 +1,7 @@
 --Select Level UI
 local lib = {}
 local IMAGES = require('lib.images')
+local SOUNDS = require('lib.sounds')
 local BUTTON = require('lib.button')
 local MAPS = require('level.maps')
 local SETTINGS = require('settings')
@@ -70,6 +71,7 @@ function lib.load()
         }
         lib.Level_MetaData[i] = level_metadata
     end
+    (SOUNDS.library["next_menu"]):play()
 end
 
 function lib.update()

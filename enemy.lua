@@ -177,8 +177,17 @@ function lib:turn(dt, newDirection)
     elseif newDirection == ENUMS.FLOWFIELD.TILE.RIGHT then
         radians = ENUMS.ORIENTATION.RIGHT
     else
-        --TODO snap to the middle of the closest tile? perhaps just kill?
-        error(newDirection..": Enemy pathing did not choose valid direction after turning.")
+        --push back to original tile by adding half of tile size to original direction
+        local push = SETTINGS.TILE_SIZE / 2
+        if self.lastDirection == ENUMS.FLOWFIELD.TILE.UP then
+            self.position.y = self.position.y + push
+        elseif self.lastDirection == ENUMS.FLOWFIELD.TILE.DOWN then
+            self.position.y = self.position.y - push
+        elseif self.lastDirection == ENUMS.FLOWFIELD.TILE.LEFT then
+            self.position.x = self.position.x + push
+        elseif self.lastDirection == ENUMS.FLOWFIELD.TILE.RIGHT then
+            self.position.x = self.position.x - push
+        end
     end
 
     -- +/- diff of final - current
