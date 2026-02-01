@@ -24,7 +24,7 @@
 - create level info in level.maps
 
 - improve visuals of tiles    
-    - two maps for a level - movement and visuals
+    ✓ two maps for a level - movement and visuals
     - add blocking when turret would block path?
 
 - improve level select and lock levels behind a progression system

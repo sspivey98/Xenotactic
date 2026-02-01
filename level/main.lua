@@ -13,6 +13,7 @@ local BUTTON = require('lib.button')
 local TILE_SIZE = SETTINGS.TILE_SIZE --size of tile in pixels
 local map = SETTINGS.map
 local VISUAL_TILE_MAP
+local COLOR = {}
 local SCREEN = SETTINGS.SCREEN
 local random = love.math.random(15) --!DELETE
 
@@ -42,11 +43,11 @@ function lib.load(level_number, TILES)
     level_number = tonumber(level_number) or 1
 
     if level_number == 5 then
-        ENUMS.COLORS[0] = {0.0, 0.2, 0.0}
+        COLOR = {0.2, 0.5, 0.2}
     elseif level_number == 6 then
-        ENUMS.COLORS[0] = {0.2, 0.0, 0.0}
+        COLOR = {0.5, 0.2, 0.2}
     else
-        ENUMS.COLORS[0] = {0.7, 0.8, 0.7}
+        COLOR = {1,1,1}
     end
 
     --create UI
@@ -146,7 +147,7 @@ function lib.draw(gameState)
                         img = ENUMS.VISUAL_TILES[tileType][3]
                     end
                 end
-                love.graphics.setColor{1,1,1}
+                love.graphics.setColor(COLOR)
                 love.graphics.draw(
                     img,
                     (x-1) * TILE_SIZE,

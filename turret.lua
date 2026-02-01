@@ -412,7 +412,7 @@ function lib:target(enemies)
         local dx = enemy.position.x - center.x
         local dy = enemy.position.y - center.y
         local distance = math.sqrt(dx*dx + dy*dy)
-        if (distance <= self.range) and (self.air == enemy.air) then
+        if (distance <= self.range) and ((self.air == enemy.air) or self.turretType == "PLASMA") then
             local progress = enemy.flowField.costMap[enemy.coords.y][enemy.coords.x]
             if progress < closest then
                 closest = progress
@@ -426,7 +426,7 @@ function lib:target(enemies)
 
     --add other enemies in the list later
     for _,enemy in pairs(enemies) do
-        if enemies[target] ~= target and (self.air == enemy.air) then
+        if enemies[target] ~= target and ((self.air == enemy.air) or self.turretType == "PLASMA") then
             table.insert(ret, enemy)
         end
     end
