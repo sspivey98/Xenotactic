@@ -260,6 +260,7 @@ function lib:draw()
             1.5, --x scale
             1.5  --y scale
         )
+
         --draw turret sprite
         if not self.upgrading then
             love.graphics.setColor(ENUMS.UPGRADE[self.level])
@@ -276,6 +277,7 @@ function lib:draw()
             --shooting projectile at enemy
             if self.bullet then
                 local projW, projH = self.shootImg:getDimensions()
+                love.graphics.setColor{1,1,1}
                 love.graphics.draw(
                     self.shootImg,
                     self.bullet.x,
@@ -375,8 +377,24 @@ function lib:draw()
                 self.range, --radius, should come from turret?
                 20
             )
+            love.graphics.setColor{1,1,1}
+        end
+
+        --draw rank, if upgraded
+        if self.level > 1 then
+            local rank = IMAGES.library["turret_rank_"..self.level-1]
+            love.graphics.setColor{1,1,1}
+            love.graphics.draw(
+                rank,
+                self.position.x + SETTINGS.TILE_SIZE/2,
+                self.position.y + SETTINGS.TILE_SIZE/2,
+                0,
+                1.5,
+                1.5
+            )
         end
     end
+    love.graphics.setColor{1,1,1}
 end
 
 --selling logic and animation

@@ -135,6 +135,13 @@ function lib:draw()
             self.deathAnimation.origin.x,
             self.deathAnimation.origin.y
         )
+        local text = "+"..self.value.." Gold"
+        local font = love.graphics.getFont()
+        local textW = font:getWidth(text)
+        local textH = font:getHeight()
+        love.graphics.setColor(ENUMS.UPGRADE_COLORS.YELLOW)
+        love.graphics.print(text, self.position.x - textW/2, self.position.y - textH - SETTINGS.TILE_SIZE/3)
+        love.graphics.setColor{1,1,1}
     else
         love.graphics.draw(
             enemies_sprite_sheet,

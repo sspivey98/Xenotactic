@@ -1,8 +1,8 @@
 - turret
-    - rank star
+    ✓ rank star
 
 - enemy 
-    - add gold earned above kill
+    ✓ add gold earned above kill
     - select enemy
         - visual
         - selected enemy gamestate prop
