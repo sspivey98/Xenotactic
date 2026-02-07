@@ -15,7 +15,25 @@ local map = SETTINGS.map
 local VISUAL_TILE_MAP
 local COLOR = {}
 local SCREEN = SETTINGS.SCREEN
-local random = love.math.random(15) --!DELETE
+local WAVES
+local random = love.math.random(14) --!DELETE
+local random2 = love.math.random(14)
+
+local blockedAnimation = {
+    timer = 1,
+    timerValue = 0,
+    text = {},
+    show = false,
+}
+do
+    local text = "BLOCKED"
+    local font = love.graphics.getFont()
+    blockedAnimation.text = {
+        value = text,
+        width = font:getWidth(text),
+        height = font:getHeight()
+    }
+end
 
 local currentTile = {
     inbounds = true, --in map or not
@@ -38,6 +56,9 @@ function lib.load(level_number, TILES)
     if TILES then
         VISUAL_TILE_MAP = TILES
     end
+
+    --load waves
+    WAVES = require('level.waves')["level"..level_number]
 
     --load tiles
     level_number = tonumber(level_number) or 1
@@ -95,8 +116,10 @@ function lib.load(level_number, TILES)
         UI.turrets[key] = turretButton
     end
 
-    --sell button
     local padding = 40
+
+    --sell button
+    ---@type button.text
     local sell_button = BUTTON:new(
         BUTTON.type.TEXT,
         {
@@ -108,7 +131,8 @@ function lib.load(level_number, TILES)
             text = "SELL"
         }
     )
-    ---@cast sell_button button.text
+
+    ---@type button.text
     local upgrade_button = BUTTON:new(
         BUTTON.type.TEXT,
         {
@@ -120,9 +144,23 @@ function lib.load(level_number, TILES)
             text = "UPGRADE"
         }
     )
-     ---@cast upgrade_button button.text
+
+    ---@type button.text
+    local send_wave = BUTTON:new(
+        BUTTON.type.TEXT,
+        {
+            x = SCREEN.MAP.WIDTH + padding,
+            y = 2 * SCREEN.HEIGHT / 5 + 3*padding,
+            width = SCREEN.UI.WIDTH / 2 - padding,
+            height = SCREEN.UI.HEIGHT / 8 - padding,
+            color = {0.3, 0.3, 0.3},
+            text = "SEND WAVE"
+        }
+    )
+
     UI.buttons["sell"] = sell_button
     UI.buttons["upgrade"] = upgrade_button
+    UI.buttons["send_wave"] = send_wave
     SOUNDS.library["next_menu"]:play()
 end
 
@@ -259,6 +297,14 @@ function lib.draw(gameState)
                 )
             end
         end
+        if blockedAnimation.show then
+            love.graphics.setColor(ENUMS.UPGRADE_COLORS.RED)
+            love.graphics.print(
+                blockedAnimation.text.value,
+                currentTile.x,
+                currentTile.y
+            )
+        end
     end
 end
 
@@ -275,6 +321,7 @@ function lib.mousepressed(gameState, x, y, mouseButton)
             if gameState.placementMode then
                 --check placement is valid
                 if UTIL:isValidPlacement(currentTile, gameState) == false then
+                    blockedAnimation.show = true
                     SOUNDS.library["invalid"]:play()
                 else --turret is placed
                     TURRET:new(gameState, currentTile.x, currentTile.y)
@@ -285,16 +332,22 @@ function lib.mousepressed(gameState, x, y, mouseButton)
                     gameState.path2:setBlocked(tile.x, tile.y)
                 end
             else
-                local check = false
+                local checkTurret = false
                 for _,turret in pairs(gameState.turrets) do
                     if turret:select(x, y) then
-                        check = true
+                        checkTurret = true
                         gameState.selectedTurret = turret
                     end
                 end
-                if not check then
-                    gameState.selectedTurret = nil
+                if not checkTurret then gameState.selectedTurret = nil end
+                local checkEnemy = false
+                for _,enemy in pairs(gameState.enemies) do
+                    if enemy:select(x, y) then
+                        checkEnemy = true
+                        gameState.selectedEnemy = enemy
+                    end
                 end
+                if not checkEnemy then gameState.selectedEnemy = nil end
             end
         else --select from UI
             for name,turret in pairs(UI.turrets) do
@@ -326,6 +379,8 @@ function lib.mousepressed(gameState, x, y, mouseButton)
                             SOUNDS.library["turret_sold"]:play()
                             gameState.selectedTurret:sell(gameState)
                             gameState.selectedTurret = nil
+                        elseif name == "send_wave" then
+                            WAVES:next()
                         end
                         --*custom logic
                     end
@@ -393,10 +448,19 @@ function lib.update(gameState, dt)
         turret:target(gameState.enemies)
     end
 
-    if UTIL.tableLength(gameState.turrets) >= 1 and UTIL.tableLength(gameState.enemies) == 0 then
-        ENEMY:new(gameState, random, gameState.path1, ENUMS.FLOWFIELD.LONGITUDE)
-        ENEMY:new(gameState, random+1, gameState.path1, ENUMS.FLOWFIELD.LONGITUDE)
-        ENEMY:new(gameState, 15, gameState.path1, ENUMS.FLOWFIELD.LONGITUDE)
+    -- if UTIL.tableLength(gameState.turrets) >= 1 and UTIL.tableLength(gameState.enemies) == 0 then
+    --     ENEMY:new(gameState, random, gameState.path1, ENUMS.FLOWFIELD.LONGITUDE)
+    --     ENEMY:new(gameState, random2, gameState.path1, ENUMS.FLOWFIELD.LONGITUDE)
+    --     ENEMY:new(gameState, 15, gameState.path1, ENUMS.FLOWFIELD.LONGITUDE)
+    -- end
+
+    --blocked animation
+    if blockedAnimation.show then
+        blockedAnimation.timerValue = blockedAnimation.timerValue + dt
+        if blockedAnimation.timerValue >= blockedAnimation.timer then
+            blockedAnimation.timerValue = 0
+            blockedAnimation.show = false
+        end
     end
 end
 

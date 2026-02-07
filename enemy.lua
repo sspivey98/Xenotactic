@@ -22,6 +22,7 @@ enemies will have different paths based on position and final
 ---@field slow_rate number `Range: 0-1` slow % (0.21) caused by turret with slow attribute
 ---@field protected lastDirection ENUMS.FLOWFIELD.TILE
 ---@field flowField FLOWFIELD which flowField for the enemy to follow
+---@field selected boolean determine if enemy is selected
 ---@field protected dying boolean mark enemy is dying or not
 ---@field protected fullHealth number enemy's health when full
 ---@field protected healthBar {width:number,height:number,x:number,y:number,value:number}
@@ -143,6 +144,24 @@ function lib:draw()
         love.graphics.print(text, self.position.x - textW/2, self.position.y - textH - SETTINGS.TILE_SIZE/3)
         love.graphics.setColor{1,1,1}
     else
+        --draw selected
+        if self.selected then
+            love.graphics.setColor(ENUMS.UPGRADE_COLORS.YELLOW)
+            love.graphics.circle("line",
+                self.position.x,
+                self.position.y,
+                SETTINGS.TILE_SIZE, --radius, should come from turret?
+                20
+            )
+            love.graphics.setColor{1,1,1}
+            --TODO change to 8 lines in a rectangle?
+        end
+
+        if self.slow_rate ~= 1 then
+            love.graphics.setColor(ENUMS.UPGRADE_COLORS.CYAN)
+        else
+            love.graphics.setColor{1,1,1}
+        end
         love.graphics.draw(
             enemies_sprite_sheet,
             self.moveAnimation.frames[self.moveAnimation.currentFrame],
@@ -339,6 +358,24 @@ end
 ---@param percent integer
 function lib:slow(percent)
     self.slow_rate = 1 - percent/100
+    --TODO add slow color while in affect
 end
+
+---turret clicked on check
+---@param x number x mouse coordinate
+---@param y number y mouse coordinate
+---@return boolean
+function lib:select(x,y)
+    local size = SETTINGS.TILE_SIZE
+    if (x >= self.position.x - size/2) and (x <= self.position.x + size/2) and
+    (y >= self.position.y - size/2) and (y <= self.position.y + size/2) then
+        self.selected = true
+        return true
+    end
+
+    self.selected = false
+    return false
+end
+
 
 return lib

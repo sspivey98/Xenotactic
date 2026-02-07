@@ -4,9 +4,10 @@
 - enemy 
     ✓ add gold earned above kill
     - select enemy
-        - visual
-        - selected enemy gamestate prop
-    - slowed enemies get a slightly different color
+        ✓ visual
+        ✓ selected enemy gamestate prop
+    ✓ slowed enemies get a slightly different color
+    - slimes can split when killed
 
 - add to UI menu
     - entity selected (turret/enemy) menu
@@ -18,14 +19,14 @@
     - enemy types per wave
     - spawn randomization
     - implement 2 pathways of enemies
-    - send next wave button
+    - send next wave button (only if wave completes before timer)
     - play round_start.ogg twice (basically overlapping) if regular, once if boss
 
 - create level info in level.maps
 
 - improve visuals of tiles    
     ✓ two maps for a level - movement and visuals
-    - add blocking when turret would block path?
+    ✓ add "blocked" when turret would block path
 
 - improve level select and lock levels behind a progression system
 - add quit to main menu from ESC

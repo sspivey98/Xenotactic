@@ -8,10 +8,11 @@
 ---@field round number
 ---@field turrets {[string]:TURRET}
 ---@field enemies {[string]:ENEMY}
----@field selected number[]
+---@field selectedEnemy ENEMY|nil
 ---@field selectedTurret TURRET|nil index of selected turret in turrets array
 ---@field selectedTurretType number
 ---@field placementMode boolean
+---@field paused boolean game state is paused
 
 ---@alias game {state:GAME.STATES,screen:{x:number,y:number},gameState:GAME.GAMESTATE}
 ---@class GAME
@@ -55,15 +56,17 @@ function lib.newGame(money, level, map, path1, path2)
         map = map or {},
         path1 = path1 or {}, --flowField left -> right
         path2 = path2 or {}, --flowField up -> down
-        lives = 10,
+        lives = 20,
         level = level or 1,
         round = 0,
         turrets = {},
         enemies = {},
-        selected = {0, 0},
+        --selected = {0, 0},
         selectedTurret = nil,
         selectedTurretType = nil,
+        selectedEnemy = nil,
         placementMode = false,
+        paused = false
     }
 
     return game

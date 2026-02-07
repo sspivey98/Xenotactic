@@ -15,5 +15,6 @@ It is highly recommend that you use the following extensions in `VS Code` or `VS
 ### Run it yourself
 
 1.) Download `love2d`
+
 2.) `love . --console`
 
