@@ -56,7 +56,7 @@ end
 function lib:new(gameState, x, y)
     --copy selected turret metadata
     local o = {}
-    o.turretType = ENUMS.TURRET_LOOKUP[gameState.selectedTurretType]
+    o.turretType = gameState.selectedTurretType
     for k, v in pairs(ENUMS.TURRET[o.turretType]) do o[k] = v end
     setmetatable(o, self)
     self.__index = self
@@ -300,7 +300,7 @@ function lib:draw()
 
                         love.graphics.setColor{1, 1, 1, self.shootAnimation.muzzle / 0.1}
 
-                        if ENUMS.TURRET_TYPE[self.turretType] == ENUMS.TURRET_TYPE.GATLING then --draw double muzzle
+                        if self.turretType == "GATLING" then --draw double muzzle
                             local offset = w/2
                             local perpendicular = {
                                 x = -math.sin(self.orientation - math.pi/2) * offset,

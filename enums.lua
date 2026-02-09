@@ -320,20 +320,22 @@ lib.ENEMY = {
     },
 }
 
----@enum TURRET_TYPE
-lib.TURRET_TYPE = {
-    WALL = 1,
-    GATLING = 2,
-    PLASMA = 3,
-    SAM = 4,
-    DCA = 5,
-    FREEZE = 6,
-    TESLA = 7
-}
+-- ---@enum TURRET_TYPE
+-- lib.TURRET_TYPE = {
+--     WALL = 1,
+--     GATLING = 2,
+--     PLASMA = 3,
+--     SAM = 4,
+--     DCA = 5,
+--     FREEZE = 6,
+--     TESLA = 7
+-- }
+
+---@alias ENUMS.TURRET_TYPE "WALL"|"GATLING"|"PLASMA"|"SAM"|"DCA"|"FREEZE"|"TESLA"
 
 ---reverse lookup match number to turret enum
 ---@type {[number]: string}
-lib.TURRET_LOOKUP = {
+lib.TURRET_TYPE = {
     [1] = "WALL",
     [2] = "GATLING",
     [3] = "PLASMA",
@@ -343,24 +345,26 @@ lib.TURRET_LOOKUP = {
     [7] = "TESLA",
 }
 
----match number to enemy enum
----@type {[number]: ENUMS.ENEMY}
+---@alias ENUMS.ENEMY_TYPE "BOSS1"|"SCORPION"|"BOSS2"|"GOBLIN"|"TERMITE"|"SLIME"|"SPIDER"|"QUEEN"|"WENDIGO"|"TURTLE"|"REDCYBORG"|"REDALIEN"|"CYBORG"|"ALIEN"|"HELICOPTER"
+
+---reverse lookup for enemy
+---@type {[number]: string}
 lib.ENEMY_TYPE = {
-    [1] = lib.ENEMY.BOSS1,
-    [2] = lib.ENEMY.SCORPION,
-    [3] = lib.ENEMY.BOSS2,
-    [4] = lib.ENEMY.GOBLIN,
-    [5] = lib.ENEMY.TERMITE,
-    [6] = lib.ENEMY.SLIME,
-    [7] = lib.ENEMY.SPIDER,
-    [8] = lib.ENEMY.QUEEN,
-    [9] = lib.ENEMY.WENDIGO,
-    [10] = lib.ENEMY.TURTLE,
-    [11] = lib.ENEMY.REDCYBORG,
-    [12] = lib.ENEMY.REDALIEN,
-    [13] = lib.ENEMY.CYBORG,
-    [14] = lib.ENEMY.ALIEN,
-    [15] = lib.ENEMY.HELICOPTER
+    [1] = "BOSS1",
+    [2] = "SCORPION",
+    [3] = "BOSS2",
+    [4] = "GOBLIN",
+    [5] = "TERMITE",
+    [6] = "SLIME",
+    [7] = "SPIDER",
+    [8] = "QUEEN",
+    [9] = "WENDIGO",
+    [10] = "TURTLE",
+    [11] = "REDCYBORG",
+    [12] = "REDALIEN",
+    [13] = "CYBORG",
+    [14] = "ALIEN",
+    [15] = "HELICOPTER"
 }
 
 ---@enum ENUMS.FLOWFIELD.TILE
@@ -393,6 +397,18 @@ lib.ORIENTATION = {
 ---upgrade colors
 ---@enum ENUMS.UPGRADE_COLORS
 lib.UPGRADE_COLORS = {
+    WHITE = {0.8, 0.8, 0.8},
+    PURPLE = {1.0, 0.0, 1.0},
+    YELLOW = {0.9, 0.8, 0.1},
+    GREEN = {0.3, 0.8, 0.4},
+    CYAN = {0, 1.0, 1.0},
+    RED = {0.7, 0.1, 0.1}
+}
+
+---general color pallet
+---@enum ENUMS.COLORS
+lib.COLORS = {
+    BLACK = {0, 0, 0},
     WHITE = {0.8, 0.8, 0.8},
     PURPLE = {1.0, 0.0, 1.0},
     YELLOW = {0.9, 0.8, 0.1},

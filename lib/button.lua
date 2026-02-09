@@ -197,8 +197,9 @@ lib.type = {
     IMAGE = 1
 }
 
----@overload fun(self: button.class, t: 0, o: button.text.options): button.text
----@overload fun(self: button.class, t: 1, o: button.image.options): button.image
+---button constructor
+---@overload fun(t: 0, o: button.text.options): button.text
+---@overload fun(t: 1, o: button.image.options): button.image
 ---@param t button.type type: `text` or `image`
 ---@param o button.text.options|button.image.options
 ---@return button

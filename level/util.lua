@@ -59,10 +59,16 @@ function lib:isValidPlacement(currentTile, gameState)
     end
 
     --check to make sure Dijkstra's doesn't fail
-    if gameState.path1:checkPath(tiles[1].x, tiles[1].y) and
-    gameState.path2:checkPath(tiles[1].x, tiles[1].y)
-    then
-        return true
+    if gameState.path1:checkPath(tiles[1].x, tiles[1].y) then
+        if gameState.path2 then
+            if gameState.path2:checkPath(tiles[1].x, tiles[1].y) then
+                return true
+            else
+                return false
+            end
+        else
+            return true
+        end
     else
         return false
     end

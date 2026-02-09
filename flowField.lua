@@ -8,9 +8,11 @@ When game in is session, there will always be two vector maps
 local ENUMS = require('enums')
 local UTIL = require('level.util')
 ---@class FLOWFIELD
+---@field direction ENUMS.FLOWFIELD
 ---@field level table[]
 ---@field map table[]
 ---@field costMap table[]
+---@field enabled boolean
 ---@overload fun(level: table[], direction: ENUMS.FLOWFIELD): FLOWFIELD
 local lib = setmetatable({},
     {
@@ -22,17 +24,28 @@ local lib = setmetatable({},
 )
 
 ---initialize the grid
----@param level table[] - 2D array of current map
+---@param level number[][] - 2D array of current map
 ---@param direction ENUMS.FLOWFIELD - ENUMS.FLOWFIELD latitude or longitude
-function lib:new(level, direction)
+---@param enabled? boolean
+function lib:new(level, direction, enabled)
     local o = {}
     setmetatable(o, self)
     self.__index = self
-    o.level = level or {}  --2D array of map as flowField
+    o.level = level  --2D array of map as flowField
+    o.direction = direction
+    o.enabled = enabled or true
     if direction == ENUMS.FLOWFIELD.LATITUDE then
         --only take up and down (place X's along all left/right side)
+        for y=1, #level do
+            o.level[y][1] = 1 --left
+            o.level[y][#level[y]] = 1 --right
+        end
     elseif direction == ENUMS.FLOWFIELD.LONGITUDE then
         --only take left and right (place X's along all top/bottom side)
+        for x=1, #level[1] do
+            o.level[1][x] = 1
+            o.level[#level][x] = 1
+        end
     end
     o.costMap = {}
     return o --? maybe set in gameState without return o?

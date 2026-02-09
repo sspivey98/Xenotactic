@@ -27,12 +27,12 @@ enemies will have different paths based on position and final
 ---@field protected fullHealth number enemy's health when full
 ---@field protected healthBar {width:number,height:number,x:number,y:number,value:number}
 ---@field protected origin {x:number,y:number} origin x,y for rotation
----@overload fun(gameState: GAME.GAMESTATE, enemyType: number, flowField: FLOWFIELD, direction: ENUMS.FLOWFIELD): ENEMY
+---@overload fun(gameState: GAME.GAMESTATE, enemyType: number, flowField: FLOWFIELD): ENEMY
 local lib = setmetatable({},
     {
-        __call = function(class, gameState, enemyType, flowField, direction)
+        __call = function(class, gameState, enemyType, flowField)
             ---@cast class ENEMY
-            return class:new(gameState, enemyType, flowField, direction)
+            return class:new(gameState, enemyType, flowField)
         end
     }
 )
@@ -47,11 +47,24 @@ local function enemyMoveFrames(enemyType)
     --480x128 -> 32x32
     local frames = {}
     local spriteSize = 32
-    local frameCounter = enemyType > 3 and 4 or 3
+
+    --some enemies have 3 and some have 4 move frames
+    local frameCounter = 4
+    if enemyType == "BOSS1" or enemyType == "SCORPION" or enemyType == "BOSS2" then
+        frameCounter = 3
+    end
+
+    local index = 0
+    for i=1,#ENUMS.ENEMY_TYPE do
+        if ENUMS.ENEMY_TYPE[i] == enemyType then
+            index = i
+            break
+        end
+    end
 
     for i=1,frameCounter do
         frames[i] = love.graphics.newQuad(
-            (enemyType-1)*spriteSize, --start x
+            (index-1)*spriteSize, --start x
             (i-1)*spriteSize, --start y
             spriteSize,--width
             spriteSize,--height
@@ -62,30 +75,32 @@ local function enemyMoveFrames(enemyType)
 end
 
 ---@param gameState GAME.GAMESTATE from game.gameState, contains array of enemy objects
----@param enemyType number enums.ENEMY_TYPE specific enemy static variables to get
----@param flowField FLOWFIELD pointer to flowField for the enemy to follow
----@param direction ENUMS.FLOWFIELD
-function lib:new(gameState, enemyType, flowField, direction)
+---@param enemyTypeName ENUMS.ENEMY_TYPE enemy type
+---@param flowField? FLOWFIELD pointer to flowField for the enemy to follow
+function lib:new(gameState, enemyTypeName, flowField)
+    --check if valid flowField
+    if not flowField then return end
+
     --copy turret
     local o = {}
-    for k, v in pairs(ENUMS.ENEMY_TYPE[enemyType]) do o[k] = v end
+    for k, v in pairs(ENUMS.ENEMY[enemyTypeName]) do o[k] = v end
     setmetatable(o, self)
     self.__index = self
 
     local rand = 0
-    if direction == ENUMS.FLOWFIELD.LONGITUDE then
+    if flowField.direction == ENUMS.FLOWFIELD.LONGITUDE then
         rand = love.math.random(12, 19)
         o.position = {x=0, y=SETTINGS.TILE_SIZE*rand - SETTINGS.TILE_SIZE/2}
         o.coords = {x=1, y=rand}
         o.lastDirection = ENUMS.FLOWFIELD.TILE.RIGHT
-    elseif direction == ENUMS.FLOWFIELD.LATITUDE then
+    elseif flowField.direction == ENUMS.FLOWFIELD.LATITUDE then
         rand = love.math.random(13, 21)
         o.position = {x=SETTINGS.TILE_SIZE*rand - SETTINGS.TILE_SIZE/2, y=0}
         o.coords = {x=rand, y=1}
         o.lastDirection = ENUMS.FLOWFIELD.TILE.DOWN
     end
     o.moveAnimation = {
-        frames = enemyMoveFrames(enemyType),
+        frames = enemyMoveFrames(enemyTypeName),
         currentFrame = 1,
         frameTime = 0.1,
         timer = 0,
@@ -98,17 +113,14 @@ function lib:new(gameState, enemyType, flowField, direction)
         timer = 0,
     }
     local frameW, frameH = o.deathAnimation.frames[o.deathAnimation.currentFrame]:getDimensions()
-    o.deathAnimation.origin = {x = frameW / 2, y = frameH / 2}
+    o.deathAnimation.origin = {x = frameW/2, y = frameH/2}
     o.dying = false
     o.index = UTIL.uuid()
     o.flowField = flowField
     o.orientation = 0
     o.slow_rate = 1
     local _,_,w,h = o.moveAnimation.frames[o.moveAnimation.currentFrame]:getViewport()
-    o.origin = {
-        x = w/2,
-        y = h/2
-    }
+    o.origin = { x = w/2, y = h/2 }
     o.turning = false
     o.goal = false
     o.fullHealth = o.health
@@ -120,7 +132,7 @@ function lib:new(gameState, enemyType, flowField, direction)
         value = o.fullHealth
     }
     gameState.enemies[o.index] = o
-    return o
+    --return o
 end
 
 ---draw the enemy frame
@@ -136,7 +148,7 @@ function lib:draw()
             self.deathAnimation.origin.x,
             self.deathAnimation.origin.y
         )
-        local text = "+"..self.value.." Gold"
+        local text = "+"..self.value.."$"
         local font = love.graphics.getFont()
         local textW = font:getWidth(text)
         local textH = font:getHeight()

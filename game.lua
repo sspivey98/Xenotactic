@@ -10,7 +10,7 @@
 ---@field enemies {[string]:ENEMY}
 ---@field selectedEnemy ENEMY|nil
 ---@field selectedTurret TURRET|nil index of selected turret in turrets array
----@field selectedTurretType number
+---@field selectedTurretType ENUMS.TURRET_TYPE
 ---@field placementMode boolean
 ---@field paused boolean game state is paused
 
@@ -54,8 +54,8 @@ function lib.newGame(money, level, map, path1, path2)
     local game = {
         money = money or 30,
         map = map or {},
-        path1 = path1 or {}, --flowField left -> right
-        path2 = path2 or {}, --flowField up -> down
+        path1 = path1, --flowField left -> right
+        path2 = path2, --flowField up -> down
         lives = 20,
         level = level or 1,
         round = 0,

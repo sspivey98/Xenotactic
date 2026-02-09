@@ -16,8 +16,6 @@ local VISUAL_TILE_MAP
 local COLOR = {}
 local SCREEN = SETTINGS.SCREEN
 local WAVES
-local random = love.math.random(14) --!DELETE
-local random2 = love.math.random(14)
 
 local blockedAnimation = {
     timer = 1,
@@ -74,7 +72,7 @@ function lib.load(level_number, TILES)
     --create UI
     --turrets icons
     for i=1, 7 do
-        local key = ENUMS.TURRET_LOOKUP[i]
+        local key = ENUMS.TURRET_TYPE[i]
         local img = IMAGES.library["icon_"..i]
         local scale = {
             x = 100 / img:getWidth(), --80 / 50
@@ -95,7 +93,6 @@ function lib.load(level_number, TILES)
         --split y into 2 rows
         local y = (math.ceil(i / 3) - 1) * height + SCREEN.HEIGHT/6 - height
 
-        ---@type button.image
         local turretButton = BUTTON:new(
             BUTTON.type.IMAGE,
             {
@@ -113,13 +110,12 @@ function lib.load(level_number, TILES)
             }
         )
 
+        ---@cast turretButton button.image
         UI.turrets[key] = turretButton
     end
 
     local padding = 40
 
-    --sell button
-    ---@type button.text
     local sell_button = BUTTON:new(
         BUTTON.type.TEXT,
         {
@@ -132,7 +128,6 @@ function lib.load(level_number, TILES)
         }
     )
 
-    ---@type button.text
     local upgrade_button = BUTTON:new(
         BUTTON.type.TEXT,
         {
@@ -145,7 +140,6 @@ function lib.load(level_number, TILES)
         }
     )
 
-    ---@type button.text
     local send_wave = BUTTON:new(
         BUTTON.type.TEXT,
         {
@@ -157,6 +151,10 @@ function lib.load(level_number, TILES)
             text = "SEND WAVE"
         }
     )
+
+    ---@cast sell_button button.text
+    ---@cast upgrade_button button.text
+    ---@cast send_wave button.text
 
     UI.buttons["sell"] = sell_button
     UI.buttons["upgrade"] = upgrade_button
@@ -198,7 +196,7 @@ function lib.draw(gameState)
         end
     else
         for y=1, map.Height do
-            for x = 1, map.Width do
+            for x=1, map.Width do
                 local tileType = gameState.map[y][x]
                 love.graphics.setColor(ENUMS.COLORS[tileType])
                 love.graphics.rectangle("fill",
@@ -329,7 +327,9 @@ function lib.mousepressed(gameState, x, y, mouseButton)
                     SOUNDS.library["turret_build"]:play()
                     --update enemy pathing
                     gameState.path1:setBlocked(tile.x, tile.y)
-                    gameState.path2:setBlocked(tile.x, tile.y)
+                    if gameState.path2 then
+                        gameState.path2:setBlocked(tile.x, tile.y)
+                    end
                 end
             else
                 local checkTurret = false
@@ -358,7 +358,7 @@ function lib.mousepressed(gameState, x, y, mouseButton)
                     else
                         SOUNDS.library["button_press"]:play()
                         --turret build logic
-                        gameState.selectedTurretType = ENUMS.TURRET_TYPE[name]
+                        gameState.selectedTurretType = name
                         gameState.placementMode = true
                     end
                 end
@@ -379,12 +379,14 @@ function lib.mousepressed(gameState, x, y, mouseButton)
                             SOUNDS.library["turret_sold"]:play()
                             gameState.selectedTurret:sell(gameState)
                             gameState.selectedTurret = nil
-                        elseif name == "send_wave" then
-                            WAVES:next()
                         end
                         --*custom logic
                     end
                 end
+            end
+
+            if UI.buttons["send_wave"]:clicked(x, y, mouseButton) then
+                WAVES:next()
             end
         end
     elseif mouseButton == ENUMS.CLICK.RIGHT then
@@ -448,12 +450,6 @@ function lib.update(gameState, dt)
         turret:target(gameState.enemies)
     end
 
-    -- if UTIL.tableLength(gameState.turrets) >= 1 and UTIL.tableLength(gameState.enemies) == 0 then
-    --     ENEMY:new(gameState, random, gameState.path1, ENUMS.FLOWFIELD.LONGITUDE)
-    --     ENEMY:new(gameState, random2, gameState.path1, ENUMS.FLOWFIELD.LONGITUDE)
-    --     ENEMY:new(gameState, 15, gameState.path1, ENUMS.FLOWFIELD.LONGITUDE)
-    -- end
-
     --blocked animation
     if blockedAnimation.show then
         blockedAnimation.timerValue = blockedAnimation.timerValue + dt
@@ -462,6 +458,9 @@ function lib.update(gameState, dt)
             blockedAnimation.show = false
         end
     end
+
+    --waves
+    WAVES:update(dt, gameState)
 end
 
 return lib
