@@ -5,9 +5,9 @@ local IMAGES = require('lib.images')
 local SOUNDS = require('lib.sounds')
 local SETTINGS = require('settings')
 local TURRET = require('turret')
-local ENEMY = require('enemy')
 local UTIL = require('level.util')
 local BUTTON = require('lib.button')
+local HEALTHBAR = require('level.healthbar')
 
 --GLOBALS
 local TILE_SIZE = SETTINGS.TILE_SIZE --size of tile in pixels
@@ -91,7 +91,7 @@ function lib.load(level_number, TILES)
             x = x + (SCREEN.UI.WIDTH / 2) + width / 2
         end
         --split y into 2 rows
-        local y = (math.ceil(i / 3) - 1) * height + SCREEN.HEIGHT/6 - height
+        local y = 20 + (math.ceil(i / 3) - 1) * height + SCREEN.HEIGHT/6 - height
 
         local turretButton = BUTTON:new(
             BUTTON.type.IMAGE,
@@ -114,7 +114,7 @@ function lib.load(level_number, TILES)
         UI.turrets[key] = turretButton
     end
 
-    local padding = 40
+    local padding = 50
 
     local sell_button = BUTTON:new(
         BUTTON.type.TEXT,
@@ -304,6 +304,9 @@ function lib.draw(gameState)
             )
         end
     end
+
+    ---healthbar
+    HEALTHBAR.draw(gameState.lives, SCREEN.MAP.WIDTH, 0)
 end
 
 ---interact function

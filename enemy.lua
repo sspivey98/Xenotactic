@@ -27,6 +27,7 @@ enemies will have different paths based on position and final
 ---@field protected fullHealth number enemy's health when full
 ---@field protected healthBar {width:number,height:number,x:number,y:number,value:number}
 ---@field protected origin {x:number,y:number} origin x,y for rotation
+---@field protected stunned number stunned timer, if 0, entity is not stunned
 ---@overload fun(gameState: GAME.GAMESTATE, enemyType: number, flowField: FLOWFIELD): ENEMY
 local lib = setmetatable({},
     {
@@ -76,8 +77,10 @@ end
 
 ---@param gameState GAME.GAMESTATE from game.gameState, contains array of enemy objects
 ---@param enemyTypeName ENUMS.ENEMY_TYPE enemy type
----@param flowField? FLOWFIELD pointer to flowField for the enemy to follow
-function lib:new(gameState, enemyTypeName, flowField)
+---@param flowField FLOWFIELD pointer to flowField for the enemy to follow
+---@param health? integer scale the enemy health based on the wave
+---@param speed? number scale enemy speed
+function lib:new(gameState, enemyTypeName, flowField, health, speed)
     --check if valid flowField
     if not flowField then return end
 
@@ -86,6 +89,10 @@ function lib:new(gameState, enemyTypeName, flowField)
     for k, v in pairs(ENUMS.ENEMY[enemyTypeName]) do o[k] = v end
     setmetatable(o, self)
     self.__index = self
+
+    --overwrite speed/health for scaling
+    if health then o.health = health end
+    if speed then o.speed = speed end
 
     local rand = 0
     if flowField.direction == ENUMS.FLOWFIELD.LONGITUDE then
@@ -123,6 +130,7 @@ function lib:new(gameState, enemyTypeName, flowField)
     o.origin = { x = w/2, y = h/2 }
     o.turning = false
     o.goal = false
+    o.stunned = 0 --stun timer
     o.fullHealth = o.health
     o.healthBar = {
         width = 2*w/3,
@@ -169,7 +177,9 @@ function lib:draw()
             --TODO change to 8 lines in a rectangle?
         end
 
-        if self.slow_rate ~= 1 then
+        if self.stunned > 0 then
+            love.graphics.setColor(ENUMS.UPGRADE_COLORS.YELLOW)
+        elseif self.slow_rate ~= 1 then
             love.graphics.setColor(ENUMS.UPGRADE_COLORS.CYAN)
         else
             love.graphics.setColor{1,1,1}
@@ -288,8 +298,14 @@ function lib:update(dt, gameState)
         if self.slow_rate > 1 then self.slow_rate = 1 end
     end
 
+    --calc stun
+    if self.stunned > 0 then
+        self.stunned = self.stunned - dt
+        if self.stunned < 0 then self.stunned = 0 end
+    end
+
     --turning state machine
-    if (not self.turning and not self.dying) or self.air then
+    if (not self.turning and not self.dying and self.stunned == 0) or self.air then
         --move enemy
         if self.lastDirection == ENUMS.FLOWFIELD.TILE.UP then
             self.position.y = self.position.y - self.slow_rate*(self.speed / 4)
@@ -370,7 +386,12 @@ end
 ---@param percent integer
 function lib:slow(percent)
     self.slow_rate = 1 - percent/100
-    --TODO add slow color while in affect
+end
+
+---stun enemy for a short period
+---@param t number timer for how long to stun
+function lib:stun(t)
+    self.stunned = t
 end
 
 ---turret clicked on check

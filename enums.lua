@@ -72,7 +72,8 @@ lib.COLORS = {
 ---@field projectile boolean
 ---@field slow integer % to slow enemy speed
 ---@field air boolean target air enemies?
----@field splash integer percent splash damage
+---@field splash number splash radius
+---@field stun_chance integer chance to stun
 ---@field targetOne boolean targets specific enemies or not
 
 ---@class ENUMS.TURRET
@@ -126,13 +127,14 @@ lib.TURRET = {
         slow = 0,
         air = false,
         splash = 0,
+        stun_chance = 0,
         targetOne = true
     },
     GATLING = {
         cost = 5,
         value = 3,
         range = 90,
-        speed = 2,
+        speed = 1,
         damage = 10,
         image = IMAGES.library["turret_gatling"],
         sound = SOUNDS.library["shoot_gatling"],
@@ -141,13 +143,14 @@ lib.TURRET = {
         slow = 0,
         air = false,
         splash = 0,
+        stun_chance = 0,
         targetOne = true
     },
     PLASMA = {
         cost = 15,
         value = 8,
         range = 100,
-        speed = 4,
+        speed = 8,
         damage = 5,
         image = IMAGES.library["turret_plasma"],
         sound = SOUNDS.library["shoot_plasma"],
@@ -156,6 +159,7 @@ lib.TURRET = {
         slow = 0,
         air = false,
         splash = 0,
+        stun_chance = 0,
         targetOne = true
     },
     SAM = {
@@ -171,6 +175,7 @@ lib.TURRET = {
         slow = 0,
         air = false,
         splash = 20,
+        stun_chance = 0,
         targetOne = true
     },
     DCA = {
@@ -186,6 +191,7 @@ lib.TURRET = {
         slow = 0,
         air = true,
         splash = 25,
+        stun_chance = 0,
         targetOne = true
     },
     FREEZE = {
@@ -201,6 +207,7 @@ lib.TURRET = {
         slow = 20,
         air = false,
         splash = 50,
+        stun_chance = 0,
         targetOne = true
     },
     TESLA = {
@@ -213,9 +220,10 @@ lib.TURRET = {
         sound = SOUNDS.library["shoot_tesla"],
         shootImg = lib.TeslaShootAnimation,
         projectile = false,
-        slow = 90,
+        slow = 0,
         air = false,
         splash = 0,
+        stun_chance = 5,
         targetOne = false
     }
 }
@@ -229,14 +237,14 @@ lib.TURRET = {
 ---@enum ENUMS.ENEMY
 lib.ENEMY = {
     BOSS1 = {
-        speed = 2,
-        health = 100,
+        speed = 1,
+        health = 26,
         value = 20,
         air = false,
     },
     SCORPION = {
         speed = 1,
-        health = 10,
+        health = 20,
         value = 1,
         air = false,
     },
@@ -272,7 +280,7 @@ lib.ENEMY = {
     },
     QUEEN = {
         speed = 1,
-        health = 500,
+        health = 528,
         value = 40,
         air = false,
     },
@@ -438,56 +446,311 @@ lib.UPGRADE_TIMES = {
     LEVEL6 = 15
 }
 
----upgrade cost per turret
----@enum ENUMS.UPGRADE_COST
-lib.UPGRADE_COST = {
-    ---@enum ENUMS.UPGRADE_COST.GATLING
+---@class ENUMS.TURRET_UPGRADE
+---@field cost integer
+---@field damage integer
+---@field range integer
+---@field sell integer
+---@field slow integer
+---@field splash number
+---@field stun_chance integer
+
+---@class ENUMS.TURRET_LEVELS
+---@field LEVEL2 ENUMS.TURRET_UPGRADE
+---@field LEVEL3 ENUMS.TURRET_UPGRADE
+---@field LEVEL4 ENUMS.TURRET_UPGRADE
+---@field LEVEL5 ENUMS.TURRET_UPGRADE
+---@field LEVEL6 ENUMS.TURRET_UPGRADE
+
+---upgrade path per turret
+---@type {[ENUMS.TURRET_TYPE]: ENUMS.TURRET_LEVELS}
+lib.UPGRADE_PATH = {
     GATLING = {
-        LEVEL2 = 5,
-        LEVEL3 = 10,
-        LEVEL4 = 15,
-        LEVEL5 = 30,
-        LEVEL6 = 60
+        LEVEL2 = {
+            cost = 5,
+            damage = 20,
+            range = 90,
+            sell = 7,
+            slow = 0,
+            splash = 0,
+            stun_chance = 0,
+        },
+        LEVEL3 = {
+            cost = 10,
+            damage = 40,
+            range = 90,
+            sell = 15,
+            slow = 0,
+            splash = 0,
+            stun_chance = 0,
+        },
+        LEVEL4 = {
+            cost = 20,
+            damage = 80,
+            range = 90,
+            sell = 30,
+            slow = 0,
+            splash = 0,
+            stun_chance = 0,
+        },
+        LEVEL5 = {
+            cost = 40,
+            damage = 160,
+            range = 90,
+            sell = 60,
+            slow = 0,
+            splash = 0,
+            stun_chance = 0,
+        },
+        LEVEL6 = {
+            cost = 120,
+            damage = 400,
+            range = 270,
+            sell = 150,
+            slow = 0,
+            splash = 0,
+            stun_chance = 0,
+        }
     },
     ---@enum ENUMS.UPGRADE_COST.PLASMA
     PLASMA = {
-        LEVEL2 = 1,
-        LEVEL3 = 2,
-        LEVEL4 = 5,
-        LEVEL5 = 10,
-        LEVEL6 = 15
+        LEVEL2 = {
+            cost = 15,
+            damage = 10,
+            range = 100,
+            sell = 22,
+            slow = 0,
+            splash = 0,
+            stun_chance = 0,
+        },
+        LEVEL3 = {
+            cost = 20,
+            damage = 18,
+            range = 100,
+            sell = 37,
+            slow = 0,
+            splash = 0,
+            stun_chance = 0,
+        },
+        LEVEL4 = {
+            cost = 40,
+            damage = 34,
+            range = 100,
+            sell = 67,
+            slow = 0,
+            splash = 0,
+            stun_chance = 0,
+        },
+        LEVEL5 = {
+            cost = 70,
+            damage = 65,
+            range = 100,
+            sell = 120,
+            slow = 0,
+            splash = 0,
+            stun_chance = 0,
+        },
+        LEVEL6 = {
+            cost = 290,
+            damage = 320,
+            range = 125,
+            sell = 337,
+            slow = 0,
+            splash = 0,
+            stun_chance = 0,
+        },
     },
     ---@enum ENUMS.UPGRADE_COST.SAM
     SAM = {
-        LEVEL2 = 1,
-        LEVEL3 = 2,
-        LEVEL4 = 5,
-        LEVEL5 = 10,
-        LEVEL6 = 15
+        LEVEL2 = {
+            cost = 15,
+            damage = 16,
+            range = 130,
+            sell = 15,
+            slow = 0,
+            splash = 1,
+            stun_chance = 0,
+        },
+        LEVEL3 = {
+            cost = 35,
+            damage = 32,
+            range = 140,
+            sell = 26,
+            slow = 0,
+            splash = 1.5,
+            stun_chance = 0,
+        },
+        LEVEL4 = {
+            cost = 60,
+            damage = 64,
+            range = 150,
+            sell = 52,
+            slow = 0,
+            splash = 1.5,
+            stun_chance = 0,
+        },
+        LEVEL5 = {
+            cost = 110,
+            damage = 128,
+            range = 160,
+            sell = 97,
+            slow = 0,
+            splash = 2,
+            stun_chance = 0,
+        },
+        LEVEL6 = {
+            cost = 260,
+            damage = 256,
+            range = 170,
+            sell = 180,
+            slow = 0,
+            splash = 3,
+            stun_chance = 0,
+        }
     },
     ---@enum ENUMS.UPGRADE_COST.DCA
     DCA = {
-        LEVEL2 = 1,
-        LEVEL3 = 2,
-        LEVEL4 = 5,
-        LEVEL5 = 10,
-        LEVEL6 = 15
+        LEVEL2 = {
+            cost = 30,
+            damage = 40,
+            range = 90,
+            sell = 37,
+            slow = 0,
+            splash = 0,
+            stun_chance = 0,
+        },
+        LEVEL3 = {
+            cost = 50,
+            damage = 80,
+            range = 90,
+            sell = 60,
+            slow = 0,
+            splash = 0,
+            stun_chance = 0,
+        },
+        LEVEL4 = {
+            cost = 75,
+            damage = 160,
+            range = 90,
+            sell = 97,
+            slow = 0,
+            splash = 0,
+            stun_chance = 0,
+        },
+        LEVEL5 = {
+            cost = 125,
+            damage = 320,
+            range = 90,
+            sell = 153,
+            slow = 0,
+            splash = 0,
+            stun_chance = 0,
+        },
+        LEVEL6 = {
+            cost = 310,
+            damage = 480,
+            range = 270,
+            sell = 247,
+            slow = 0,
+            splash = 0,
+            stun_chance = 0,
+        }
     },
     ---@enum ENUMS.UPGRADE_COST.FREEZE
     FREEZE = {
-        LEVEL2 = 1,
-        LEVEL3 = 2,
-        LEVEL4 = 5,
-        LEVEL5 = 10,
-        LEVEL6 = 15
+        LEVEL2 = {
+            cost = 25,
+            damage = 15,
+            range = 80,
+            sell = 56,
+            slow = 25,
+            splash = 1,
+            stun_chance = 0,
+        },
+        LEVEL3 = {
+            cost = 25,
+            damage = 20,
+            range = 80,
+            sell = 75,
+            slow = 30,
+            splash = 1.5,
+            stun_chance = 0,
+        },
+        LEVEL4 = {
+            cost = 25,
+            damage = 25,
+            range = 80,
+            sell = 93,
+            slow = 40,
+            splash = 1.5,
+            stun_chance = 0,
+        },
+        LEVEL5 = {
+            cost = 25,
+            damage = 30,
+            range = 80,
+            sell = 112,
+            slow = 50,
+            splash = 2,
+            stun_chance = 0,
+        },
+        LEVEL6 = {
+            cost = 50,
+            damage = 50,
+            range = 120,
+            sell = 150,
+            slow = 75,
+            splash = 3,
+            stun_chance = 0,
+        }
     },
     ---@enum ENUMS.UPGRADE_COST.TESLA
     TESLA = {
-        LEVEL2 = 1,
-        LEVEL3 = 2,
-        LEVEL4 = 5,
-        LEVEL5 = 10,
-        LEVEL6 = 15
+        LEVEL2 = {
+            cost = 25,
+            damage = 20,
+            range = 70,
+            sell = 41,
+            slow = 0,
+            splash = 0,
+            stun_chance = 7,
+        },
+        LEVEL3 = {
+            cost = 50,
+            damage = 40,
+            range = 70,
+            sell = 79,
+            slow = 0,
+            splash = 0,
+            stun_chance = 10,
+        },
+        LEVEL4 = {
+            cost = 100,
+            damage = 60,
+            range = 70,
+            sell = 153,
+            slow = 0,
+            splash = 0,
+            stun_chance = 13,
+        },
+        LEVEL5 = {
+            cost = 185,
+            damage = 180,
+            range = 70,
+            sell = 292,
+            slow = 0,
+            splash = 0,
+            stun_chance = 15,
+        },
+        LEVEL6 = {
+            cost = 355,
+            damage = 320,
+            range = 70,
+            sell = 558,
+            slow = 0,
+            splash = 0,
+            stun_chance = 20,
+        }
     }
 }
 

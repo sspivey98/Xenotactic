@@ -1,5 +1,11 @@
 - turret
     ✓ rank star
+    ✓ upgrade path
+    ✓ splash range
+    - DCA shoots 4 different enemies at a time
+    ✓ implement stun mechanic
+    ✓ plasma can shoot more than one bullet at a time
+    ✓ after enemy is targeted, don't change until out of range or dead
 
 - enemy 
     ✓ add gold earned above kill
@@ -8,21 +14,20 @@
         ✓ selected enemy gamestate prop
     ✓ slowed enemies get a slightly different color
     - slimes can split when killed
+    - bosses should have 25% bigger sprites
 
 - add to UI menu
     - entity selected (turret/enemy) menu
     - upgrade/sell button for turret
     - wave information
-    - health bar
+    ✓ health bar
 
 - implement wave logic
-    - enemy types per wave
-    - spawn randomization
-    - implement 2 pathways of enemies
-    - send next wave button (only if wave completes before timer)
-    - play round_start.ogg twice (basically overlapping) if regular, once if boss
-
-- create level info in level.maps
+    ✓ enemy types per wave
+    ✓ spawn randomization
+    ✓ implement 2 pathways of enemies
+    ✓ send next wave button (only if wave completes before timer)
+    ✓ play round_start.ogg twice (basically overlapping) if regular, once if boss
 
 - improve visuals of tiles    
     ✓ two maps for a level - movement and visuals

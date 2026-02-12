@@ -16,11 +16,12 @@ local UTIL = require('level.util')
 ---@field level number turret upgrade level
 ---@field selected boolean
 ---@field upgradeCost integer cost of next upgrade
----@field protected targeting ENEMY[]|nil
+---@field protected targetsInRange ENEMY[]|nil all targets in range
+---@field protected targeting ENEMY|nil current selected target
 ---@field protected shootAnimation {cooldown:number, muzzle:number, currentFrame:integer, timer:number, frameTime:number}
----@field protected bullet? {x:number,y:number,angle:number}
+---@field protected bullets {x:number,y:number,angle:number}[] array of bullets. Plasma can have 2-3 bullets active, SAM only 1, DCA 4
 ---@field protected upgradeBar {width:number,height:number,x:number,y:number,value:number}
----@field protected turretType string
+---@field protected turretType ENUMS.TURRET_TYPE
 ---@overload fun(gameState: GAME.GAMESTATE, x:number, y:number): TURRET
 local lib = setmetatable({},
     {
@@ -77,7 +78,8 @@ function lib:new(gameState, x, y)
     o.upgrading = false
     o.upgradeCost = 5
     o.upgradeTimer = 0
-    o.targeting = {}
+    o.targeting = nil
+    o.targetsInRange = {}
     o.level = 1 --upgrade level
     o.selected = false
     o.shootAnimation = {
@@ -95,9 +97,7 @@ function lib:new(gameState, x, y)
         y = o.position.y+h,
         value = 0
     }
-    if o.projectile then
-        o.bullet = nil --created when shooting
-    end
+    o.bullets = {} --created when shooting
     gameState.turrets[o.index] = o
     gameState.money = gameState.money - o.cost
 end
@@ -151,30 +151,33 @@ function lib:update(dt)
         --]]
 
         --turret targeting, reloading, firing
-        if self.targeting[1] then
-            local target = self.targeting[1]
+        if self.targeting then
             --shooting logic
             if self.targetOne then
-                if self.bullet then --shooting projectile
-                    if target.health > 0 then
-                        local dx = target.position.x - self.bullet.x
-                        local dy = target.position.y - self.bullet.y
-                        local distance = math.sqrt(dx*dx + dy*dy)
+                if #self.bullets > 0 then --shooting projectile
+                    if self.targeting.health > 0 then
+                        for i,bullet in ipairs(self.bullets) do
+                            local dx = self.targeting.position.x - bullet.x
+                            local dy = self.targeting.position.y - bullet.y
+                            local distance = math.sqrt(dx*dx + dy*dy)
 
-                        if distance < 5 then --consider it a hit
-                            self:doDamage()
-                            self.bullet = nil
-                        else --move
-                            local speed = 400
-                            self.bullet.x = self.bullet.x + (dx / distance) * speed * dt
-                            self.bullet.y = self.bullet.y + (dy / distance) * speed * dt
-                            self.bullet.angle = math.atan2(dy, dx)
+                            if distance < 5 then --consider it a hit
+                                self:doDamage()
+                                self.bullets[i] = nil
+                            else --move
+                                local speed = 400
+                                bullet.x = bullet.x + (dx / distance) * speed * dt
+                                bullet.y = bullet.y + (dy / distance) * speed * dt
+                                bullet.angle = math.atan2(dy, dx)
+                            end
                         end
                     else
                         --target died, bullet disappears
-                        self.bullet = nil
+                        self.bullets = {}
                     end
-                else
+                end
+
+                if #self.bullets == 0 or (self.turretType == "PLASMA") then
                     --center of turret
                     local turretCenter = {
                         x = self.position.x + SETTINGS.TILE_SIZE / 2,
@@ -182,8 +185,8 @@ function lib:update(dt)
                     }
 
                     --targeting logic
-                    local dx = target.position.x - turretCenter.x
-                    local dy = target.position.y - turretCenter.y
+                    local dx = self.targeting.position.x - turretCenter.x
+                    local dy = self.targeting.position.y - turretCenter.y
                     self.orientation = math.atan2(dy, dx) + math.pi / 2
 
                     self.shootAnimation.cooldown = self.shootAnimation.cooldown - dt
@@ -193,10 +196,39 @@ function lib:update(dt)
 
                     if self.shootAnimation.cooldown <= 0 then
                         self:shoot()
-                        self.shootAnimation.cooldown = 1 / self.speed
+                        self.shootAnimation.cooldown = 2 / self.speed
                         self.shootAnimation.muzzle = 0.1
                     end
                 end
+            --target 4 enemies at once
+            elseif self.turretType == "DCA" then
+                --update current bullets trajectory
+                if #self.bullets > 0  then
+                    if #self.targetsInRange > 0 then
+                        for i,bullet in ipairs(self.bullets) do
+                            if self.targetsInRange[i].health > 0 then
+                                local dx = self.targetsInRange[i].position.x - bullet.x
+                                local dy = self.targetsInRange[i].position.y - bullet.y
+                                local distance = math.sqrt(dx*dx + dy*dy)
+
+                                if distance < 5 then --consider it a hit
+                                    self:doDamage()
+                                    self.bullets[i] = nil
+                                else --move
+                                    local speed = 400
+                                    bullet.x = bullet.x + (dx / distance) * speed * dt
+                                    bullet.y = bullet.y + (dy / distance) * speed * dt
+                                    bullet.angle = math.atan2(dy, dx)
+                                end
+                            else
+                                self.bullets[i] = nil
+                            end
+                        end
+                    else
+                        self.bullets = {}
+                    end
+                end
+                --shoot other targets
             else
                 --animation from turret center, hit everyone in ranges
                 self.shootAnimation.cooldown = self.shootAnimation.cooldown - dt
@@ -225,24 +257,73 @@ function lib:update(dt)
                     self.shootAnimation.timer = 0
                 end
             end
+        else
+            self.bullets = {}
         end
     end
 end
 
----draw turret
+----------------------------
+--- Helper draw functions  |
+----------------------------
+---@private
+function lib:drawBuildAnimation()
+    love.graphics.setColor{0.7, 0.7, 0.7}
+    love.graphics.draw(
+        build_turret_sprite_sheet,
+        self.buildAnimation.frames[self.buildAnimation.currentFrame],
+        self.position.x,
+        self.position.y,
+        0,
+        1.5, --x scale
+        1.5  --y scale
+    )
+    love.graphics.setColor{1,1,1}
+end
+
+---@private
+function lib:drawSelected()
+    --draw red circle
+    love.graphics.setColor{1, 0, 0.3} --bright red
+    love.graphics.circle("line",
+        self.position.x + SETTINGS.TILE_SIZE,
+        self.position.y + SETTINGS.TILE_SIZE,
+        self.range, --radius, should come from turret?
+        20
+    )
+    love.graphics.setColor{1,1,1}
+end
+
+---@private
+function lib:drawUpgradeBar()
+    --Draw progress (green)
+    love.graphics.setColor(0.2, 0.8, 0.2)
+    love.graphics.rectangle("fill", self.upgradeBar.x, self.upgradeBar.y, self.upgradeBar.width * self.upgradeBar.value, self.upgradeBar.height)
+
+    --Draw bar border
+    love.graphics.setColor(0, 0, 0)
+    love.graphics.rectangle("line", self.upgradeBar.x, self.upgradeBar.y, self.upgradeBar.width, self.upgradeBar.height)
+end
+
+---@private
+function lib:drawRank()
+    local rank = IMAGES.library["turret_rank_"..self.level-1]
+    love.graphics.setColor{1,1,1}
+    love.graphics.draw(
+        rank,
+        self.position.x + SETTINGS.TILE_SIZE/2,
+        self.position.y - SETTINGS.TILE_SIZE/2,
+        0,
+        1.5,
+        1.5
+    )
+end
+
+---main draw turret function
 function lib:draw()
     --build animation
     if not self.buildAnimation.built then
-        love.graphics.setColor{0.7, 0.7, 0.7}
-        love.graphics.draw(
-            build_turret_sprite_sheet,
-            self.buildAnimation.frames[self.buildAnimation.currentFrame],
-            self.position.x,
-            self.position.y,
-            0,
-            1.5, --x scale
-            1.5  --y scale
-        )
+        self:drawBuildAnimation()
     --other animations
     else
         love.graphics.setColor{0.8, 0.8, 0.8}
@@ -275,21 +356,24 @@ function lib:draw()
                 oy
             )
             --shooting projectile at enemy
-            if self.bullet then
-                local projW, projH = self.shootImg:getDimensions()
-                love.graphics.setColor{1,1,1}
+            local projW, projH = self.shootImg:getDimensions()
+            love.graphics.setColor{1,1,1}
+            for _,bullet in ipairs(self.bullets) do
                 love.graphics.draw(
                     self.shootImg,
-                    self.bullet.x,
-                    self.bullet.y,
-                    self.bullet.angle,
+                    bullet.x,
+                    bullet.y,
+                    bullet.angle,
                     1.5, -- Scale
                     1.5,
                     projW / 2,
                     projH / 2
                 )
-            else --shoot immediately
-                if (self.shootAnimation.muzzle > 0) and (#self.targeting > 0) then
+            end
+
+            --shoot immediately
+            if self.projectile == false then 
+                if (self.shootAnimation.muzzle > 0) and self.targeting then
                     if self.targetOne then
                         local flash_distance = oy * 1.5
                         local flash = {
@@ -358,41 +442,14 @@ function lib:draw()
             end
             love.graphics.setColor(1, 1, 1)
         else
-             --Draw progress (green)
-            love.graphics.setColor(0.2, 0.8, 0.2)
-            love.graphics.rectangle("fill", self.upgradeBar.x, self.upgradeBar.y, self.upgradeBar.width * self.upgradeBar.value, self.upgradeBar.height)
-
-            --Draw bar border
-            love.graphics.setColor(0, 0, 0)
-            love.graphics.rectangle("line", self.upgradeBar.x, self.upgradeBar.y, self.upgradeBar.width, self.upgradeBar.height)
+            self:drawUpgradeBar()
         end
 
         --draw selected range range
-        if self.selected then
-            --draw red circle
-            love.graphics.setColor{1, 0, 0.3} --bright red
-            love.graphics.circle("line",
-                self.position.x + SETTINGS.TILE_SIZE,
-                self.position.y + SETTINGS.TILE_SIZE,
-                self.range, --radius, should come from turret?
-                20
-            )
-            love.graphics.setColor{1,1,1}
-        end
+        if self.selected then self:drawSelected() end
 
         --draw rank, if upgraded
-        if self.level > 1 then
-            local rank = IMAGES.library["turret_rank_"..self.level-1]
-            love.graphics.setColor{1,1,1}
-            love.graphics.draw(
-                rank,
-                self.position.x + SETTINGS.TILE_SIZE/2,
-                self.position.y + SETTINGS.TILE_SIZE/2,
-                0,
-                1.5,
-                1.5
-            )
-        end
+        if self.level > 1 then self:drawRank() end
     end
     love.graphics.setColor{1,1,1}
 end
@@ -402,7 +459,9 @@ end
 function lib:sell(gameState)
     --unblock from map
     gameState.path1:setEmpty(self.position.x, self.position.y, true)
-    gameState.path2:setEmpty(self.position.x, self.position.y, true)
+    if gameState.path2 then
+        gameState.path2:setEmpty(self.position.x, self.position.y, true)
+    end
     --refund money
     gameState.money = gameState.money + self.value
     --remove from game state turrets
@@ -426,21 +485,32 @@ function lib:target(enemies)
 
     local ret = {}
 
-    for guid,enemy in pairs(enemies) do
-        local dx = enemy.position.x - center.x
-        local dy = enemy.position.y - center.y
-        local distance = math.sqrt(dx*dx + dy*dy)
-        if (distance <= self.range) and ((self.air == enemy.air) or self.turretType == "PLASMA") then
-            local progress = enemy.flowField.costMap[enemy.coords.y][enemy.coords.x]
-            if progress < closest then
-                closest = progress
-                target = guid
-            end
+    --if target is still in range and not dead, then don't update
+    if self.targeting then
+        if self.targeting.health <= 0 or self:inRange(self.targeting) == false then
+            self.targeting = nil
         end
     end
 
-    --add the enemy closest to the goal first
-    table.insert(ret, enemies[target])
+    --update all enemies in range
+    if not self.targeting then
+        for guid,enemy in pairs(enemies) do
+            local dx = enemy.position.x - center.x
+            local dy = enemy.position.y - center.y
+            local distance = math.sqrt(dx*dx + dy*dy)
+            if (distance <= self.range) and ((self.air == enemy.air) or self.turretType == "PLASMA") then
+                local progress = enemy.flowField.costMap[enemy.coords.y][enemy.coords.x]
+                if progress < closest then
+                    closest = progress
+                    target = guid
+                end
+            end
+        end
+
+        self.targeting = enemies[target]
+        --add the enemy closest to the goal first
+        table.insert(ret, enemies[target])
+    end
 
     --add other enemies in the list later
     for _,enemy in pairs(enemies) do
@@ -449,7 +519,7 @@ function lib:target(enemies)
         end
     end
 
-    self.targeting = ret
+    self.targetsInRange = ret
 end
 
 ---Check if enemy is in range
@@ -470,35 +540,44 @@ function lib:inProximity(enemy1, enemy2)
     local dx = enemy1.position.x - enemy2.position.x
     local dy = enemy1.position.y - enemy2.position.y
     local distance = math.sqrt(dx * dx + dy * dy)
-    return distance <= SETTINGS.TILE_SIZE
+    return distance <= self.splash*SETTINGS.TILE_SIZE
 end
 
 ---shoot at enemy
 function lib:shoot()
-    if self.targetOne then
-        if self.targeting[1] then
-            if self.targeting[1].health > 0 then
-                self.sound:play()
-                --spawn projectile
-                if self.projectile then
-                    self.bullet = {
+    if self.targeting then
+        if self.targetOne then
+            self.sound:play()
+            --spawn projectile
+            if self.projectile then
+                if self.turretType == "PLASMA" or self.turretType == "DCA" then
+                    table.insert(self.bullets, {
+                        x = self.position.x + SETTINGS.TILE_SIZE,
+                        y = self.position.y + SETTINGS.TILE_SIZE,
+                        angle = self.orientation - math.pi/2
+                    })
+                else
+                    self.bullets[1] = {
                         x = self.position.x + SETTINGS.TILE_SIZE,
                         y = self.position.y + SETTINGS.TILE_SIZE,
                         angle = self.orientation - math.pi/2
                     }
-                else
-                    --instant damage
-                    self:doDamage()
                 end
+            else
+                --instant damage
+                self:doDamage()
             end
-        end
-    else
+
         --blindly shoot all enemies in range
-        self.sound:play()
-        if #self.targeting > 0 then
-            for _,enemy in pairs(self.targeting) do
+        else
+            self.sound:play()
+            for _,enemy in pairs(self.targetsInRange) do
                 enemy.health = enemy.health - self.damage
-                enemy:slow(self.slow)
+                if self.stun_chance > 0 then
+                    if love.math.random() < self.stun_chance/100 then
+                        enemy:stun(1)
+                    end
+                end
             end
         end
     end
@@ -534,19 +613,25 @@ function lib:upgrade(gameState)
     --do upgrade logic
     gameState.money = gameState.money - self.cost
     self.upgrading = true
-    self.upgradeCost = ENUMS.UPGRADE_COST[self.turretType]["LEVEL"..self.level]
+
+    --upgrade stats
+    local upgrade = ENUMS.UPGRADE_PATH[self.turretType]["LEVEL"..self.level+1]
+    for k,v in pairs(upgrade) do
+        self[k] = v
+    end
     return true
 end
 
 ---inflict damage on enemy/enemies
 function lib:doDamage()
-    local target = self.targeting[1]
-    target.health = target.health - self.damage
+    --nil check
+    if not self.targeting then return end
+    self.targeting.health = self.targeting.health - self.damage
     if self.splash > 0 then
         for _,enemy in ipairs(self.targeting) do
-            if enemy ~= target then
-                if self:inProximity(target, enemy) then
-                    enemy.health = enemy.health - (self.splash/100)*self.damage
+            if enemy ~= self.targeting then
+                if self:inProximity(self.targeting, enemy) then
+                    enemy.health = enemy.health - (0.25)*self.damage
                     enemy:slow(self.slow)
                 end
             end

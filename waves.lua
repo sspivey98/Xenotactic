@@ -6,6 +6,8 @@ local ENUMS = require('enums')
 ---wave object. Wave class contains an array of this
 ---@class WAVE
 ---@field enemies ENUMS.ENEMY_TYPE[] always deploy the same amount in vertical and horizontal
+---@field health? integer health modifier for scaling waves
+---@field speed? number speed modifier for scaling waves
 ---@field timer number actual running timer
 ---@field spawnTimer number spawn timer
 
@@ -44,8 +46,10 @@ end
 ---@param wave_number integer
 ---@param enemy_amount integer
 ---@param enemyTypeName ENUMS.ENEMY_TYPE
+---@param health? integer
+---@param speed? number
 ---@return boolean success
-function lib:load(wave_number, enemy_amount, enemyTypeName)
+function lib:load(wave_number, enemy_amount, enemyTypeName, health, speed)
     if wave_number < 1 or wave_number > self.amount then
         return false
     end
@@ -57,6 +61,8 @@ function lib:load(wave_number, enemy_amount, enemyTypeName)
     end
 
     self.waves[wave_number].enemies = enemies
+    self.waves[wave_number].health = health or nil
+    self.waves[wave_number].speed = speed or nil
 
     return true
 end
@@ -65,14 +71,10 @@ end
 function lib:next()
     --increment wave
     self.current = self.current + 1
-    SOUNDS.library["round_start"]:play()
 
-    --if boss round
-    if UTIL.tableLength(self.waves[self.current].enemies) == 1 then
-        --wait 0.2 seconds
+    for i=1, UTIL.tableLength(self.waves[self.current].enemies) do
         SOUNDS.library["round_start"]:play()
     end
-    
 end
 
 ---update timer and enemy created
@@ -90,9 +92,9 @@ function lib:update(dt, gameState)
 
         --spawn enemies from queue
         if wave.spawnTimer <= 0 and #wave.enemies > 0 then
-            ENEMY:new(gameState, wave.enemies[1], gameState.path1)
+            ENEMY:new(gameState, wave.enemies[1], gameState.path1, wave.health, wave.speed)
             if not self.horizontalOnly then
-                ENEMY:new(gameState, wave.enemies[1], gameState.path2)
+                ENEMY:new(gameState, wave.enemies[1], gameState.path2, wave.health, wave.speed)
             end
             table.remove(wave.enemies, 1)
 
