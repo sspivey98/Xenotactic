@@ -294,7 +294,7 @@ function lib:update(dt, gameState)
 
     --reduce slow rate
     if self.slow_rate < 1 then
-        self.slow_rate = self.slow_rate + dt
+        self.slow_rate = self.slow_rate + dt/2
         if self.slow_rate > 1 then self.slow_rate = 1 end
     end
 

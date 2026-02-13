@@ -1,5 +1,5 @@
 # XenoTactic Remastered
-This is a remaster of the browser game, Xeno Tactic. I'm trying to mimic the behavior of version 1.3.
+This is a remaster of the browser game, Xeno Tactic. I'm aiming to reproduce the behavior of version 1.3 in a newer engine.
 
 ## Reference
 You can play the original game [here](https://www.newgrounds.com/portal/view/382321).

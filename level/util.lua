@@ -25,13 +25,10 @@ function lib.getTileAt(map, x, y)
     return tile
 end
 
----convert map tile coordinate to center pixel
-function lib.getPixelAt(map, x, y) end
-
 ---check if tile is buildable, if there is a turret already, or if it blocks the enemy pathing
 ---currentTile needs {x,y}
 ---@param currentTile {x:number,y:number}
----@param gameState any
+---@param gameState GAME.GAMESTATE
 ---@return boolean valid
 function lib:isValidPlacement(currentTile, gameState)
     local tiles = {
@@ -49,7 +46,7 @@ function lib:isValidPlacement(currentTile, gameState)
     end
 
     --check if tile already has turret
-    for _,turret in ipairs(gameState.turrets) do
+    for _,turret in pairs(gameState.turrets) do
         if not (currentTile.x + SETTINGS.TILE_SIZE < turret.position.x or  -- new turret is completely to the left
                 currentTile.x > turret.position.x + SETTINGS.TILE_SIZE or  -- new turret is completely to the right
                 currentTile.y + SETTINGS.TILE_SIZE < turret.position.y or  -- new turret is completely above

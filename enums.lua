@@ -174,7 +174,7 @@ lib.TURRET = {
         projectile = true,
         slow = 0,
         air = false,
-        splash = 20,
+        splash = 1.5,
         stun_chance = 0,
         targetOne = true
     },
@@ -190,9 +190,9 @@ lib.TURRET = {
         projectile = true,
         slow = 0,
         air = true,
-        splash = 25,
+        splash = 1,
         stun_chance = 0,
-        targetOne = true
+        targetOne = false
     },
     FREEZE = {
         cost = 50,
@@ -206,7 +206,7 @@ lib.TURRET = {
         projectile = true,
         slow = 20,
         air = false,
-        splash = 50,
+        splash = 1.5,
         stun_chance = 0,
         targetOne = true
     },
@@ -568,7 +568,7 @@ lib.UPGRADE_PATH = {
             range = 130,
             sell = 15,
             slow = 0,
-            splash = 1,
+            splash = 1.5,
             stun_chance = 0,
         },
         LEVEL3 = {
@@ -577,7 +577,7 @@ lib.UPGRADE_PATH = {
             range = 140,
             sell = 26,
             slow = 0,
-            splash = 1.5,
+            splash = 2,
             stun_chance = 0,
         },
         LEVEL4 = {
@@ -586,7 +586,7 @@ lib.UPGRADE_PATH = {
             range = 150,
             sell = 52,
             slow = 0,
-            splash = 1.5,
+            splash = 2,
             stun_chance = 0,
         },
         LEVEL5 = {
@@ -595,7 +595,7 @@ lib.UPGRADE_PATH = {
             range = 160,
             sell = 97,
             slow = 0,
-            splash = 2,
+            splash = 2.5,
             stun_chance = 0,
         },
         LEVEL6 = {
@@ -664,7 +664,7 @@ lib.UPGRADE_PATH = {
             range = 80,
             sell = 56,
             slow = 25,
-            splash = 1,
+            splash = 1.5,
             stun_chance = 0,
         },
         LEVEL3 = {
@@ -673,7 +673,7 @@ lib.UPGRADE_PATH = {
             range = 80,
             sell = 75,
             slow = 30,
-            splash = 1.5,
+            splash = 2,
             stun_chance = 0,
         },
         LEVEL4 = {
@@ -682,7 +682,7 @@ lib.UPGRADE_PATH = {
             range = 80,
             sell = 93,
             slow = 40,
-            splash = 1.5,
+            splash = 2,
             stun_chance = 0,
         },
         LEVEL5 = {
@@ -691,7 +691,7 @@ lib.UPGRADE_PATH = {
             range = 80,
             sell = 112,
             slow = 50,
-            splash = 2,
+            splash = 2.5,
             stun_chance = 0,
         },
         LEVEL6 = {
