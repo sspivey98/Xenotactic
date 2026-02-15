@@ -308,16 +308,16 @@ function lib:update(dt, gameState)
     if (not self.turning and not self.dying and self.stunned == 0) or self.air then
         --move enemy
         if self.lastDirection == ENUMS.FLOWFIELD.TILE.UP then
-            self.position.y = self.position.y - self.slow_rate*(self.speed / 4)
+            self.position.y = self.position.y - self.slow_rate*self.speed
             self.orientation = ENUMS.ORIENTATION.UP
         elseif self.lastDirection == ENUMS.FLOWFIELD.TILE.DOWN then
-            self.position.y = self.position.y + self.slow_rate*(self.speed / 4)
+            self.position.y = self.position.y + self.slow_rate*self.speed
             self.orientation = ENUMS.ORIENTATION.DOWN
         elseif self.lastDirection == ENUMS.FLOWFIELD.TILE.LEFT then
-            self.position.x = self.position.x - self.slow_rate*(self.speed / 4)
+            self.position.x = self.position.x - self.slow_rate*self.speed
             self.orientation = ENUMS.ORIENTATION.LEFT
         elseif self.lastDirection == ENUMS.FLOWFIELD.TILE.RIGHT then
-            self.position.x = self.position.x + self.slow_rate*(self.speed / 4)
+            self.position.x = self.position.x + self.slow_rate*self.speed
             self.orientation = ENUMS.ORIENTATION.RIGHT
         end
 

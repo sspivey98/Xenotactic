@@ -136,7 +136,7 @@ function lib:update(dt)
             local distance = math.sqrt(dx*dx + dy*dy)
 
             if distance < 5 then --consider it a hit
-                self:doDamage()
+                self:doDamage(bullet.target)
                 table.remove(self.bullets, i)
             else --move
                 local speed = 400
@@ -548,7 +548,7 @@ function lib:shoot()
                 end
             else
                 --instant damage
-                self:doDamage()
+                self:doDamage(self.targeting)
             end
         else
             self.sound:play()
@@ -561,19 +561,19 @@ function lib:shoot()
                     y = self.position.y + SETTINGS.TILE_SIZE,
                     angle = self.orientation - math.pi/2
                 }
-                local max_bullets = 3
-                local counter = 0
+                local max_bullets = 4
+                local counter = 1
                 for i=2,#self.targetsInRange do
-                    if self.targetsInRange[i] ~= nil then
-                        self.bullets[i] =  {
+                    if self.targetsInRange[i] ~= self.targeting then
+                        counter = counter + 1
+                        self.bullets[counter] =  {
                             target = self.targetsInRange[i],
                             x = self.position.x + SETTINGS.TILE_SIZE,
                             y = self.position.y + SETTINGS.TILE_SIZE,
                             angle = self.orientation - math.pi/2
                         }
-                        counter = counter + 1
                     end
-                    if counter == max_bullets then break end
+                    if counter >= max_bullets then break end
                 end
             --blindly shoot all enemies in range
             else
@@ -630,25 +630,30 @@ function lib:upgrade(gameState)
 end
 
 ---inflict damage on enemy/enemies
-function lib:doDamage()
-    --nil check
-    if not self.targeting then return end
-
+---@param enemy ENEMY
+function lib:doDamage(enemy)
     --damage
-    self.targeting.health = self.targeting.health - self.damage
+    enemy.health = enemy.health - self.damage
 
     --slow, if applicable
     if self.slow > 0 then
-        self.targeting:slow(self.slow)
+        enemy:slow(self.slow)
+    end
+
+    --stun, if applicable
+    if self.stun_chance > 0 then
+        if love.math.random() < self.stun_chance/100 then
+            enemy:stun(1)
+        end
     end
 
     --splash damage
     if self.splash > 0 then
-        for _,enemy in ipairs(self.targetsInRange) do
-            if enemy ~= self.targeting then
-                if self:inProximity(self.targeting, enemy) then
-                    enemy.health = enemy.health - (0.33)*self.damage
-                    enemy:slow(self.slow)
+        for _,enemyInRange in ipairs(self.targetsInRange) do
+            if enemyInRange ~= enemy then
+                if self:inProximity(enemyInRange, enemy) then
+                    enemyInRange.health = enemyInRange.health - (0.33)*self.damage
+                    enemyInRange:slow(self.slow)
                 end
             end
         end

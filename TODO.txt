@@ -2,7 +2,7 @@
     ✓ rank star
     ✓ upgrade path
     ✓ splash range
-    - DCA shoots 4 different enemies at a time
+    ✓ DCA shoots 4 different enemies at a time
     ✓ implement stun mechanic
     ✓ plasma can shoot more than one bullet at a time
     ✓ after enemy is targeted, don't change until out of range or dead

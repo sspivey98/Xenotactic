@@ -1,6 +1,5 @@
 ---load waves for each level
 local WAVES = require('waves')
-local ENUMS = require('enums')
 
 local lib = {}
 

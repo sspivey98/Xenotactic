@@ -9,13 +9,18 @@ local SETTINGS = require('settings')
 local MAPS = require('level.maps')
 local FLOWFIELD = require('flowField')
 local UTIL = require('level.util')
+local TICK = require('lib.tick')
 
 local game
 
 ---initialize function
-function love.load()
+function love.load(arg)
     love.window.setTitle("Tower Defense")
+    love.window.setVSync(1)
     love.window.setMode(1280, 720)
+
+    --enforce 60 FPS for now
+    TICK.framerate = 60
 
     game = GAME.initGame()
     love.graphics.setNewFont("/assets/fonts/11_Visitor_TT1_BRK.ttf", 16)

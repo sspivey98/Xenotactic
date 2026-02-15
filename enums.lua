@@ -182,7 +182,7 @@ lib.TURRET = {
         cost = 50,
         value = 25,
         range = 90,
-        speed = 3,
+        speed = 2,
         damage = 20,
         image = IMAGES.library["turret_sam"],
         sound = SOUNDS.library["shoot_missile"],
@@ -190,7 +190,7 @@ lib.TURRET = {
         projectile = true,
         slow = 0,
         air = true,
-        splash = 1,
+        splash = 1.5,
         stun_chance = 0,
         targetOne = false
     },
@@ -321,7 +321,7 @@ lib.ENEMY = {
         air = false,
     },
     HELICOPTER = {
-        speed = 2,
+        speed = 0.8,
         health = 44,
         value = 3,
         air = true,
