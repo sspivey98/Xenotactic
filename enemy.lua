@@ -23,11 +23,13 @@ enemies will have different paths based on position and final
 ---@field protected lastDirection ENUMS.FLOWFIELD.TILE
 ---@field flowField FLOWFIELD which flowField for the enemy to follow
 ---@field selected boolean determine if enemy is selected
+---@field protected splitter {amount: integer, type:ENUMS.ENEMY_TYPE, x:integer,y:integer} enemies that split into more enemies after dying
 ---@field protected dying boolean mark enemy is dying or not
 ---@field protected fullHealth number enemy's health when full
 ---@field protected healthBar {width:number,height:number,x:number,y:number,value:number}
 ---@field protected origin {x:number,y:number} origin x,y for rotation
 ---@field protected stunned number stunned timer, if 0, entity is not stunned
+---@field private scale number how large the enemy is
 ---@overload fun(gameState: GAME.GAMESTATE, enemyType: number, flowField: FLOWFIELD): ENEMY
 local lib = setmetatable({},
     {
@@ -43,6 +45,7 @@ local enemies_sprite_sheet = IMAGES.library["enemies"]
 
 ---creates array of sprites for the enemy
 ---@private
+---@param enemyType ENUMS.ENEMY_TYPE
 ---@return love.Quad[]
 local function enemyMoveFrames(enemyType)
     --480x128 -> 32x32
@@ -79,8 +82,12 @@ end
 ---@param enemyTypeName ENUMS.ENEMY_TYPE enemy type
 ---@param flowField FLOWFIELD pointer to flowField for the enemy to follow
 ---@param health? integer scale the enemy health based on the wave
+---@param value? integer enemy kill value
 ---@param speed? number scale enemy speed
-function lib:new(gameState, enemyTypeName, flowField, health, speed)
+---@param boss? boolean scale enemy size
+---@param splitter? {amount: integer, type:ENUMS.ENEMY_TYPE} how many enemies to split into
+---@param coords? {x:number,y:number} position of splitter
+function lib:new(gameState, enemyTypeName, flowField, health, value, speed, boss, splitter, coords)
     --check if valid flowField
     if not flowField then return end
 
@@ -105,6 +112,10 @@ function lib:new(gameState, enemyTypeName, flowField, health, speed)
         o.position = {x=SETTINGS.TILE_SIZE*rand - SETTINGS.TILE_SIZE/2, y=0}
         o.coords = {x=rand, y=1}
         o.lastDirection = ENUMS.FLOWFIELD.TILE.DOWN
+    end
+    if coords then
+        o.coords = {x=coords.x,y=coords.y}
+        o.position = {x=SETTINGS.TILE_SIZE*coords.x - SETTINGS.TILE_SIZE/2, y=SETTINGS.TILE_SIZE*coords.y - SETTINGS.TILE_SIZE/2}
     end
     o.moveAnimation = {
         frames = enemyMoveFrames(enemyTypeName),
@@ -139,6 +150,18 @@ function lib:new(gameState, enemyTypeName, flowField, health, speed)
         y = 0,
         value = o.fullHealth
     }
+    o.scale = 1.5
+    if boss then
+        o.scale = 2
+    end
+    if value then o.value = value end
+    if splitter then
+        o.splitter = {
+            amount = splitter.amount or 0,
+            type = splitter.type or nil,
+        }
+    end
+
     gameState.enemies[o.index] = o
     --return o
 end
@@ -184,14 +207,15 @@ function lib:draw()
         else
             love.graphics.setColor{1,1,1}
         end
+
         love.graphics.draw(
             enemies_sprite_sheet,
             self.moveAnimation.frames[self.moveAnimation.currentFrame],
             self.position.x,
             self.position.y,
             self.orientation, --orientation (radians)
-            1.5, --x scale
-            1.5,  --y scale
+            self.scale, --x scale
+            self.scale,  --y scale
             self.origin.x, --origin x for rotation
             self.origin.y --origin y for rotation
         )
@@ -372,6 +396,13 @@ function lib:kill(gameState)
     SOUNDS.library["enemy_kill"]:play()
     gameState.money = gameState.money + self.value
     gameState.enemies[self.index] = nil
+
+    --if splitter spawn more enemies
+    if self.splitter then
+        for i=1,self.splitter.amount do
+            lib:new(gameState, self.splitter.type, self.flowField, self.fullHealth/self.splitter.amount, nil, nil, nil, nil, {x=self.coords.x,y=self.coords.y})
+        end
+    end
 end
 
 ---Remove entity from game state and lose life

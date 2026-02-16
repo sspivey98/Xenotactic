@@ -13,8 +13,8 @@
         ✓ visual
         ✓ selected enemy gamestate prop
     ✓ slowed enemies get a slightly different color
-    - slimes can split when killed
-    - bosses should have 25% bigger sprites
+    ✓ slimes can split when killed
+    ✓ bosses should have 25% bigger sprites
 
 - add to UI menu
     - entity selected (turret/enemy) menu

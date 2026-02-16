@@ -3,7 +3,7 @@ local WAVES = require('waves')
 
 local lib = {}
 
-lib.level1 = WAVES:new(20, 35, 0.3, true)
+lib.level1 = WAVES:new(20, 35, 0.5, true)
 lib.level2 = WAVES:new(20, 26)
 lib.level3 = WAVES:new(30, 26)
 lib.level4 = WAVES:new(40, 25)
@@ -15,19 +15,19 @@ lib.level6 = WAVES:new(100, 24)
 for i=1,5 do
     ---@type WAVES
     local wave = lib["level"..i]
-    wave:load(1, 10, "SCORPION")
-    wave:load(2, 10, "ALIEN")
-    wave:load(3, 10, "BOSS1")
+    wave:load(1, 10, "SCORPION", 20)
+    wave:load(2, 10, "ALIEN", 24)
+    wave:load(3, 10, "BOSS1", 29)
     wave:load(4, 10, "GOBLIN", 33)
     wave:load(5, 10, "TERMITE", 36)
     wave:load(6, 10, "SLIME", 60)
     wave:load(7, 10, "SPIDER", 40)
-    wave:load(8, 1, "QUEEN", 528, 0.8)
+    wave:load(8, 1, "QUEEN", 528, 20, 0.8, true)
     wave:load(9, 10, "WENDIGO", 58)
     wave:load(10, 10, "TURTLE", 66)
     wave:load(11, 10, "REDCYBORG", 73)
     wave:load(12, 10, "SCORPION", 79, 1.5)
-    wave:load(13, 10, "SLIME", 132)
+    wave:load(13, 10, "SLIME", 132, 8, 1, false, {amount=2, type="CYBORG"})
     wave:load(14, 10, "HELICOPTER", 44)
     wave:load(15, 10, "SCORPION", 96)
     wave:load(16, 1, "BOSS1", 1544, 0.8)

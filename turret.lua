@@ -577,6 +577,7 @@ function lib:shoot()
                 end
             --blindly shoot all enemies in range
             else
+                self.targeting.health = self.targeting.health - self.damage
                 for _,enemy in pairs(self.targetsInRange) do
                     enemy.health = enemy.health - self.damage
                     if self.stun_chance > 0 then
