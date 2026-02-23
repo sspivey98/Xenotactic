@@ -17,7 +17,8 @@ local game
 function love.load(arg)
     love.window.setTitle("Tower Defense")
     love.window.setVSync(1)
-    love.window.setMode(1280, 720)
+    local resolution = SETTINGS.resolution[3]
+    love.window.setMode(resolution.WIDTH, resolution.HEIGHT)
 
     --enforce 60 FPS for now
     TICK.framerate = 60
@@ -74,11 +75,13 @@ function love.mousepressed(x, y, mouseButton)
                     --load level
                     (SOUNDS.library["button_press2"]):play()
                     local map = MAPS["level_"..index]
+                    local waves = require('level.waves')["level"..index]
                     if index == 1 then
                         game.gameState = GAME.newGame(
                             60,
                             index,
                             UTIL:deepCopy(map),
+                            waves,
                             FLOWFIELD:new(UTIL:deepCopy(map), ENUMS.FLOWFIELD.LONGITUDE)
                         )
                     else
@@ -86,6 +89,7 @@ function love.mousepressed(x, y, mouseButton)
                             60,
                             index,
                             UTIL:deepCopy(map),
+                            waves,
                             FLOWFIELD:new(UTIL:deepCopy(map), ENUMS.FLOWFIELD.LONGITUDE),
                             FLOWFIELD:new(UTIL:deepCopy(map), ENUMS.FLOWFIELD.LATITUDE)
                         )

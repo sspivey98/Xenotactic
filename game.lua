@@ -13,6 +13,7 @@
 ---@field selectedTurretType ENUMS.TURRET_TYPE
 ---@field placementMode boolean
 ---@field paused boolean game state is paused
+---@field waves WAVES
 
 ---@alias game {state:GAME.STATES,screen:{x:number,y:number},gameState:GAME.GAMESTATE}
 ---@class GAME
@@ -47,10 +48,11 @@ end
 ---@param money? number
 ---@param level number level number
 ---@param map {}[]
+---@param waves WAVES
 ---@param path1 FLOWFIELD
 ---@param path2? FLOWFIELD
 ---@return GAME.GAMESTATE
-function lib.newGame(money, level, map, path1, path2)
+function lib.newGame(money, level, map, waves, path1, path2)
     local game = {
         money = money or 30,
         map = map or {},
@@ -61,12 +63,12 @@ function lib.newGame(money, level, map, path1, path2)
         round = 0,
         turrets = {},
         enemies = {},
-        --selected = {0, 0},
         selectedTurret = nil,
         selectedTurretType = nil,
         selectedEnemy = nil,
         placementMode = false,
-        paused = false
+        paused = false,
+        waves = waves
     }
 
     return game

@@ -6,8 +6,7 @@ local SOUNDS = require('lib.sounds')
 local SETTINGS = require('settings')
 local TURRET = require('turret')
 local UTIL = require('level.util')
-local BUTTON = require('lib.button')
-local HEALTHBAR = require('level.healthbar')
+local UI = require('level.ui')
 
 --GLOBALS
 local TILE_SIZE = SETTINGS.TILE_SIZE --size of tile in pixels
@@ -15,7 +14,6 @@ local map = SETTINGS.map
 local VISUAL_TILE_MAP
 local COLOR = {}
 local SCREEN = SETTINGS.SCREEN
-local WAVES
 
 local blockedAnimation = {
     timer = 1,
@@ -40,13 +38,6 @@ local currentTile = {
     y = 0,
 }
 
---ui buttons load here
----@type {turrets:{[string]:button.image},buttons:{[string]:button.text}}
-local UI = {
-    turrets = {},
-    buttons = {}
-}
-
 ---initialize level
 ---@param level_number number level number selected (1-6)
 ---@param TILES number[][] visual tilemap to use 
@@ -54,9 +45,6 @@ function lib.load(level_number, TILES)
     if TILES then
         VISUAL_TILE_MAP = TILES
     end
-
-    --load waves
-    WAVES = require('level.waves')["level"..level_number]
 
     --load tiles
     level_number = tonumber(level_number) or 1
@@ -70,95 +58,7 @@ function lib.load(level_number, TILES)
     end
 
     --create UI
-    --turrets icons
-    for i=1, 7 do
-        local key = ENUMS.TURRET_TYPE[i]
-        local img = IMAGES.library["icon_"..i]
-        local scale = {
-            x = 100 / img:getWidth(), --80 / 50
-            y = 100 / img:getHeight()
-        }
-        local width = img:getWidth() * scale.x
-        local height = img:getHeight() * scale.y
-
-        --split x into 3 columns
-        local x = SCREEN.MAP.WIDTH
-        if i % 3 == 1 then
-            x = x + (SCREEN.UI.WIDTH / 2) - 3*width / 2
-        elseif i % 3 == 2 then
-            x = x + (SCREEN.UI.WIDTH / 2) - width / 2
-        else
-            x = x + (SCREEN.UI.WIDTH / 2) + width / 2
-        end
-        --split y into 2 rows
-        local y = 20 + (math.ceil(i / 3) - 1) * height + SCREEN.HEIGHT/6 - height
-
-        local turretButton = BUTTON:new(
-            BUTTON.type.IMAGE,
-            {
-                x = x,
-                y = y,
-                width = width,
-                height = height,
-                image = img,
-                color = {1,1,1},
-                hoveredColor = {1,0.7,0.7},
-                scale = {
-                    x = scale.x,
-                    y = scale.y
-                }
-            }
-        )
-
-        ---@cast turretButton button.image
-        UI.turrets[key] = turretButton
-    end
-
-    local padding = 50
-
-    local sell_button = BUTTON:new(
-        BUTTON.type.TEXT,
-        {
-            x = SCREEN.MAP.WIDTH + padding,
-            y = 2 * SCREEN.HEIGHT / 5 + padding,
-            width = SCREEN.UI.WIDTH / 2 - padding,
-            height = SCREEN.UI.HEIGHT / 8 - padding,
-            color = {0.3, 0.3, 0.3},
-            text = "SELL"
-        }
-    )
-
-    local upgrade_button = BUTTON:new(
-        BUTTON.type.TEXT,
-        {
-            x = SCREEN.MAP.WIDTH + padding,
-            y = 3*SCREEN.HEIGHT / 5 + padding,
-            width = SCREEN.UI.WIDTH / 2 - padding,
-            height = SCREEN.UI.HEIGHT / 8 - padding,
-            color = {0.3, 0.3, 0.3},
-            text = "UPGRADE"
-        }
-    )
-
-    local send_wave = BUTTON:new(
-        BUTTON.type.TEXT,
-        {
-            x = SCREEN.MAP.WIDTH + padding,
-            y = 2 * SCREEN.HEIGHT / 5 + 3*padding,
-            width = SCREEN.UI.WIDTH / 2 - padding,
-            height = SCREEN.UI.HEIGHT / 8 - padding,
-            color = {0.3, 0.3, 0.3},
-            text = "SEND WAVE"
-        }
-    )
-
-    ---@cast sell_button button.text
-    ---@cast upgrade_button button.text
-    ---@cast send_wave button.text
-
-    UI.buttons["sell"] = sell_button
-    UI.buttons["upgrade"] = upgrade_button
-    UI.buttons["send_wave"] = send_wave
+    UI:load()
     SOUNDS.library["next_menu"]:play()
 end
 
@@ -240,12 +140,12 @@ function lib.draw(gameState)
     --<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     --|          UI                |
     -->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    --[[
-    --TODO for UI
-    add current turret/enemy selected info
-    add upgrade/sell turret button
-    add next wave information
-    --]]
+    UI:drawCurrentWaveInfo(gameState)
+    UI:drawNextWaveInfo(gameState)
+    UI:drawSelectedTurret(gameState)
+    UI:drawSelectedTurretUpgrade(gameState)
+    UI:drawMoney(gameState.money)
+    UI:drawHealthBar(gameState.lives, SCREEN.MAP.WIDTH, 0)
 
     --draw UI turret buttons
     for _,turret in pairs(UI.turrets) do
@@ -304,9 +204,6 @@ function lib.draw(gameState)
             )
         end
     end
-
-    ---healthbar
-    HEALTHBAR.draw(gameState.lives, SCREEN.MAP.WIDTH, 0)
 end
 
 ---interact function
@@ -389,7 +286,7 @@ function lib.mousepressed(gameState, x, y, mouseButton)
             end
 
             if UI.buttons["send_wave"]:clicked(x, y, mouseButton) then
-                WAVES:next()
+                gameState.waves:next(gameState)
             end
         end
     elseif mouseButton == ENUMS.CLICK.RIGHT then
@@ -449,7 +346,7 @@ function lib.update(gameState, dt)
     --]]
     --turrets
     for _,turret in pairs(gameState.turrets) do
-        turret:update(dt)
+        turret:update(dt, gameState)
         turret:target(gameState.enemies)
     end
 
@@ -463,7 +360,7 @@ function lib.update(gameState, dt)
     end
 
     --waves
-    WAVES:update(dt, gameState)
+    gameState.waves:update(dt, gameState)
 end
 
 return lib

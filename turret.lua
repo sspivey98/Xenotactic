@@ -104,7 +104,8 @@ end
 
 ---turret logic
 ---@param dt number delta between last frame and current in seconds
-function lib:update(dt)
+---@param gameState GAME.GAMESTATE
+function lib:update(dt, gameState)
     --build animation
     if not self.buildAnimation.built then
         local animate = self.buildAnimation
@@ -149,6 +150,10 @@ function lib:update(dt)
 
     --upgrade animation
     if self.upgrading then
+        --auto upgrade if on round 0
+        if gameState.round == 0 then
+            self.upgradeTimer = ENUMS.UPGRADE_TIMES["LEVEL"..self.level+1]
+        end
         --upgrade progress bar
         self.upgradeBar.value = self.upgradeTimer / ENUMS.UPGRADE_TIMES["LEVEL"..self.level+1]
         self.upgradeTimer = self.upgradeTimer + dt

@@ -1,8 +1,5 @@
 ---@alias dimension {WIDTH:number,HEIGHT:number}
 ---@class SETTINGS
----@field TILE_SIZE number size of a side of square tile in pixels
----@field map {Width:number, Height:number} dimension in tiles
----@field SCREEN {MAP:dimension,UI:dimension,WIDTH:number,HEIGHT:number}
 local lib = {}
 
 --[[
@@ -15,13 +12,26 @@ local lib = {}
     - 1600x900 
     - 1920x1080
 --]]
+---@type dimension[]
+lib.resolution = {
+    [1] = {WIDTH=800, HEIGHT=600},
+    [2] = {WIDTH=1024, HEIGHT=768},
+    [3] = {WIDTH=1280, HEIGHT=720},
+    [4] = {WIDTH=1366, HEIGHT=768},
+    [5] = {WIDTH=1600, HEIGHT=900},
+    [6] = {WIDTH=1920, HEIGHT=1080},
+}
 
+---@type number size of a side of square tile in pixels
 lib.TILE_SIZE = 24
+
+---@type {Width:number, Height:number} dimension in tiles
 lib.map = {
     Width = 33,
     Height = 30
 }
 
+---@type {MAP:dimension,UI:dimension,WIDTH:number,HEIGHT:number}
 lib.SCREEN = {
     MAP = {
         WIDTH = lib.map.Width * lib.TILE_SIZE,

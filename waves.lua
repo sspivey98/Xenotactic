@@ -1,7 +1,6 @@
 local SOUNDS = require('lib.sounds')
 local UTIL = require('level.util')
 local ENEMY = require('enemy')
-local ENUMS = require('enums')
 
 ---wave object. Wave class contains an array of this
 ---@class WAVE
@@ -16,7 +15,6 @@ local ENUMS = require('enums')
 
 ---class to handle waves logic
 ---@class WAVES
----@field current integer current ongoing wave
 ---@field amount integer total amount of waves
 ---@field waves WAVE[] array of all waves for the level
 ---@field protected timer number default timer amount for each wave
@@ -35,7 +33,6 @@ function lib:new(amount, timer, spawnTimer, horizontalOnly)
     setmetatable(o, self)
     self.__index = self
     o.amount = amount
-    o.current = 0
     o.spawnTimer = spawnTimer or 0.2
     o.horizontalOnly = horizontalOnly or false
     o.waves = {}
@@ -77,11 +74,12 @@ function lib:load(wave_number, enemy_amount, enemyTypeName, health, value, speed
 end
 
 ---send the next wave; can't send until current wave is all killed
-function lib:next()
+---@param gameState GAME.GAMESTATE
+function lib:next(gameState)
     --increment wave
-    self.current = self.current + 1
+    gameState.round = gameState.round + 1
 
-    for i=1, UTIL.tableLength(self.waves[self.current].enemies) do
+    for i=1, UTIL.tableLength(self.waves[gameState.round].enemies) do
         SOUNDS.library["round_start"]:play()
     end
 end
@@ -91,8 +89,8 @@ end
 ---@param gameState GAME.GAMESTATE
 function lib:update(dt, gameState)
     --wait until waves start
-    if self.current > 0 then
-        local wave = self.waves[self.current]
+    if gameState.round > 0 then
+        local wave = self.waves[gameState.round]
 
         --update timers
         wave.timer = wave.timer - dt
@@ -115,7 +113,7 @@ function lib:update(dt, gameState)
 
         --send next wave if timer complete
         if wave.timer <= 0 then
-            self:next()
+            self:next(gameState)
         end
     end
 end
