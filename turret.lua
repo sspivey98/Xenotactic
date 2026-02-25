@@ -614,6 +614,10 @@ end
 ---@param gameState GAME.GAMESTATE
 ---@return boolean
 function lib:upgrade(gameState)
+    if self.turretType == "WALL" then
+        return false
+    end
+
     --max level
     if self.level == 6 then
         return false

@@ -140,12 +140,13 @@ function lib.draw(gameState)
     --<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     --|          UI                |
     -->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    UI:drawCurrentWaveInfo(gameState)
-    UI:drawNextWaveInfo(gameState)
     UI:drawSelectedTurret(gameState)
     UI:drawSelectedTurretUpgrade(gameState)
     UI:drawMoney(gameState.money)
     UI:drawHealthBar(gameState.lives, SCREEN.MAP.WIDTH, 0)
+    UI:drawTimer(gameState)
+    UI:drawRound(gameState)
+    UI:drawEnemyCounter(gameState)
 
     --draw UI turret buttons
     for _,turret in pairs(UI.turrets) do

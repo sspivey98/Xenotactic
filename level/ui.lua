@@ -166,70 +166,130 @@ function lib:drawMoney(money)
     love.graphics.setColor(1, 1, 1) -- Reset color
 end
 
+---draw wave timer
 ---@param gameState GAME.GAMESTATE
-function lib:drawCurrentWaveInfo(gameState)
-    --draw box outline
-    love.graphics.setColor{0, 0, 0, 0.7}
-    love.graphics.rectangle(
-        "fill",
-        SETTINGS.SCREEN.MAP.WIDTH + self.padding,
-        SETTINGS.SCREEN.HEIGHT / 2 + self.padding,
-        SETTINGS.SCREEN.UI.WIDTH / 2 - 2*self.padding,
-        SETTINGS.SCREEN.HEIGHT / 4 - 2*self.padding,
-        5,
-        5
-    )
+function lib:drawTimer(gameState)
+    local timer = -1
     if gameState.round > 0 then
-        local enemiesAmount = UTIL.tableLength(gameState.enemies)
-        local enemyValue = gameState.waves.waves[gameState.round].value
-        local enemyType = gameState.waves.waves[gameState.round].enemies
-        local enemyHealth = gameState.waves.waves[gameState.round].health
+        timer = math.floor(gameState.waves.waves[gameState.round].timer)
     end
+
+    local text = "Timer: "..timer.." s"
+    local font = love.graphics.getFont()
+    local textWidth = font:getWidth(text)
+    local textHeight = font:getHeight()
+    local x = SETTINGS.SCREEN.MAP.WIDTH - textWidth - self.padding/2
+    local y = self.padding/2
+
+    --background box
+    love.graphics.setColor(0, 0, 0, 0.7)
+    love.graphics.rectangle("fill", x - 5, y - 5, textWidth + 10, textHeight + 10, 5, 5)
+
+    --draw text
+    love.graphics.setColor(ENUMS.UPGRADE_COLORS.CYAN)
+    love.graphics.print(text, x, y)
+
+    love.graphics.setColor(1, 1, 1) -- Reset color
+end
+
+function lib:drawRound(gameState)
+    local text = "Round: "..gameState.round
+    local font = love.graphics.getFont()
+    local textWidth = font:getWidth(text)
+    local textHeight = font:getHeight()
+    local x = self.padding/2
+    local y = self.padding/2
+
+    --background box
+    love.graphics.setColor(0, 0, 0, 0.7)
+    love.graphics.rectangle("fill", x - 5, y - 5, textWidth + 10, textHeight + 10, 5, 5)
+
+    --draw text
+    love.graphics.setColor(ENUMS.UPGRADE_COLORS.CYAN)
+    love.graphics.print(text, x, y)
+
+    love.graphics.setColor(1, 1, 1) -- Reset color
 end
 
 ---@param gameState GAME.GAMESTATE
-function lib:drawNextWaveInfo(gameState)
-    --draw box outline
-    love.graphics.setColor{0, 0, 0, 0.7}
-    love.graphics.rectangle(
-        "fill",
-        SETTINGS.SCREEN.MAP.WIDTH + SETTINGS.SCREEN.UI.WIDTH / 2 + self.padding,
-        SETTINGS.SCREEN.HEIGHT / 2 + self.padding,
-        SETTINGS.SCREEN.UI.WIDTH / 2 - 2*self.padding,
-        SETTINGS.SCREEN.HEIGHT / 4 - 2*self.padding,
-        5,
-        5
-    )
+function lib:drawEnemyCounter(gameState)
+    local text = "Enemies: "..UTIL.tableLength(gameState.enemies)
+    local font = love.graphics.getFont()
+    local textWidth = font:getWidth(text)
+    local textHeight = font:getHeight()
+    local x = SETTINGS.SCREEN.MAP.WIDTH - self.padding/2 - textWidth
+    local y = SETTINGS.SCREEN.HEIGHT - self.padding
+
+    --background box
+    love.graphics.setColor(0, 0, 0, 0.7)
+    love.graphics.rectangle("fill", x - 5, y - 5, textWidth + 10, textHeight + 10, 5, 5)
+
+    --draw text
+    love.graphics.setColor(ENUMS.UPGRADE_COLORS.RED)
+    love.graphics.print(text, x, y)
+
+    love.graphics.setColor(1, 1, 1) -- Reset color
 end
 
 ---@param gameState GAME.GAMESTATE
 function lib:drawSelectedTurret(gameState)
+    local box = {
+        x = SETTINGS.SCREEN.MAP.WIDTH + self.padding,
+        y = SETTINGS.SCREEN.HEIGHT / 2 + self.padding/2,
+        width = SETTINGS.SCREEN.UI.WIDTH / 2 - 2*self.padding,
+        height = SETTINGS.SCREEN.HEIGHT / 2 - 4*self.padding
+    }
     --draw box outline
     love.graphics.setColor{0, 0, 0, 0.8}
-    love.graphics.rectangle(
-        "fill",
-        SETTINGS.SCREEN.MAP.WIDTH + self.padding,
-        3*SETTINGS.SCREEN.HEIGHT / 4 - self.padding/2,
-        SETTINGS.SCREEN.UI.WIDTH / 2 - 2*self.padding,
-        SETTINGS.SCREEN.HEIGHT / 4 - 2*self.padding,
-        5,
-        5
-    )
+    love.graphics.rectangle("fill", box.x, box.y, box.width, box.height, 5, 5)
+    love.graphics.setColor{0.5, 0.5, 0.5}
+    love.graphics.rectangle("line", box.x, box.y, box.width, box.height, 5, 5)
+    if gameState.selectedTurret and gameState.selectedTurretType ~= "WALL" then
+        local damage = gameState.selectedTurret.damage
+        local range = gameState.selectedTurret.range
+        local sell = gameState.selectedTurret.value
+        local speed = gameState.selectedTurret.speed
+
+        -- Title
+        love.graphics.setColor(ENUMS.UPGRADE_COLORS.CYAN)
+        love.graphics.print("Selected: "..gameState.selectedTurretType, box.x + self.padding/2, box.y + self.padding/2)
+        love.graphics.setColor(ENUMS.UPGRADE_COLORS.YELLOW)
+        love.graphics.print("Damage: "..damage, box.x + self.padding/2, box.y + 2*self.padding)
+        love.graphics.print("Speed: "..speed, box.x + self.padding/2, box.y + 3*self.padding)
+        love.graphics.print("Range: "..range, box.x + self.padding/2, box.y + 4*self.padding)
+        love.graphics.print("Sell: "..sell, box.x + self.padding/2, box.y + 5*self.padding)
+    end
+    love.graphics.setColor(1, 1, 1) -- Reset color
 end
 
 ---@param gameState GAME.GAMESTATE
 function lib:drawSelectedTurretUpgrade(gameState)
+    local box = {
+        x = SETTINGS.SCREEN.MAP.WIDTH + SETTINGS.SCREEN.UI.WIDTH / 2 + self.padding,
+        y = SETTINGS.SCREEN.HEIGHT / 2 + self.padding/2,
+        width = SETTINGS.SCREEN.UI.WIDTH / 2 - 2*self.padding,
+        height = SETTINGS.SCREEN.HEIGHT / 2 - 4*self.padding
+    }
     --draw box outline
     love.graphics.setColor{0, 0, 0, 0.8}
-    love.graphics.rectangle(
-        "fill",
-        SETTINGS.SCREEN.MAP.WIDTH + SETTINGS.SCREEN.UI.WIDTH / 2 + self.padding,
-        3*SETTINGS.SCREEN.HEIGHT / 4 - self.padding/2,
-        SETTINGS.SCREEN.UI.WIDTH / 2 - 2*self.padding,
-        SETTINGS.SCREEN.HEIGHT / 4 - 2*self.padding,
-        5,
-        5
-    )
+    love.graphics.rectangle("fill", box.x, box.y, box.width, box.height, 5, 5)
+    love.graphics.setColor{0.5, 0.5, 0.5}
+    love.graphics.rectangle("line", box.x, box.y, box.width, box.height, 5, 5)
+
+    if gameState.selectedTurret and gameState.selectedTurretType ~= "WALL" then
+        local level = gameState.selectedTurret.level + 1
+        if level <= 6 then
+            love.graphics.setColor(ENUMS.UPGRADE_COLORS.CYAN)
+            love.graphics.print("Upgrade: level "..level, box.x + self.padding/2, box.y + self.padding/2)
+            love.graphics.setColor(ENUMS.UPGRADE_COLORS.YELLOW)
+            local turret = ENUMS.UPGRADE_PATH[gameState.selectedTurretType]["LEVEL"..level]
+            love.graphics.print("Cost: "..turret.cost, box.x + self.padding/2, box.y + 2*self.padding)
+            love.graphics.print("Damage: "..turret.damage, box.x + self.padding/2, box.y + 3*self.padding)
+            love.graphics.print("Range: "..turret.range, box.x + self.padding/2, box.y + 4*self.padding)
+            love.graphics.print("Sell: "..turret.value, box.x + self.padding/2, box.y + 5*self.padding)
+        end
+    end
+    love.graphics.setColor(1, 1, 1) -- Reset color
 end
 
 return lib

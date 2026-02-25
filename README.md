@@ -1,5 +1,5 @@
 # XenoTactic Remastered
-This is a remaster of the browser game, Xeno Tactic. I'm aiming to reproduce the behavior of version 1.3 in a newer engine.
+This is a remaster of the browser game, Xeno Tactic, in Love2d. I'm aiming to reproduce the behavior of version 1.3.
 
 ## Reference
 You can play the original game [here](https://www.newgrounds.com/portal/view/382321).
@@ -18,3 +18,6 @@ It is highly recommend that you use the following extensions in `VS Code` or `VS
 
 2.) `love . --console`
 
+or...
+
+1.) run 'debug' on the `Local Lua Debugger`
