@@ -5,10 +5,10 @@ local SOUNDS = require('lib.sounds')
 local BUTTON = require('lib.button')
 local MAPS = require('level.maps')
 local SETTINGS = require('settings')
+local DROPDOWN = require('lib.dropdown')
 
 ---@type button.image[]
 lib.Levels = {}
-
 lib.Level_MetaData = {}
 
 ---load level
@@ -71,7 +71,7 @@ function lib.load()
         }
         lib.Level_MetaData[i] = level_metadata
     end
-    (SOUNDS.library["next_menu"]):play()
+    SOUNDS.library["next_menu"]:play()
 end
 
 function lib.update()

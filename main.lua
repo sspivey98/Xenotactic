@@ -10,14 +10,15 @@ local MAPS = require('level.maps')
 local FLOWFIELD = require('flowField')
 local UTIL = require('level.util')
 local TICK = require('lib.tick')
+local SETTINGSMENU = require('settingsMenu')
 
 local game
 
 ---initialize function
 function love.load(arg)
-    love.window.setTitle("Tower Defense")
+    love.window.setTitle("Xeno Tactic Remastered")
     love.window.setVSync(1)
-    local resolution = SETTINGS.resolution[3]
+    local resolution = SETTINGS.resolution
     love.window.setMode(resolution.WIDTH, resolution.HEIGHT)
 
     --enforce 60 FPS for now
@@ -44,6 +45,12 @@ function love.update(dt)
             game.state = GAME.STATES.MENU
         end
         LEVEL.update(game.gameState, dt)
+    elseif game.state == GAME.STATES.SETTINGS then
+        if love.keyboard.isDown("escape") then
+            MENU.load()
+            game.state = GAME.STATES.MENU
+        end
+        SETTINGSMENU:update()
     elseif game.state == GAME.STATES.GAME_OVER then
     end
 end
@@ -62,6 +69,10 @@ function love.mousepressed(x, y, mouseButton)
                         LEVEL_SELECT.load()
                         game.state = GAME.STATES.LEVEL_SELECT
                         print("Moving game state to level select")
+                    elseif key == "SETTINGS" then
+                        SOUNDS.library["button_press"]:play()
+                        SETTINGSMENU:load()
+                        game.state = GAME.STATES.SETTINGS
                     elseif key == "QUIT" then
                         love.event.quit()
                     end
@@ -102,6 +113,8 @@ function love.mousepressed(x, y, mouseButton)
                 end
             end
         end
+    elseif game.state == GAME.STATES.SETTINGS then
+        SETTINGSMENU:mousepressed(x, y, mouseButton)
     elseif game.state == GAME.STATES.GAME then
         --game logic
         LEVEL.mousepressed(game.gameState, x, y, mouseButton)
@@ -116,6 +129,8 @@ function love.draw()
         LEVEL_SELECT.drawLevelSelect()
     elseif game.state == GAME.STATES.GAME then
         LEVEL.draw(game.gameState)
+    elseif game.state == GAME.STATES.SETTINGS then
+        SETTINGSMENU:draw()
     elseif game.state == GAME.STATES.GAME_OVER then
     else
         --error

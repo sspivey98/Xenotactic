@@ -16,6 +16,7 @@ local UTIL = require('level.util')
 ---@field level number turret upgrade level
 ---@field selected boolean
 ---@field upgradeCost integer cost of next upgrade
+---@field private scale number scale of sprite based on resolution 
 ---@field protected targetsInRange ENEMY[] all targets in range
 ---@field protected targeting ENEMY|nil current selected target
 ---@field protected shootAnimation {cooldown:number, muzzle:number, currentFrame:integer, timer:number, frameTime:number}
@@ -54,7 +55,8 @@ end
 ---@param gameState GAME.GAMESTATE
 ---@param x number
 ---@param y number
-function lib:new(gameState, x, y)
+---@param scale? number
+function lib:new(gameState, x, y, scale)
     --copy selected turret metadata
     local o = {}
     o.turretType = gameState.selectedTurretType
@@ -90,8 +92,10 @@ function lib:new(gameState, x, y)
         timer = 0 --only needed for tesla
     }
     local w,h = o.image:getDimensions()
+    o.scale = scale or 1.5
+    o.range = o.range*scale
     o.upgradeBar = {
-        width = w*1.5,
+        width = w*o.scale,
         height = h/6,
         x = o.position.x,
         y = o.position.y+h,
@@ -136,7 +140,7 @@ function lib:update(dt, gameState)
             local dy = bullet.target.position.y - bullet.y
             local distance = math.sqrt(dx*dx + dy*dy)
 
-            if distance < 5 then --consider it a hit
+            if distance < 4*self.scale then --consider it a hit
                 self:doDamage(bullet.target)
                 table.remove(self.bullets, i)
             else --move
@@ -255,8 +259,8 @@ function lib:drawBuildAnimation()
         self.position.x,
         self.position.y,
         0,
-        1.5, --x scale
-        1.5  --y scale
+        self.scale, --x scale
+        self.scale  --y scale
     )
     love.graphics.setColor{1,1,1}
 end
@@ -294,8 +298,8 @@ function lib:drawRank()
         self.position.x + SETTINGS.TILE_SIZE/2,
         self.position.y - SETTINGS.TILE_SIZE/2,
         0,
-        1.5,
-        1.5
+        self.scale,
+        self.scale
     )
 end
 
@@ -318,8 +322,8 @@ function lib:draw()
             self.position.x,
             self.position.y,
             0,
-            1.5, --x scale
-            1.5  --y scale
+            self.scale, --x scale
+            self.scale  --y scale
         )
 
         --draw turret sprite
@@ -327,11 +331,11 @@ function lib:draw()
             love.graphics.setColor(ENUMS.UPGRADE[self.level])
             love.graphics.draw(
                 self.image,
-                self.position.x + (ox * 1.5),
-                self.position.y + (oy * 1.5),
+                self.position.x + (ox * self.scale),
+                self.position.y + (oy * self.scale),
                 self.orientation, --r
-                1.5, --x scale
-                1.5, --y scale
+                self.scale, --x scale
+                self.scale, --y scale
                 ox,
                 oy
             )
@@ -345,8 +349,8 @@ function lib:draw()
                     bullet.x,
                     bullet.y,
                     bullet.angle,
-                    1.5, -- Scale
-                    1.5,
+                    self.scale, -- Scale
+                    self.scale,
                     projW / 2,
                     projH / 2
                 )
@@ -356,10 +360,10 @@ function lib:draw()
             if self.projectile == false then
                 if (self.shootAnimation.muzzle > 0) and self.targeting then
                     if self.targetOne then
-                        local flash_distance = oy * 1.5
+                        local flash_distance = oy * self.scale
                         local flash = {
-                            x = self.position.x + (ox*1.5) + math.cos(self.orientation - math.pi/2) * flash_distance,
-                            y = self.position.y + (oy*1.5) + math.sin(self.orientation - math.pi/2) * flash_distance
+                            x = self.position.x + (ox*self.scale) + math.cos(self.orientation - math.pi/2) * flash_distance,
+                            y = self.position.y + (oy*self.scale) + math.sin(self.orientation - math.pi/2) * flash_distance
                         }
                         local flashW, flashH = self.shootImg:getDimensions()
 
@@ -377,8 +381,8 @@ function lib:draw()
                                 flash.x + perpendicular.x,
                                 flash.y + perpendicular.y,
                                 self.orientation - math.pi/2,
-                                1.5,
-                                1.5,
+                                self.scale,
+                                self.scale,
                                 flashW / 2,
                                 flashH / 2
                             )
@@ -388,8 +392,8 @@ function lib:draw()
                                 flash.x - perpendicular.x,
                                 flash.y - perpendicular.y,
                                 self.orientation - math.pi/2,
-                                1.5,
-                                1.5,
+                                self.scale,
+                                self.scale,
                                 flashW / 2,
                                 flashH / 2
                             )
@@ -399,8 +403,8 @@ function lib:draw()
                                 flash.x,
                                 flash.y,
                                 self.orientation - math.pi/2,
-                                1.5,
-                                1.5,
+                                self.scale,
+                                self.scale,
                                 flashW / 2,
                                 flashH / 2
                             )
@@ -413,8 +417,8 @@ function lib:draw()
                             self.position.x + SETTINGS.TILE_SIZE,
                             self.position.y + SETTINGS.TILE_SIZE,
                             0,
-                            1.5,
-                            1.5,
+                            self.scale,
+                            self.scale,
                             flashW / 2,
                             flashH / 2
                         )

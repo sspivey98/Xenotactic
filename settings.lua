@@ -12,15 +12,36 @@ local lib = {}
     - 1600x900 
     - 1920x1080
 --]]
----@type dimension[]
-lib.resolution = {
-    [1] = {WIDTH=800, HEIGHT=600},
-    [2] = {WIDTH=1024, HEIGHT=768},
-    [3] = {WIDTH=1280, HEIGHT=720},
-    [4] = {WIDTH=1366, HEIGHT=768},
-    [5] = {WIDTH=1600, HEIGHT=900},
-    [6] = {WIDTH=1920, HEIGHT=1080},
-}
+---@type dimension
+lib.resolution = {WIDTH=1280, HEIGHT=720}
+lib.scale = 1.5
+
+function lib:setResolution(width, height)
+    if width == 1280 and height == 720 then
+        self.resolution.WIDTH = 1280
+        self.resolution.HEIGHT = 720
+        self.TILE_SIZE = 24
+        self.scale = 1.5
+    elseif width == 1600 and height == 900 then
+        self.resolution.WIDTH = 1600
+        self.resolution.HEIGHT = 900
+        self.TILE_SIZE = 30
+        self.scale = 1.8
+    elseif width == 1920 and height == 1080 then
+        self.resolution.WIDTH = 1920
+        self.resolution.HEIGHT = 1080
+        self.TILE_SIZE = 36
+        self.scale = 2.3
+    else
+        error("Bad argument")
+    end
+    love.window.setMode(width,height)
+    self.SCREEN.MAP = {
+        WIDTH = self.map.Width * self.TILE_SIZE,
+        HEIGHT = self.map.Height * self.TILE_SIZE
+    }
+    self.load()
+end
 
 ---@type number size of a side of square tile in pixels
 lib.TILE_SIZE = 24

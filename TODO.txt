@@ -33,7 +33,12 @@
     ✓ two maps for a level - movement and visuals
     ✓ add "blocked" when turret would block path
 
+
+- add options screen
+    - password unlock for levels
+    - change resolution
 - improve level select and lock levels behind a progression system
 - add quit to main menu from ESC
 - add lose screen
+- add win screen 
 

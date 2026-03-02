@@ -25,11 +25,21 @@ function lib.load()
             text = "PLAY"
         }
     )
-    local quit_button = BUTTON:new(
+    local settings_button = BUTTON:new(
         BUTTON.type.TEXT,
         {
             x = SETTINGS.SCREEN.WIDTH / 2 - width / 2,
             y = SETTINGS.SCREEN.HEIGHT / 2 + height,
+            width = width,
+            height = height,
+            text = "SETTINGS"
+        }
+    )
+    local quit_button = BUTTON:new(
+        BUTTON.type.TEXT,
+        {
+            x = SETTINGS.SCREEN.WIDTH / 2 - width / 2,
+            y = SETTINGS.SCREEN.HEIGHT / 2 + 2*height,
             width = width,
             height = height,
             text = "QUIT"
@@ -37,6 +47,7 @@ function lib.load()
     )
 
     lib.Buttons["PLAY"] = play_button
+    lib.Buttons["SETTINGS"] = settings_button
     lib.Buttons["QUIT"] = quit_button
 end
 

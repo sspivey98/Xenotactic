@@ -25,7 +25,8 @@ lib.STATES = {
     MENU = 0,
     LEVEL_SELECT = 1,
     GAME = 2,
-    GAME_OVER = 3
+    SETTINGS = 3,
+    GAME_OVER = 4
 }
 
 

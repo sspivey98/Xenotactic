@@ -1,7 +1,6 @@
 --level metadata and functions
 local lib = {}
 local ENUMS = require('enums')
-local IMAGES = require('lib.images')
 local SOUNDS = require('lib.sounds')
 local SETTINGS = require('settings')
 local TURRET = require('turret')
@@ -9,11 +8,8 @@ local UTIL = require('level.util')
 local UI = require('level.ui')
 
 --GLOBALS
-local TILE_SIZE = SETTINGS.TILE_SIZE --size of tile in pixels
-local map = SETTINGS.map
 local VISUAL_TILE_MAP
 local COLOR = {}
-local SCREEN = SETTINGS.SCREEN
 
 local blockedAnimation = {
     timer = 1,
@@ -67,9 +63,9 @@ end
 function lib.draw(gameState)
     --draw map
     if VISUAL_TILE_MAP then
-        local scale = TILE_SIZE / 230
-        for y=1, map.Height do
-            for x = 1, map.Width do
+        local scale = SETTINGS.TILE_SIZE / 230
+        for y=1, SETTINGS.map.Height do
+            for x = 1, SETTINGS.map.Width do
                 local tileType = VISUAL_TILE_MAP[y][x]
                 local img = ENUMS.VISUAL_TILES[tileType]
                 if tileType == 0 then
@@ -86,8 +82,8 @@ function lib.draw(gameState)
                 love.graphics.setColor(COLOR)
                 love.graphics.draw(
                     img,
-                    (x-1) * TILE_SIZE,
-                    (y-1) * TILE_SIZE,
+                    (x-1) * SETTINGS.TILE_SIZE,
+                    (y-1) * SETTINGS.TILE_SIZE,
                     0,
                     scale,
                     scale
@@ -95,33 +91,33 @@ function lib.draw(gameState)
             end
         end
     else
-        for y=1, map.Height do
-            for x=1, map.Width do
+        for y=1, SETTINGS.map.Height do
+            for x=1, SETTINGS.map.Width do
                 local tileType = gameState.map[y][x]
                 love.graphics.setColor(ENUMS.COLORS[tileType])
                 love.graphics.rectangle("fill",
-                    (x-1) * TILE_SIZE,
-                    (y-1) * TILE_SIZE,
-                    TILE_SIZE,
-                    TILE_SIZE)
+                    (x-1) * SETTINGS.TILE_SIZE,
+                    (y-1) * SETTINGS.TILE_SIZE,
+                    SETTINGS.TILE_SIZE,
+                    SETTINGS.TILE_SIZE)
 
                 -- Draw grid lines
                 love.graphics.setColor{0, 0, 0, 0.3}
                 love.graphics.rectangle("line",
-                    (x-1) * TILE_SIZE,
-                    (y-1) * TILE_SIZE,
-                    TILE_SIZE,
-                    TILE_SIZE)
+                    (x-1) * SETTINGS.TILE_SIZE,
+                    (y-1) * SETTINGS.TILE_SIZE,
+                    SETTINGS.TILE_SIZE,
+                    SETTINGS.TILE_SIZE)
             end
         end
     end
     --draw ui box
     love.graphics.setColor{0.1, 0.1, 0.1}
     love.graphics.rectangle("fill",
-        SCREEN.MAP.WIDTH,
+        SETTINGS.SCREEN.MAP.WIDTH,
         0,
-        SCREEN.UI.WIDTH,
-        SCREEN.HEIGHT
+        SETTINGS.SCREEN.UI.WIDTH,
+        SETTINGS.SCREEN.HEIGHT
     )
     --<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     --|          turrets           |
@@ -143,7 +139,7 @@ function lib.draw(gameState)
     UI:drawSelectedTurret(gameState)
     UI:drawSelectedTurretUpgrade(gameState)
     UI:drawMoney(gameState.money)
-    UI:drawHealthBar(gameState.lives, SCREEN.MAP.WIDTH, 0)
+    UI:drawHealthBar(gameState.lives, SETTINGS.SCREEN.MAP.WIDTH, 0)
     UI:drawTimer(gameState)
     UI:drawRound(gameState)
     UI:drawEnemyCounter(gameState)
@@ -175,14 +171,14 @@ function lib.draw(gameState)
                 love.graphics.rectangle("fill",
                     currentTile.x,
                     currentTile.y,
-                    TILE_SIZE*2,
-                    TILE_SIZE*2
+                    SETTINGS.TILE_SIZE*2,
+                    SETTINGS.TILE_SIZE*2
                 )
                 --draw circle
                 love.graphics.setColor{1, 0, 0.3} --bright red
                 love.graphics.circle("line",
-                    currentTile.x + TILE_SIZE,
-                    currentTile.y + TILE_SIZE,
+                    currentTile.x + SETTINGS.TILE_SIZE,
+                    currentTile.y + SETTINGS.TILE_SIZE,
                     100, --radius, should come from turret?
                     20
                 )
@@ -191,8 +187,8 @@ function lib.draw(gameState)
                 love.graphics.rectangle("fill",
                     currentTile.x,
                     currentTile.y,
-                    TILE_SIZE*2,
-                    TILE_SIZE*2
+                    SETTINGS.TILE_SIZE*2,
+                    SETTINGS.TILE_SIZE*2
                 )
             end
         end
@@ -216,14 +212,13 @@ function lib.mousepressed(gameState, x, y, mouseButton)
     if mouseButton == ENUMS.CLICK.LEFT then
         local tile = UTIL.getTileAt(gameState.map, x, y)
         if tile then
-            --!print("("..tile.x..", "..tile.y..") :: "..tile.type)
             if gameState.placementMode then
                 --check placement is valid
                 if UTIL:isValidPlacement(currentTile, gameState) == false then
                     blockedAnimation.show = true
                     SOUNDS.library["invalid"]:play()
                 else --turret is placed
-                    TURRET:new(gameState, currentTile.x, currentTile.y)
+                    TURRET:new(gameState, currentTile.x, currentTile.y, SETTINGS.scale)
                     gameState.placementMode = false
                     SOUNDS.library["turret_build"]:play()
                     --update enemy pathing
@@ -268,7 +263,6 @@ function lib.mousepressed(gameState, x, y, mouseButton)
             if gameState.selectedTurret then
                 for name,button in pairs(UI.buttons) do
                     if button:clicked(x, y, mouseButton) then
-                        --* custom logic
                         if name == "upgrade" then
                             --check cost
                             if gameState.selectedTurret:upgrade(gameState) then
@@ -281,7 +275,6 @@ function lib.mousepressed(gameState, x, y, mouseButton)
                             gameState.selectedTurret:sell(gameState)
                             gameState.selectedTurret = nil
                         end
-                        --*custom logic
                     end
                 end
             end
@@ -322,8 +315,8 @@ function lib.update(gameState, dt)
     if tile and tile.type ~= 1 then
         currentTile.inbounds = true
         --do backwards conversion for 'snap' feel
-        currentTile.x = (tile.x - 1) * TILE_SIZE
-        currentTile.y = (tile.y - 1) * TILE_SIZE
+        currentTile.x = (tile.x - 1) * SETTINGS.TILE_SIZE
+        currentTile.y = (tile.y - 1) * SETTINGS.TILE_SIZE
     else
         currentTile.inbounds = false
     end

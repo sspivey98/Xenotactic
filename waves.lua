@@ -7,7 +7,7 @@ local ENEMY = require('enemy')
 ---@field enemies ENUMS.ENEMY_TYPE[] always deploy the same amount in vertical and horizontal
 ---@field health? integer health modifier for scaling waves
 ---@field speed? number speed modifier for scaling waves
----@field boss? boolean image scaling
+---@field scale? number image scaling
 ---@field value? integer money per kill modifier
 ---@field splitter? {amount: integer, type:ENUMS.ENEMY_TYPE} how many enemies to split into
 ---@field timer number actual running timer
@@ -49,10 +49,10 @@ end
 ---@param health? integer
 ---@param value? integer money for kill
 ---@param speed? number
----@param boss? boolean bigger sprite
+---@param scale? number bigger sprite
 ---@param splitter? {amount: integer, type:ENUMS.ENEMY_TYPE} how many enemies to split into
 ---@return boolean success
-function lib:load(wave_number, enemy_amount, enemyTypeName, health, value, speed, boss, splitter)
+function lib:load(wave_number, enemy_amount, enemyTypeName, health, value, speed, scale, splitter)
     if wave_number < 1 or wave_number > self.amount then
         return false
     end
@@ -66,7 +66,7 @@ function lib:load(wave_number, enemy_amount, enemyTypeName, health, value, speed
     self.waves[wave_number].enemies = enemies
     self.waves[wave_number].health = health or nil
     self.waves[wave_number].speed = speed or nil
-    self.waves[wave_number].boss = boss or nil
+    self.waves[wave_number].scale = scale or nil
     self.waves[wave_number].value = value or nil
     self.waves[wave_number].splitter = splitter or nil
 
@@ -99,9 +99,9 @@ function lib:update(dt, gameState)
 
         --spawn enemies from queue
         if wave.spawnTimer <= 0 and #wave.enemies > 0 then
-            ENEMY:new(gameState, wave.enemies[1], gameState.path1, wave.health, wave.value, wave.speed, wave.boss, wave.splitter)
+            ENEMY:new(gameState, wave.enemies[1], gameState.path1, wave.health, wave.value, wave.speed, wave.scale, wave.splitter)
             if not self.horizontalOnly then
-                ENEMY:new(gameState, wave.enemies[1], gameState.path2, wave.health, wave.value, wave.speed, wave.boss, wave.splitter)
+                ENEMY:new(gameState, wave.enemies[1], gameState.path2, wave.health, wave.value, wave.speed, wave.scale, wave.splitter)
             end
             table.remove(wave.enemies, 1)
 

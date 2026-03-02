@@ -2,6 +2,7 @@ local ENUMS = require('enums')
 local IMAGES = require('lib.images')
 local SOUNDS = require('lib.sounds')
 local UTIL = require('level.util')
+local SETTINGS = require('settings')
 
 --[[
 *ENEMY PATHING NOTES
@@ -84,10 +85,10 @@ end
 ---@param health? integer scale the enemy health based on the wave
 ---@param value? integer enemy kill value
 ---@param speed? number scale enemy speed
----@param boss? boolean scale enemy size
+---@param scale? number scale enemy size
 ---@param splitter? {amount: integer, type:ENUMS.ENEMY_TYPE} how many enemies to split into
 ---@param coords? {x:number,y:number} position of splitter
-function lib:new(gameState, enemyTypeName, flowField, health, value, speed, boss, splitter, coords)
+function lib:new(gameState, enemyTypeName, flowField, health, value, speed, scale, splitter, coords)
     --check if valid flowField
     if not flowField then return end
 
@@ -150,9 +151,10 @@ function lib:new(gameState, enemyTypeName, flowField, health, value, speed, boss
         y = 0,
         value = o.fullHealth
     }
-    o.scale = 1.5
-    if boss then
-        o.scale = 2
+    if scale then
+        o.scale = scale*SETTINGS.scale
+    else
+        o.scale = SETTINGS.scale
     end
     if value then o.value = value end
     if splitter then
@@ -174,8 +176,8 @@ function lib:draw()
             self.position.x,
             self.position.y,
             0, --orientation (radians)
-            0.5, --x scale
-            0.5,  --y scale
+            self.scale/3, --x scale
+            self.scale/3,  --y scale
             self.deathAnimation.origin.x,
             self.deathAnimation.origin.y
         )
