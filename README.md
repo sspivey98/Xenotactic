@@ -1,5 +1,6 @@
 # XenoTactic Remastered
 This is a remaster of the browser game, Xeno Tactic, in Love2d. I'm aiming to reproduce the behavior of version 1.3.
+![Sample](sample.jpg)
 
 ## Reference
 You can play the original game [here](https://www.newgrounds.com/portal/view/382321).

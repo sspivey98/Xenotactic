@@ -17,10 +17,10 @@
     ✓ bosses should have 25% bigger sprites
 
 - add to UI menu
-    - entity selected (turret/enemy) menu
-    - upgrade/sell button for turret
-    - wave information
+    ✓ turret selected menu
+    ✓ upgrade/sell button for turret
     ✓ health bar
+    - enemy selected property in bottom left
 
 - implement wave logic
     ✓ enemy types per wave
@@ -34,11 +34,13 @@
     ✓ add "blocked" when turret would block path
 
 
+✓ add money value to each enemy
 - add options screen
-    - password unlock for levels
-    - change resolution
+    
+    ✓ change resolution
 - improve level select and lock levels behind a progression system
-- add quit to main menu from ESC
+    - password unlock for level
+- add pause button
+- add quit to main menu from ESC 
 - add lose screen
 - add win screen 
-

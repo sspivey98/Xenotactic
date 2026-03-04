@@ -36,20 +36,10 @@ function love.update(dt)
     if game.state == GAME.STATES.MENU then
         MENU.update()
     elseif game.state == GAME.STATES.LEVEL_SELECT then
-        if love.keyboard.isDown("escape") then
-            game.state = GAME.STATES.MENU
-        end
         LEVEL_SELECT.update()
     elseif game.state == GAME.STATES.GAME then
-        if love.keyboard.isDown("escape") then
-            game.state = GAME.STATES.MENU
-        end
         LEVEL.update(game.gameState, dt)
     elseif game.state == GAME.STATES.SETTINGS then
-        if love.keyboard.isDown("escape") then
-            MENU.load()
-            game.state = GAME.STATES.MENU
-        end
         SETTINGSMENU:update()
     elseif game.state == GAME.STATES.GAME_OVER then
     end
@@ -134,5 +124,29 @@ function love.draw()
     elseif game.state == GAME.STATES.GAME_OVER then
     else
         --error
+    end
+end
+
+function love.textinput(text)
+    if game.state == GAME.STATES.SETTINGS then
+        SETTINGSMENU:textinput(text)
+    end
+end
+
+function love.keypressed(key)
+    if game.state == GAME.STATES.GAME then
+        if key == "escape" then
+            game.state = GAME.STATES.MENU
+        end
+    elseif game.state == GAME.STATES.LEVEL_SELECT then
+        if key == "escape" then
+            game.state = GAME.STATES.MENU
+        end
+    elseif game.state == GAME.STATES.SETTINGS then
+        if key == "escape" then
+            MENU.load()
+            game.state = GAME.STATES.MENU
+        end
+        SETTINGSMENU:keyPressed(key)
     end
 end

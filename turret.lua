@@ -640,6 +640,7 @@ function lib:upgrade(gameState)
     for k,v in pairs(upgrade) do
         self[k] = v
     end
+    self.range = self.range * self.scale
     return true
 end
 

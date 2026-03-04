@@ -1,8 +1,8 @@
 ---@class dropdown
----@field x integer
----@field y integer
----@field width integer
----@field height integer
+---@field protected x integer
+---@field protected y integer
+---@field protected width integer
+---@field protected height integer
 ---@field options string[]
 ---@field selectedIndex? integer item in dropdown list selected
 ---@field hoveredIndex? integer|nil
