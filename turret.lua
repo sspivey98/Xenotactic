@@ -618,18 +618,12 @@ end
 ---@param gameState GAME.GAMESTATE
 ---@return boolean
 function lib:upgrade(gameState)
-    if self.turretType == "WALL" then
-        return false
-    end
+    if self.turretType == "WALL" then return false end
 
     --max level
-    if self.level == 6 then
-        return false
-    end
+    if self.level == 6 then return false end
 
-    if gameState.money < self.cost then
-        return false
-    end
+    if gameState.money < self.cost then return false end
 
     --do upgrade logic
     gameState.money = gameState.money - self.cost

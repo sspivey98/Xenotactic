@@ -12,6 +12,8 @@ local UTIL = require('level.util')
 lib.turrets = {}
 ---@type {[string]:button.text}
 lib.buttons = {}
+---@type {[string]:button.text}
+lib.pause = {}
 
 --padding
 lib.padding = SETTINGS.TILE_SIZE
@@ -129,6 +131,34 @@ function lib:load()
     self.buttons["sell"] = sell_button
     self.buttons["upgrade"] = upgrade_button
     self.buttons["send_wave"] = send_wave
+
+    local yes_button = BUTTON:new(
+        BUTTON.type.TEXT,
+        {
+            x = (SETTINGS.SCREEN.WIDTH - 300)/2 + self.padding,
+            y = (SETTINGS.SCREEN.HEIGHT - 150)/2 + 4*self.padding,
+            width = 100,
+            height = 40,
+            text = "YES",
+            color = ENUMS.UPGRADE_COLORS.GREEN
+        }
+    )
+    local no_button = BUTTON:new(
+        BUTTON.type.TEXT,
+        {
+            x = (SETTINGS.SCREEN.WIDTH - 300)/2 + 7*self.padding,
+            y = (SETTINGS.SCREEN.HEIGHT - 150)/2 + 4*self.padding,
+            width = 100,
+            height = 40,
+            text = "NO",
+            color = ENUMS.UPGRADE_COLORS.RED
+        }
+    )
+
+    ---@cast yes_button button.text
+    ---@cast no_button button.text
+    self.pause["yes_button"] = yes_button
+    self.pause["no_button"] = no_button
 end
 
 ---draw health bar frame
@@ -290,6 +320,36 @@ function lib:drawSelectedTurretUpgrade(gameState)
         end
     end
     love.graphics.setColor(1, 1, 1) -- Reset color
+end
+
+function lib:drawPauseMenu()
+    --dim background
+    love.graphics.setColor(0, 0, 0, 0.7)
+    love.graphics.rectangle("fill", 0, 0, SETTINGS.SCREEN.WIDTH, SETTINGS.SCREEN.HEIGHT)
+
+    --menu box
+    local boxWidth = 300
+    local boxHeight = 150
+    local boxX = (SETTINGS.SCREEN.WIDTH - boxWidth) / 2
+    local boxY = (SETTINGS.SCREEN.HEIGHT - boxHeight) / 2
+
+    love.graphics.setColor(0.2, 0.2, 0.2)
+    love.graphics.rectangle("fill", boxX, boxY, boxWidth, boxHeight, 10, 10)
+
+    love.graphics.setColor(0.6, 0.6, 0.6)
+    love.graphics.rectangle("line", boxX, boxY, boxWidth, boxHeight, 10, 10)
+
+    -- Draw text
+    love.graphics.setColor(1, 1, 1)
+    local font = love.graphics.getFont()
+    local quitText = "Quit?"
+    local textWidth = font:getWidth(quitText)
+    love.graphics.print(quitText, boxX + (boxWidth - textWidth) / 2, boxY + 30)
+
+    self.pause["yes_button"]:draw()
+    self.pause["no_button"]:draw()
+
+    love.graphics.setColor(1, 1, 1)
 end
 
 return lib

@@ -9,6 +9,7 @@ local UI = require('level.ui')
 
 --GLOBALS
 local VISUAL_TILE_MAP
+local PAUSE = false
 local COLOR = {}
 
 local blockedAnimation = {
@@ -134,27 +135,6 @@ function lib.draw(gameState)
     end
 
     --<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-    --|          UI                |
-    -->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    UI:drawSelectedTurret(gameState)
-    UI:drawSelectedTurretUpgrade(gameState)
-    UI:drawMoney(gameState.money)
-    UI:drawHealthBar(gameState.lives, SETTINGS.SCREEN.MAP.WIDTH, 0)
-    UI:drawTimer(gameState)
-    UI:drawRound(gameState)
-    UI:drawEnemyCounter(gameState)
-
-    --draw UI turret buttons
-    for _,turret in pairs(UI.turrets) do
-        turret:draw()
-    end
-
-    --draw UI buttons
-    for _,button in pairs(UI.buttons) do
-        button:draw()
-    end
-
-    --<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     --|        placementMode       |
     -->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     --[[
@@ -201,92 +181,127 @@ function lib.draw(gameState)
             )
         end
     end
+
+    --<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    --|          UI                |
+    -->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    UI:drawSelectedTurret(gameState)
+    UI:drawSelectedTurretUpgrade(gameState)
+    UI:drawMoney(gameState.money)
+    UI:drawHealthBar(gameState.lives, SETTINGS.SCREEN.MAP.WIDTH, 0)
+    UI:drawTimer(gameState)
+    UI:drawRound(gameState)
+    UI:drawEnemyCounter(gameState)
+
+    --draw UI turret buttons
+    for _,turret in pairs(UI.turrets) do
+        turret:draw()
+    end
+
+    --draw UI buttons
+    for _,button in pairs(UI.buttons) do
+        button:draw()
+    end
+
+    if PAUSE then
+        UI:drawPauseMenu()
+    end
 end
 
 ---interact function
----@param gameState GAME.GAMESTATE
+---@param game GAME
 ---@param x number
 ---@param y number
 ---@param mouseButton ENUMS.CLICK
-function lib.mousepressed(gameState, x, y, mouseButton)
-    if mouseButton == ENUMS.CLICK.LEFT then
-        local tile = UTIL.getTileAt(gameState.map, x, y)
-        if tile then
-            if gameState.placementMode then
-                --check placement is valid
-                if UTIL:isValidPlacement(currentTile, gameState) == false then
-                    blockedAnimation.show = true
-                    SOUNDS.library["invalid"]:play()
-                else --turret is placed
-                    TURRET:new(gameState, currentTile.x, currentTile.y, SETTINGS.scale)
-                    gameState.placementMode = false
-                    SOUNDS.library["turret_build"]:play()
-                    --update enemy pathing
-                    gameState.path1:setBlocked(tile.x, tile.y)
-                    if gameState.path2 then
-                        gameState.path2:setBlocked(tile.x, tile.y)
-                    end
-                end
-            else
-                local checkTurret = false
-                for _,turret in pairs(gameState.turrets) do
-                    if turret:select(x, y) then
-                        checkTurret = true
-                        gameState.selectedTurret = turret
-                    end
-                end
-                if not checkTurret then gameState.selectedTurret = nil end
-                local checkEnemy = false
-                for _,enemy in pairs(gameState.enemies) do
-                    if enemy:select(x, y) then
-                        checkEnemy = true
-                        gameState.selectedEnemy = enemy
-                    end
-                end
-                if not checkEnemy then gameState.selectedEnemy = nil end
-            end
-        else --select from UI
-            for name,turret in pairs(UI.turrets) do
-                if turret:clicked(x,y,mouseButton) then
-                    if gameState.money < ENUMS.TURRET[name].cost then
+function lib.mousepressed(game, x, y, mouseButton)
+    if not PAUSE then
+        if mouseButton == ENUMS.CLICK.LEFT then
+            local tile = UTIL.getTileAt(game.gameState.map, x, y)
+            if tile then
+                if game.gameState.placementMode then
+                    --check placement is valid
+                    if UTIL:isValidPlacement(currentTile, game.gameState) == false then
+                        blockedAnimation.show = true
                         SOUNDS.library["invalid"]:play()
-                        --flash icon dark red?
-                    else
-                        SOUNDS.library["button_press"]:play()
-                        --turret build logic
-                        gameState.selectedTurretType = name
-                        gameState.placementMode = true
+                    else --turret is placed
+                        TURRET:new(game.gameState, currentTile.x, currentTile.y, SETTINGS.scale)
+                        game.gameState.placementMode = false
+                        SOUNDS.library["turret_build"]:play()
+                        --update enemy pathing
+                        game.gameState.path1:setBlocked(tile.x, tile.y)
+                        if game.gameState.path2 then
+                            game.gameState.path2:setBlocked(tile.x, tile.y)
+                        end
                     end
+                else
+                    local checkTurret = false
+                    for _,turret in pairs(game.gameState.turrets) do
+                        if turret:select(x, y) then
+                            checkTurret = true
+                            game.gameState.selectedTurret = turret
+                        end
+                    end
+                    if not checkTurret then game.gameState.selectedTurret = nil end
+                    local checkEnemy = false
+                    for _,enemy in pairs(game.gameState.enemies) do
+                        if enemy:select(x, y) then
+                            checkEnemy = true
+                            game.gameState.selectedEnemy = enemy
+                        end
+                    end
+                    if not checkEnemy then game.gameState.selectedEnemy = nil end
                 end
-            end
-
-            if gameState.selectedTurret then
-                for name,button in pairs(UI.buttons) do
-                    if button:clicked(x, y, mouseButton) then
-                        if name == "upgrade" then
-                            --check cost
-                            if gameState.selectedTurret:upgrade(gameState) then
-                                SOUNDS.library["upgrading"]:play()
-                            else
-                                SOUNDS.library["invalid"]:play()
-                            end
-                        elseif name == "sell" then
-                            SOUNDS.library["turret_sold"]:play()
-                            gameState.selectedTurret:sell(gameState)
-                            gameState.selectedTurret = nil
+            else --select from UI
+                for name,turret in pairs(UI.turrets) do
+                    if turret:clicked(x,y,mouseButton) then
+                        if game.gameState.money < ENUMS.TURRET[name].cost then
+                            SOUNDS.library["invalid"]:play()
+                            --flash icon dark red?
+                        else
+                            SOUNDS.library["button_press"]:play()
+                            --turret build logic
+                            game.gameState.selectedTurretType = name
+                            game.gameState.placementMode = true
                         end
                     end
                 end
-            end
 
-            if UI.buttons["send_wave"]:clicked(x, y, mouseButton) then
-                gameState.waves:next(gameState)
+                if game.gameState.selectedTurret then
+                    for name,button in pairs(UI.buttons) do
+                        if button:clicked(x, y, mouseButton) then
+                            if name == "upgrade" then
+                                --check cost
+                                if game.gameState.selectedTurret:upgrade(game.gameState) then
+                                    SOUNDS.library["upgrading"]:play()
+                                else
+                                    SOUNDS.library["invalid"]:play()
+                                end
+                            elseif name == "sell" then
+                                SOUNDS.library["turret_sold"]:play()
+                                game.gameState.selectedTurret:sell(game.gameState)
+                                game.gameState.selectedTurret = nil
+                            end
+                        end
+                    end
+                end
+
+                if UI.buttons["send_wave"]:clicked(x, y, mouseButton) then
+                    game.gameState.waves:next(game.gameState)
+                end
             end
+        elseif mouseButton == ENUMS.CLICK.RIGHT then
+            --deselect whatever
+            game.gameState.selectedTurret = nil
+            game.gameState.placementMode = false
         end
-    elseif mouseButton == ENUMS.CLICK.RIGHT then
-        --deselect whatever
-        gameState.selectedTurret = nil
-        gameState.placementMode = false
+    else
+        if UI.pause["yes_button"]:clicked(x, y, mouseButton) then
+            PAUSE = not PAUSE
+            game.state = ENUMS.STATES.MENU
+        end
+        if UI.pause["no_button"]:clicked(x, y, mouseButton) then
+            PAUSE = not PAUSE
+        end
     end
 end
 
@@ -294,67 +309,78 @@ end
 ---@param gameState GAME.GAMESTATE
 ---@param dt number
 function lib.update(gameState, dt)
-    if gameState.lives == 0 then
-        SOUNDS.library["mission_failed"]:play()
-    end
-
     local mouse = { x=0, y=0 }
     mouse.x, mouse.y = love.mouse.getPosition()
+    if not PAUSE then
+        if gameState.lives == 0 then
+            SOUNDS.library["mission_failed"]:play()
+        end
 
-    --UI selection
-    for _,turret in pairs(UI.turrets) do
-        turret:isHovered(mouse.x, mouse.y)
-    end
+        --UI selection
+        for _,turret in pairs(UI.turrets) do
+            turret:isHovered(mouse.x, mouse.y)
+        end
 
-    for _,button in pairs(UI.buttons) do
-        button:isHovered(mouse.x, mouse.y)
-    end
+        for _,button in pairs(UI.buttons) do
+            button:isHovered(mouse.x, mouse.y)
+        end
 
-    --updateMap
-    local tile = UTIL.getTileAt(gameState.map, mouse.x, mouse.y)
-    if tile and tile.type ~= 1 then
-        currentTile.inbounds = true
-        --do backwards conversion for 'snap' feel
-        currentTile.x = (tile.x - 1) * SETTINGS.TILE_SIZE
-        currentTile.y = (tile.y - 1) * SETTINGS.TILE_SIZE
+        --updateMap
+        local tile = UTIL.getTileAt(gameState.map, mouse.x, mouse.y)
+        if tile and tile.type ~= 1 then
+            currentTile.inbounds = true
+            --do backwards conversion for 'snap' feel
+            currentTile.x = (tile.x - 1) * SETTINGS.TILE_SIZE
+            currentTile.y = (tile.y - 1) * SETTINGS.TILE_SIZE
+        else
+            currentTile.inbounds = false
+        end
+
+        --enemies
+        for _,enemy in pairs(gameState.enemies) do
+            enemy:update(dt, gameState)
+        end
+
+        --[[
+            1.) Search for enemies within radius of turret
+            2.) Select far-most right enemy in radius
+            3.) give coordinates to turret
+            4.) turn turret to face coordinates
+            5.) turret shoot function
+            6.) remove health from enemy
+
+            delay search to not be every frame
+            ignore search if turret already has a target (and its still in range)
+            force research if enemy dies
+        --]]
+        --turrets
+        for _,turret in pairs(gameState.turrets) do
+            turret:update(dt, gameState)
+            turret:target(gameState.enemies)
+        end
+
+        --blocked animation
+        if blockedAnimation.show then
+            blockedAnimation.timerValue = blockedAnimation.timerValue + dt
+            if blockedAnimation.timerValue >= blockedAnimation.timer then
+                blockedAnimation.timerValue = 0
+                blockedAnimation.show = false
+            end
+        end
+
+        --waves
+        gameState.waves:update(dt, gameState)
     else
-        currentTile.inbounds = false
-    end
-
-    --enemies
-    for _,enemy in pairs(gameState.enemies) do
-        enemy:update(dt, gameState)
-    end
-
-    --[[
-        1.) Search for enemies within radius of turret
-        2.) Select far-most right enemy in radius
-        3.) give coordinates to turret
-        4.) turn turret to face coordinates
-        5.) turret shoot function
-        6.) remove health from enemy
-
-        delay search to not be every frame
-        ignore search if turret already has a target (and its still in range)
-        force research if enemy dies
-    --]]
-    --turrets
-    for _,turret in pairs(gameState.turrets) do
-        turret:update(dt, gameState)
-        turret:target(gameState.enemies)
-    end
-
-    --blocked animation
-    if blockedAnimation.show then
-        blockedAnimation.timerValue = blockedAnimation.timerValue + dt
-        if blockedAnimation.timerValue >= blockedAnimation.timer then
-            blockedAnimation.timerValue = 0
-            blockedAnimation.show = false
+        for _,button in pairs(UI.pause) do
+            button:isHovered(mouse.x, mouse.y)
         end
     end
+end
 
-    --waves
-    gameState.waves:update(dt, gameState)
+function lib:keypressed(key)
+    if key == "escape" then
+       PAUSE = not PAUSE
+    end
 end
 
 return lib

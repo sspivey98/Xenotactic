@@ -33,15 +33,15 @@ end
 ---update the state of the game every frame
 ---@param dt number delta between last frame and current
 function love.update(dt)
-    if game.state == GAME.STATES.MENU then
+    if game.state == ENUMS.STATES.MENU then
         MENU.update()
-    elseif game.state == GAME.STATES.LEVEL_SELECT then
+    elseif game.state == ENUMS.STATES.LEVEL_SELECT then
         LEVEL_SELECT.update()
-    elseif game.state == GAME.STATES.GAME then
+    elseif game.state == ENUMS.STATES.GAME then
         LEVEL.update(game.gameState, dt)
-    elseif game.state == GAME.STATES.SETTINGS then
+    elseif game.state == ENUMS.STATES.SETTINGS then
         SETTINGSMENU:update()
-    elseif game.state == GAME.STATES.GAME_OVER then
+    elseif game.state == ENUMS.STATES.GAME_OVER then
     end
 end
 
@@ -50,26 +50,26 @@ end
 ---@param y number y coordinate
 ---@param mouseButton ENUMS.CLICK
 function love.mousepressed(x, y, mouseButton)
-    if game.state == GAME.STATES.MENU then
+    if game.state == ENUMS.STATES.MENU then
         if mouseButton == ENUMS.CLICK.LEFT then
             for key,button in pairs(MENU.Buttons) do
                 if button:clicked(x, y, mouseButton) then
                     if key == "PLAY" then
                         (SOUNDS.library["button_press"]):play()
                         LEVEL_SELECT.load()
-                        game.state = GAME.STATES.LEVEL_SELECT
+                        game.state = ENUMS.STATES.LEVEL_SELECT
                         print("Moving game state to level select")
                     elseif key == "SETTINGS" then
                         SOUNDS.library["button_press"]:play()
                         SETTINGSMENU:load()
-                        game.state = GAME.STATES.SETTINGS
+                        game.state = ENUMS.STATES.SETTINGS
                     elseif key == "QUIT" then
                         love.event.quit()
                     end
                 end
             end
         end
-    elseif game.state == GAME.STATES.LEVEL_SELECT then
+    elseif game.state == ENUMS.STATES.LEVEL_SELECT then
         if mouseButton == ENUMS.CLICK.LEFT then
             for index, level in pairs(LEVEL_SELECT.Levels) do
                 if level:clicked(x, y, mouseButton) then
@@ -97,55 +97,53 @@ function love.mousepressed(x, y, mouseButton)
                     end
                     local TILE_SET = MAPS.VISUAL_MAP["level_"..index]
                     LEVEL.load(index, TILE_SET)
-                    game.state = GAME.STATES.GAME
+                    game.state = ENUMS.STATES.GAME
                     print("Selected level: " .. index)
                     break
                 end
             end
         end
-    elseif game.state == GAME.STATES.SETTINGS then
+    elseif game.state == ENUMS.STATES.SETTINGS then
         SETTINGSMENU:mousepressed(x, y, mouseButton)
-    elseif game.state == GAME.STATES.GAME then
+    elseif game.state == ENUMS.STATES.GAME then
         --game logic
-        LEVEL.mousepressed(game.gameState, x, y, mouseButton)
+        LEVEL.mousepressed(game, x, y, mouseButton)
     end
 end
 
 ---draw on the screen every frame
 function love.draw()
-    if game.state == GAME.STATES.MENU then
+    if game.state == ENUMS.STATES.MENU then
         MENU.draw()
-    elseif game.state == GAME.STATES.LEVEL_SELECT then
+    elseif game.state == ENUMS.STATES.LEVEL_SELECT then
         LEVEL_SELECT.drawLevelSelect()
-    elseif game.state == GAME.STATES.GAME then
+    elseif game.state == ENUMS.STATES.GAME then
         LEVEL.draw(game.gameState)
-    elseif game.state == GAME.STATES.SETTINGS then
+    elseif game.state == ENUMS.STATES.SETTINGS then
         SETTINGSMENU:draw()
-    elseif game.state == GAME.STATES.GAME_OVER then
+    elseif game.state == ENUMS.STATES.GAME_OVER then
     else
         --error
     end
 end
 
 function love.textinput(text)
-    if game.state == GAME.STATES.SETTINGS then
+    if game.state == ENUMS.STATES.SETTINGS then
         SETTINGSMENU:textinput(text)
     end
 end
 
 function love.keypressed(key)
-    if game.state == GAME.STATES.GAME then
+    if game.state == ENUMS.STATES.GAME then
+        LEVEL:keypressed(key)
+    elseif game.state == ENUMS.STATES.LEVEL_SELECT then
         if key == "escape" then
-            game.state = GAME.STATES.MENU
+            game.state = ENUMS.STATES.MENU
         end
-    elseif game.state == GAME.STATES.LEVEL_SELECT then
-        if key == "escape" then
-            game.state = GAME.STATES.MENU
-        end
-    elseif game.state == GAME.STATES.SETTINGS then
+    elseif game.state == ENUMS.STATES.SETTINGS then
         if key == "escape" then
             MENU.load()
-            game.state = GAME.STATES.MENU
+            game.state = ENUMS.STATES.MENU
         end
         SETTINGSMENU:keyPressed(key)
     end

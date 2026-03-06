@@ -18,23 +18,15 @@
 ---@alias game {state:GAME.STATES,screen:{x:number,y:number},gameState:GAME.GAMESTATE}
 ---@class GAME
 ---@field gameState GAME.GAMESTATE
+---@field state GAME.STATES
 local lib = {}
-
----@enum GAME.STATES
-lib.STATES = {
-    MENU = 0,
-    LEVEL_SELECT = 1,
-    GAME = 2,
-    SETTINGS = 3,
-    GAME_OVER = 4
-}
-
 
 ---initialize the menu
 ---@return game
 function lib.initGame()
+    local ENUMS = require('enums')
     local game = {
-        state = lib.STATES.MENU,
+        state = ENUMS.STATES.MENU,
         screen = {
             w = love.graphics.getWidth(),
             h = love.graphics.getHeight()

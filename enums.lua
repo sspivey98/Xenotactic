@@ -4,6 +4,15 @@ local SOUNDS = require('lib.sounds')
 ---@class ENUMS
 local lib = {}
 
+---@enum GAME.STATES
+lib.STATES = {
+    MENU = 0,
+    LEVEL_SELECT = 1,
+    GAME = 2,
+    SETTINGS = 3,
+    GAME_OVER = 4
+}
+
 ---@enum ENUMS.CLICK
 lib.CLICK = {
     LEFT = 1,
