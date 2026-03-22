@@ -5,6 +5,7 @@ local ENEMY = require('enemy')
 ---wave object. Wave class contains an array of this
 ---@class WAVE
 ---@field enemies ENUMS.ENEMY_TYPE[] always deploy the same amount in vertical and horizontal
+---@field enemyType ENUMS.ENEMY_TYPE enemy type for UI display
 ---@field health? integer health modifier for scaling waves
 ---@field speed? number speed modifier for scaling waves
 ---@field scale? number image scaling
@@ -62,6 +63,7 @@ function lib:load(wave_number, enemy_amount, enemyTypeName, health, value, speed
     for i=1,enemy_amount do
         enemies[i] = enemyTypeName
     end
+    self.waves[wave_number].enemyType = enemyTypeName
 
     self.waves[wave_number].enemies = enemies
     self.waves[wave_number].health = health or nil
@@ -73,15 +75,22 @@ function lib:load(wave_number, enemy_amount, enemyTypeName, health, value, speed
     return true
 end
 
----send the next wave; can't send until current wave is all killed
+---send the next wave; can't send until current wave has spawned in
 ---@param gameState GAME.GAMESTATE
+---@return boolean
 function lib:next(gameState)
+    if gameState.round > 0 then
+        if gameState.round == gameState.waves.amount --last wave in mission
+        or #gameState.waves.waves[gameState.round].enemies ~= 0 --enemies in current wave have all spawned
+        then
+            return false
+        end
+    end
+
     --increment wave
     gameState.round = gameState.round + 1
-
-    for i=1, UTIL.tableLength(self.waves[gameState.round].enemies) do
-        SOUNDS.library["round_start"]:play()
-    end
+    SOUNDS.library["round_start"]:play()
+    return true
 end
 
 ---update timer and enemy created
@@ -115,6 +124,8 @@ function lib:update(dt, gameState)
         if wave.timer <= 0 then
             self:next(gameState)
         end
+    elseif gameState.round == gameState.waves.amount then
+        self.waves[gameState.round].timer = 0
     end
 end
 

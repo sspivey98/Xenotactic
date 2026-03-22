@@ -48,6 +48,7 @@ function lib:new(level, direction, enabled)
         end
     end
     o.costMap = {}
+    o:calculate()
     return o --? maybe set in gameState without return o?
 end
 

@@ -11,6 +11,8 @@ local FLOWFIELD = require('flowField')
 local UTIL = require('level.util')
 local TICK = require('lib.tick')
 local SETTINGSMENU = require('settingsMenu')
+local GAMEOVER = require('level.gameover')
+local WINNER = require('level.winner')
 
 local game
 
@@ -38,10 +40,13 @@ function love.update(dt)
     elseif game.state == ENUMS.STATES.LEVEL_SELECT then
         LEVEL_SELECT.update()
     elseif game.state == ENUMS.STATES.GAME then
-        LEVEL.update(game.gameState, dt)
+        LEVEL.update(game, dt)
     elseif game.state == ENUMS.STATES.SETTINGS then
         SETTINGSMENU:update()
     elseif game.state == ENUMS.STATES.GAME_OVER then
+        GAMEOVER:update()
+    elseif game.state == ENUMS.STATES.LEVEL_WIN then
+        WINNER:update(game)
     end
 end
 
@@ -104,10 +109,12 @@ function love.mousepressed(x, y, mouseButton)
             end
         end
     elseif game.state == ENUMS.STATES.SETTINGS then
-        SETTINGSMENU:mousepressed(x, y, mouseButton)
+        SETTINGSMENU:mousepressed(x, y, mouseButton, game)
     elseif game.state == ENUMS.STATES.GAME then
         --game logic
         LEVEL.mousepressed(game, x, y, mouseButton)
+    elseif game.state == ENUMS.STATES.LEVEL_WIN then
+        WINNER:mousepressed(x, y, mouseButton, game)
     end
 end
 
@@ -122,6 +129,9 @@ function love.draw()
     elseif game.state == ENUMS.STATES.SETTINGS then
         SETTINGSMENU:draw()
     elseif game.state == ENUMS.STATES.GAME_OVER then
+        GAMEOVER:draw()
+    elseif game.state == ENUMS.STATES.LEVEL_WIN then
+        WINNER:draw()
     else
         --error
     end
@@ -146,5 +156,13 @@ function love.keypressed(key)
             game.state = ENUMS.STATES.MENU
         end
         SETTINGSMENU:keyPressed(key)
+    elseif game.state == ENUMS.STATES.GAME_OVER then
+        if key == "escape" then
+            game.state = ENUMS.STATES.LEVEL_SELECT
+        end
+    elseif game.state == ENUMS.STATES.LEVEL_WIN then
+        if key == "escape" then
+            game.state = ENUMS.STATES.LEVEL_SELECT
+        end
     end
 end

@@ -192,6 +192,7 @@ function lib.draw(gameState)
     UI:drawTimer(gameState)
     UI:drawRound(gameState)
     UI:drawEnemyCounter(gameState)
+    UI:drawCurrentEnemy(gameState)
 
     --draw UI turret buttons
     for _,turret in pairs(UI.turrets) do
@@ -306,13 +307,22 @@ function lib.mousepressed(game, x, y, mouseButton)
 end
 
 ---update logic function
----@param gameState GAME.GAMESTATE
+---@param game game
 ---@param dt number
-function lib.update(gameState, dt)
+function lib.update(game, dt)
+    if game.gameState.lives <= 0 then
+        game.state = ENUMS.STATES.GAME_OVER
+    end
+    if game.gameState.round == game.gameState.waves.amount --last wave in mission
+        and UTIL.tableLength(game.gameState.enemies) == 0 --no more enemies
+        and #game.gameState.waves.waves[game.gameState.round].enemies <= 0 --no more enemies to spawn
+    then
+        game.state = ENUMS.STATES.LEVEL_WIN
+    end
     local mouse = { x=0, y=0 }
     mouse.x, mouse.y = love.mouse.getPosition()
     if not PAUSE then
-        if gameState.lives == 0 then
+        if game.gameState.lives == 0 then
             SOUNDS.library["mission_failed"]:play()
         end
 
@@ -326,7 +336,7 @@ function lib.update(gameState, dt)
         end
 
         --updateMap
-        local tile = UTIL.getTileAt(gameState.map, mouse.x, mouse.y)
+        local tile = UTIL.getTileAt(game.gameState.map, mouse.x, mouse.y)
         if tile and tile.type ~= 1 then
             currentTile.inbounds = true
             --do backwards conversion for 'snap' feel
@@ -337,8 +347,8 @@ function lib.update(gameState, dt)
         end
 
         --enemies
-        for _,enemy in pairs(gameState.enemies) do
-            enemy:update(dt, gameState)
+        for _,enemy in pairs(game.gameState.enemies) do
+            enemy:update(dt, game.gameState)
         end
 
         --[[
@@ -354,9 +364,9 @@ function lib.update(gameState, dt)
             force research if enemy dies
         --]]
         --turrets
-        for _,turret in pairs(gameState.turrets) do
-            turret:update(dt, gameState)
-            turret:target(gameState.enemies)
+        for _,turret in pairs(game.gameState.turrets) do
+            turret:update(dt, game.gameState)
+            turret:target(game.gameState.enemies)
         end
 
         --blocked animation
@@ -369,7 +379,7 @@ function lib.update(gameState, dt)
         end
 
         --waves
-        gameState.waves:update(dt, gameState)
+        game.gameState.waves:update(dt, game.gameState)
     else
         for _,button in pairs(UI.pause) do
             button:isHovered(mouse.x, mouse.y)

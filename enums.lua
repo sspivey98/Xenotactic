@@ -10,7 +10,8 @@ lib.STATES = {
     LEVEL_SELECT = 1,
     GAME = 2,
     SETTINGS = 3,
-    GAME_OVER = 4
+    GAME_OVER = 4,
+    LEVEL_WIN = 5
 }
 
 ---@enum ENUMS.CLICK
@@ -658,7 +659,7 @@ lib.UPGRADE_PATH = {
         LEVEL6 = {
             cost = 310,
             damage = 480,
-            range = 180,
+            range = 80,
             value = 247,
             slow = 0,
             splash = 0,
@@ -777,6 +778,16 @@ lib.AlienDeathFrames = {
     [10] = IMAGES.library["alien_death_10"],
     [11] = IMAGES.library["alien_death_11"],
     [12] = IMAGES.library["alien_death_12"]
+}
+
+---@type string[]
+lib.Passwords = {
+    [1] = "", --no password to unlock level 1
+    [2] = "4loopz",
+    [3] = "nowe1",
+    [4] = "reginald2",
+    [5] = "newgrounds07",
+    [6] = "impossible6"
 }
 
 return lib

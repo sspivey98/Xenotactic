@@ -19,10 +19,11 @@
 ---@class GAME
 ---@field gameState GAME.GAMESTATE
 ---@field state GAME.STATES
+---@field unlocked integer
 local lib = {}
 
 ---initialize the menu
----@return game
+---@return GAME
 function lib.initGame()
     local ENUMS = require('enums')
     local game = {
@@ -31,7 +32,8 @@ function lib.initGame()
             w = love.graphics.getWidth(),
             h = love.graphics.getHeight()
         },
-        gameState = nil --newGame() goes here on level load
+        gameState = nil, --newGame() goes here on level load
+        unlocked = 1
     }
 
     return game
@@ -61,7 +63,7 @@ function lib.newGame(money, level, map, waves, path1, path2)
         selectedEnemy = nil,
         placementMode = false,
         paused = false,
-        waves = waves
+        waves = waves,
     }
 
     return game

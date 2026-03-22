@@ -36,11 +36,11 @@
 
 ✓ add money value to each enemy
 - add options screen
-    
     ✓ change resolution
 - improve level select and lock levels behind a progression system
     - password unlock for level
-- add pause button
-- add quit to main menu from ESC 
-- add lose screen
-- add win screen 
+✓ add pause button
+✓ add quit to main menu from ESC 
+✓ add lose screen
+✓ add win screen 
+✓ send wave should finish spawning current wave

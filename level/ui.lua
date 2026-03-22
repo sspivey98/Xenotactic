@@ -19,6 +19,7 @@ lib.pause = {}
 lib.padding = SETTINGS.TILE_SIZE
 
 local frames = {
+    [0] = IMAGES.library["healthbar_0"],
     [1] = IMAGES.library["healthbar_1"],
     [2] = IMAGES.library["healthbar_2"],
     [3] = IMAGES.library["healthbar_3"],
@@ -350,6 +351,85 @@ function lib:drawPauseMenu()
     self.pause["no_button"]:draw()
 
     love.graphics.setColor(1, 1, 1)
+end
+
+
+---for caching purposes
+local enemies_sprite_sheet = IMAGES.library["enemies"]
+local enemyQuads = {}
+local function getEnemyQuad(index)
+    if not enemyQuads[index] then
+        local spriteSize = 32
+        enemyQuads[index] = love.graphics.newQuad(
+            (index - 1) * spriteSize, -- x
+            0,                        -- y 
+            spriteSize,               -- width
+            spriteSize,               -- height
+            enemies_sprite_sheet:getDimensions()
+        )
+    end
+    return enemyQuads[index]
+end
+
+---draw current wave enemy sprite in bottom left
+---@param gameState GAME.GAMESTATE
+function lib:drawCurrentEnemy(gameState)
+    local text = "Current:"
+    local font = love.graphics.getFont()
+    local textWidth = font:getWidth(text)
+    local textHeight = font:getHeight()
+    local x = self.padding/2
+    local y = SETTINGS.SCREEN.HEIGHT - self.padding
+
+    --background box
+    love.graphics.setColor(0,0,0)
+    love.graphics.rectangle("fill", x - 5, y - 5, textWidth + 10, textHeight + 10, 5, 5)
+
+    --draw text
+    love.graphics.setColor(ENUMS.UPGRADE_COLORS.CYAN)
+    love.graphics.print(text, x, y)
+    --draw sprite
+    if gameState.round > 0 then
+        local wave = gameState.waves.waves[gameState.round]
+
+        local index = 0
+        for i=1,#ENUMS.ENEMY_TYPE do
+            if ENUMS.ENEMY_TYPE[i] == wave.enemyType then
+                index = i
+                break
+            end
+        end
+
+        if gameState.round > 0 then
+
+            local spriteSize = 32
+            local spriteX = x + textWidth + 5
+            local spriteY = SETTINGS.SCREEN.HEIGHT - self.padding - textHeight
+            -- Background box for sprite
+            love.graphics.setColor(0, 0, 0)
+            love.graphics.rectangle("fill",
+                spriteX - 5,
+                spriteY - 5,
+                spriteSize * SETTINGS.scale*.75 + 10,
+                spriteSize * SETTINGS.scale*.75 + 10,
+                5, 5
+            )
+
+            -- Draw enemy sprite
+            love.graphics.setColor(1, 1, 1)
+            love.graphics.draw(
+                enemies_sprite_sheet,
+                getEnemyQuad(index),
+                spriteX,
+                spriteY,
+                0,
+                SETTINGS.scale*.75,
+                SETTINGS.scale*.75
+            )
+        end
+    end
+
+    love.graphics.setColor(1, 1, 1) -- Reset color
 end
 
 return lib

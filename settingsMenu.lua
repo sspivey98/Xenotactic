@@ -2,6 +2,8 @@ local DROPDOWN = require('lib.dropdown')
 local BUTTON = require('lib.button')
 local ENTRYBOX = require('lib.entryBox')
 local SETTINGS = require('settings')
+local IMAGES = require('lib.images')
+local ENUMS = require('enums')
 
 ---@class settingsMenu
 local lib = {}
@@ -48,13 +50,34 @@ function lib:update()
     self.entryBox:update()
 end
 function lib:draw()
+    -- Background
+    local splash_screen = IMAGES.library["default_background"]
+    love.graphics.setColor(1, 1, 1)
+
+    --center image
+    local scaled = {
+        x = SETTINGS.SCREEN.WIDTH / splash_screen:getWidth(),
+        y = SETTINGS.SCREEN.HEIGHT / splash_screen:getHeight()
+    }
+    local scale = math.min(scaled.x, scaled.y)
+    scaled.width = splash_screen:getWidth() * scale
+    scaled.height = splash_screen:getHeight() * scale
+    local x = (SETTINGS.SCREEN.WIDTH - scaled.width) / 2
+    local y = (SETTINGS.SCREEN.HEIGHT - scaled.height) / 2
+
+    love.graphics.draw(splash_screen, x, y, 0, scale, scale)
+
     love.graphics.setColor(1,1,1)
     self.button:draw()
     self.dropdown:draw()
     self.entryBox:draw()
 end
 
-function lib:mousepressed(x,y,mouseButton)
+---@param x integer
+---@param y integer
+---@param mouseButton integer
+---@param game GAME
+function lib:mousepressed(x,y,mouseButton, game)
     self.dropdown:mousePressed(x,y,mouseButton)
     if self.button:clicked(x,y,mouseButton) then
         --change window
@@ -69,9 +92,11 @@ function lib:mousepressed(x,y,mouseButton)
 
         if self.entryBox:getText() then
             local password = string.lower(self.entryBox:getText())
-            if password == "7loopz" then
-                print("LEVEL 2 unlocked!")
-                --unlock level 1
+            for num,pass in ipairs(ENUMS.Passwords) do
+                if password == pass then
+                    print("LEVEL "..num.." unlocked!")
+                    game.unlocked = num
+                end
             end
         end
     end

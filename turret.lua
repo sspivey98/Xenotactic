@@ -623,10 +623,11 @@ function lib:upgrade(gameState)
     --max level
     if self.level == 6 then return false end
 
-    if gameState.money < self.cost then return false end
+    if gameState.money < ENUMS.UPGRADE_PATH[self.turretType]["LEVEL"..self.level+1].cost then 
+        return false
+    end
 
     --do upgrade logic
-    gameState.money = gameState.money - self.cost
     self.upgrading = true
 
     --upgrade stats
@@ -634,6 +635,9 @@ function lib:upgrade(gameState)
     for k,v in pairs(upgrade) do
         self[k] = v
     end
+
+    gameState.money = gameState.money - self.cost
+
     self.range = self.range * self.scale
     return true
 end
