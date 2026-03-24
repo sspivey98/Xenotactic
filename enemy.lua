@@ -26,7 +26,7 @@ enemies will have different paths based on position and final
 ---@field selected boolean determine if enemy is selected
 ---@field protected splitter {amount: integer, type:ENUMS.ENEMY_TYPE, x:integer,y:integer} enemies that split into more enemies after dying
 ---@field protected dying boolean mark enemy is dying or not
----@field protected fullHealth number enemy's health when full
+---@field fullHealth number enemy's health when full
 ---@field protected healthBar {width:number,height:number,x:number,y:number,value:number}
 ---@field protected origin {x:number,y:number} origin x,y for rotation
 ---@field protected stunned number stunned timer, if 0, entity is not stunned

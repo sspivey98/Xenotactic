@@ -5,7 +5,6 @@ local SOUNDS = require('lib.sounds')
 local BUTTON = require('lib.button')
 local MAPS = require('level.maps')
 local SETTINGS = require('settings')
-local DROPDOWN = require('lib.dropdown')
 
 ---@type button.image[]
 lib.Levels = {}
@@ -82,7 +81,8 @@ function lib.update()
 end
 
 ---draw levels
-function lib.drawLevelSelect()
+---@param game GAME
+function lib:draw(game)
     --Background
     love.graphics.setColor(0.15, 0.25, 0.35)
     love.graphics.rectangle("fill", 0, 0, SETTINGS.SCREEN.WIDTH, SETTINGS.SCREEN.HEIGHT)
@@ -104,7 +104,34 @@ function lib.drawLevelSelect()
 
         love.graphics.setColor(1, 1, 1)
         love.graphics.printf(metadata[3].text, metadata[3].x, metadata[3].y, 200, "left")
+    end
 
+    --draw locks
+    for i=1,6 do
+        if i > game.unlocked then
+            local level = lib.Levels[i]
+            local lockX = level.x + level.width / 2
+            local lockY = level.y + level.height / 2
+
+            --draw simple padlock
+            love.graphics.setColor(0.7, 0.7, 0.7)
+            love.graphics.setLineWidth(3)
+
+            --shackle (top arc)
+            love.graphics.arc("line", "open", lockX, lockY - 8, 12, math.pi, 0)
+
+            --body (rounded rectangle)
+            love.graphics.rectangle("fill", lockX - 15, lockY - 8, 30, 25, 4, 4)
+
+            --keyhole
+            love.graphics.setColor(0.2, 0.2, 0.2)
+            love.graphics.circle("fill", lockX, lockY + 2, 4)
+            love.graphics.rectangle("fill", lockX - 2, lockY + 2, 4, 8)
+
+            love.graphics.setLineWidth(1)
+            level.color = {0.5,0.5,0.5}
+            level.disabled = true
+        end
     end
 end
 

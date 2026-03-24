@@ -44,28 +44,32 @@ function lib:draw()
         10, 10
     )
 
-    -- Title
+    --title
     love.graphics.setFont(largeFont)
     love.graphics.setColor(ENUMS.UPGRADE_COLORS.GREEN)
     love.graphics.printf(lib.text, 0, startY, SETTINGS.SCREEN.WIDTH, "center")
 
-    -- Body
+    --body
     love.graphics.setFont(mediumFont)
     love.graphics.setColor(1, 1, 1)
     love.graphics.printf(lib.body, 0, startY + 100, SETTINGS.SCREEN.WIDTH, "center")
 
-    -- Password
+    --password
     love.graphics.setFont(smallFont)
     love.graphics.setColor(1, 0.84, 0)
     love.graphics.printf(lib.password, 0, startY + 180, SETTINGS.SCREEN.WIDTH, "center")
 
-    -- Reset
+    --reset
     love.graphics.setColor(1, 1, 1)
     love.graphics.setFont(love.graphics.newFont("assets/fonts/11_Visitor_TT1_BRK.ttf", 16))
 end
 
 ---@param game GAME
 function lib:update(game)
+    if game.gameState.level == 6 then
+        self.body = "THANKS FOR PLAYING!"
+        self.password = ":)"
+    end
     if self.password == "" then
         local unlock = game.gameState.level + 1
         self.body = "To unlock level "..unlock..", use the following password:"

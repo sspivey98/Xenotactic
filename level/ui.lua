@@ -223,6 +223,34 @@ function lib:drawTimer(gameState)
     love.graphics.setColor(1, 1, 1) -- Reset color
 end
 
+---@param enemy ENEMY
+function lib:drawHealth(enemy)
+    local text = string.format("%d/%d", math.floor(enemy.health), enemy.fullHealth)
+    local font = love.graphics.getFont()
+    local textWidth = font:getWidth(text)
+    local textHeight = font:getHeight()
+
+    local textX = enemy.position.x - textWidth / 2
+    local textY = enemy.position.y - 25
+
+    -- Background box
+    love.graphics.setColor(0, 0, 0, 0.7)
+    love.graphics.rectangle("fill", textX - 2, textY - 2, textWidth + 4, textHeight + 4, 2, 2)
+
+    -- Health text
+    local healthPercent = enemy.health / enemy.fullHealth
+    if healthPercent > 0.5 then
+        love.graphics.setColor(0.2, 1, 0.2) -- Green
+    elseif healthPercent > 0.25 then
+        love.graphics.setColor(1, 1, 0.2) -- Yellow
+    else
+        love.graphics.setColor(1, 0.2, 0.2) -- Red
+    end
+
+    love.graphics.print(text, textX, textY)
+    love.graphics.setColor(1, 1, 1) -- Reset
+end
+
 function lib:drawRound(gameState)
     local text = "Round: "..gameState.round
     local font = love.graphics.getFont()

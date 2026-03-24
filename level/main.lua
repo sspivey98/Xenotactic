@@ -207,6 +207,10 @@ function lib.draw(gameState)
     if PAUSE then
         UI:drawPauseMenu()
     end
+
+    if gameState.selectedEnemy then
+        UI:drawHealth(gameState.selectedEnemy)
+    end
 end
 
 ---interact function

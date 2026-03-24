@@ -9,12 +9,14 @@
 
 - enemy 
     ✓ add gold earned above kill
-    - select enemy
+    ✓ select enemy
         ✓ visual
         ✓ selected enemy gamestate prop
     ✓ slowed enemies get a slightly different color
     ✓ slimes can split when killed
     ✓ bosses should have 25% bigger sprites
+    ✓ add health above selected enemy
+    ✓ add money value to each enemy
 
 - add to UI menu
     ✓ turret selected menu
@@ -33,14 +35,18 @@
     ✓ two maps for a level - movement and visuals
     ✓ add "blocked" when turret would block path
 
-
-✓ add money value to each enemy
-- add options screen
-    ✓ change resolution
-- improve level select and lock levels behind a progression system
-    - password unlock for level
 ✓ add pause button
 ✓ add quit to main menu from ESC 
 ✓ add lose screen
 ✓ add win screen 
 ✓ send wave should finish spawning current wave
+
+- add options screen
+    ✓ change resolution
+    ✓ password to unlock
+    ✓ audio bar
+✓ improve level select and lock levels behind a progression system
+
+FIXES:
+    - enemies sometimes don't respect flowfield
+    - selected turret menu doesn't work

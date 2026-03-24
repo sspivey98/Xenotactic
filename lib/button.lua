@@ -1,12 +1,13 @@
 ---@class button
----@field protected x number
----@field protected y number
----@field protected width number
----@field protected height number
----@field protected color number[]
+---@field x number
+---@field y number
+---@field width number
+---@field height number
+---@field color number[]
 ---@field hovered boolean
 ---@field protected wasHovered boolean
 ---@field protected hoveredColor number[]
+---@field disabled boolean
 local IButton = {}
 
 local ENUMS = require('enums')
@@ -45,7 +46,8 @@ function IButton:new(o)
         color = o.color or {0.3, 0.3, 0.3},
         hoveredColor = o.hoveredColor or {0.7,0.7,0.7},
         hovered = false,
-        wasHovered = false
+        wasHovered = false,
+        disabled = false,
     }
     setmetatable(obj, self)
     self.__index = self
@@ -58,18 +60,21 @@ function IButton:draw() end
 ---return if mouse is currently hovering
 ---@return boolean
 function IButton:isHovered(x, y)
-    self.wasHovered = self.hovered
-    if x >= self.x and x <= self.x + self.width and
-        y >= self.y and y <= self.y + self.height then
-            self.hovered = true
-            if not self.wasHovered then
-                SOUNDS.library["button_hover"]:play()
-            end
-    else
-        self.hovered = false
-    end
+    if not self.disabled then
+        self.wasHovered = self.hovered
+        if x >= self.x and x <= self.x + self.width and
+            y >= self.y and y <= self.y + self.height then
+                self.hovered = true
+                if not self.wasHovered then
+                    SOUNDS.library["button_hover"]:play()
+                end
+        else
+            self.hovered = false
+        end
 
-    return self.hovered
+        return self.hovered
+    end
+    return false
 end
 
 ---return if mouse has been left clicked

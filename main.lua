@@ -123,7 +123,7 @@ function love.draw()
     if game.state == ENUMS.STATES.MENU then
         MENU.draw()
     elseif game.state == ENUMS.STATES.LEVEL_SELECT then
-        LEVEL_SELECT.drawLevelSelect()
+        LEVEL_SELECT:draw(game)
     elseif game.state == ENUMS.STATES.GAME then
         LEVEL.draw(game.gameState)
     elseif game.state == ENUMS.STATES.SETTINGS then

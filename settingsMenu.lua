@@ -19,30 +19,45 @@ local lib = {}
     - 1920x1080
 --]]
 function lib:load()
-    self.button = BUTTON:new(
-        BUTTON.type.TEXT,
-        {
-            x = 50,
-            y = 200,
-            width = 200,
-            height = 40,
-            text = "Confirm"
-        }
-    )
+    local x = SETTINGS.SCREEN.WIDTH / 2
+    local y = 100
+    local w = 300
+    local h = 50
+    local padding = 120
+
     self.dropdown = DROPDOWN:new({
-        x = 250,
-        y = 100,
-        width = 200,
-        height = 40,   -- height per item
+        x = x - w/2,
+        y = y,
+        width = w,
+        height = h,   -- height per item
         options = {"1280x720", "1600x900", "1920x1080"},
     })
 
-    self.entryBox = ENTRYBOX:new({
-        x = 450,
-        y = 400,
-        width = 200,
-        height = 40,   -- height per item
+    self.audio = DROPDOWN:new({
+        x = x - w/2,
+        y = y+padding,
+        width = w,
+        height = h,   -- height per item
+        options = {"100%", "80%", "60%", "40%", "20%", "0%"},
     })
+
+    self.entryBox = ENTRYBOX:new({
+        x = x - w/2,
+        y = y+2*padding,
+        width = w,
+        height = h,   -- height per item
+    })
+
+    self.button = BUTTON:new(
+        BUTTON.type.TEXT,
+        {
+            x = x - w/2,
+            y = y+3*padding,
+            width = w,
+            height = h,
+            text = "Confirm"
+        }
+    )
 end
 function lib:update()
     local mouseX, mouseY = love.mouse.getPosition()
@@ -69,8 +84,9 @@ function lib:draw()
 
     love.graphics.setColor(1,1,1)
     self.button:draw()
-    self.dropdown:draw()
     self.entryBox:draw()
+    self.audio:draw()
+    self.dropdown:draw()
 end
 
 ---@param x integer
@@ -79,6 +95,12 @@ end
 ---@param game GAME
 function lib:mousepressed(x,y,mouseButton, game)
     self.dropdown:mousePressed(x,y,mouseButton)
+    if self.audio:mousePressed(x,y,mouseButton) then
+        local res = self.audio.options[self.audio.selectedIndex]
+        local sub = res:sub(1, -2)
+        local num = tonumber(sub)/100
+        love.audio.setVolume(num)
+    end
     if self.button:clicked(x,y,mouseButton) then
         --change window
         local res = self.dropdown.options[self.dropdown.selectedIndex]
