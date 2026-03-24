@@ -18,7 +18,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y zip wget
+          sudo apt-get install -y zip wget wine64
           wget https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe -O rcedit.exe
 
       - name: Inject Version String
@@ -34,7 +34,6 @@ jobs:
           unzip love-win.zip
           
           cat love-11.5-win64/love.exe ${{ github.event.repository.name }}.love > releases/win64/${{ github.event.repository.name }}.exe
-          sudo apt-get install -y wine64
           wine64 rcedit.exe releases/win64/${{ github.event.repository.name }}.exe --set-icon "assets/turret_gatling.ico"
           
           cp love-11.5-win64/*.dll releases/win64/
