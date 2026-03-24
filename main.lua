@@ -18,7 +18,7 @@ local game
 
 ---initialize function
 function love.load(arg)
-    love.window.setTitle("Xeno Tactic Remastered")
+    --love.window.setTitle("Xeno Tactic Remastered")
     love.window.setVSync(1)
     local resolution = SETTINGS.resolution
     love.window.setMode(resolution.WIDTH, resolution.HEIGHT)
