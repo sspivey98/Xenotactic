@@ -1,3 +1,4 @@
+![Build Status](https://github.com/sspivey98/Xenotactic/actions/workflows/build.yml/badge.svg)
 # XenoTactic Remastered
 This is a remaster of the browser game, Xeno Tactic, in Love2d. I'm aiming to reproduce the behavior of version 1.3.
 ![Sample](sample.jpg)
