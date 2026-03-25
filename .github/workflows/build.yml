@@ -2,8 +2,7 @@ name: CI/CD (Love)
 
 on:
   push:
-    tags:
-      branches: [ main ]
+    branches: [ main ]
 
 jobs:
   build:
@@ -58,14 +57,14 @@ jobs:
         run: cp ${{ github.event.repository.name }}.love ${{ github.event.repository.name }}-linux.love
 
       - name: Create GitHub Release
-              if: steps.version_check.outputs.changed == 'true'
-              uses: softprops/action-gh-release@v2
-              with:
-                tag_name: v${{ steps.get_version.outputs.version }}
-                files: |
-                  ${{ github.event.repository.name }}-win64.zip
-                  ${{ github.event.repository.name }}-linux.love
-                name: Release ${{ steps.get_version.outputs.version }}
-                generate_release_notes: true
-              env:
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: steps.version_check.outputs.changed == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.get_version.outputs.version }}
+          files: |
+            ${{ github.event.repository.name }}-win64.zip
+            ${{ github.event.repository.name }}-linux.love
+          name: Release ${{ steps.get_version.outputs.version }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
