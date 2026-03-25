@@ -244,6 +244,7 @@ function lib.mousepressed(game, x, y, mouseButton)
                         if turret:select(x, y) then
                             checkTurret = true
                             game.gameState.selectedTurret = turret
+                            game.gameState.selectedTurretType = turret.turretType
                         end
                     end
                     if not checkTurret then game.gameState.selectedTurret = nil end

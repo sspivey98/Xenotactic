@@ -22,7 +22,7 @@ local UTIL = require('level.util')
 ---@field protected shootAnimation {cooldown:number, muzzle:number, currentFrame:integer, timer:number, frameTime:number}
 ---@field protected bullets {target:ENEMY,x:number,y:number,angle:number}[] array of bullets. Plasma can have 2-3 bullets active, SAM only 1, DCA 4
 ---@field protected upgradeBar {width:number,height:number,x:number,y:number,value:number}
----@field protected turretType ENUMS.TURRET_TYPE
+---@field turretType ENUMS.TURRET_TYPE
 ---@overload fun(gameState: GAME.GAMESTATE, x:number, y:number): TURRET
 local lib = setmetatable({},
     {

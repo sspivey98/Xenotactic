@@ -49,4 +49,4 @@
 
 FIXES:
     - enemies sometimes don't respect flowfield
-    - selected turret menu doesn't work
+    ✓ selected turret menu doesn't work
