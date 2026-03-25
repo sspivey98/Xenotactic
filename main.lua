@@ -1,4 +1,5 @@
 if os.getenv("LOCAL_LUA_DEBUGGER_VSCODE") == "1" then require("lldebugger").start() end
+local VERSION = require('version')
 local GAME = require('game')
 local ENUMS = require('enums')
 local MENU = require('menu')
@@ -18,7 +19,7 @@ local game
 
 ---initialize function
 function love.load(arg)
-    --love.window.setTitle("Xeno Tactic Remastered")
+    love.window.setTitle("Xenotactic v"..VERSION)
     love.window.setVSync(1)
     local resolution = SETTINGS.resolution
     love.window.setMode(resolution.WIDTH, resolution.HEIGHT)

@@ -3,8 +3,7 @@ name: CI/CD (Love)
 on:
   push:
     tags:
-      - 'v*'
-    branches: [ main ]
+      branches: [ main ]
 
 jobs:
   build:
@@ -14,17 +13,34 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y zip wget
+          sudo apt-get install -y zip
 
-      - name: Inject Version String
-        run: echo "return '${{ github.ref_name }}'" > version.lua
+      - name: Extract Version
+        id: get_version
+        run: |
+          VERSION=$(grep -oP 'return "\K[^"]*' version.lua)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+        
+      - name: Check if version changed
+        id: version_check
+        run: |
+          git show HEAD~1:version.lua > /tmp/old_version.lua 2>/dev/null || echo 'return ""' > /tmp/old_version.lua
+          OLD_VERSION=$(grep -oP 'return "\K[^"]*' /tmp/old_version.lua || echo "")
+          
+          if [ "${{ steps.get_version.outputs.version }}" != "$OLD_VERSION" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Package .love file
-        run: zip -9 -r ${{ github.event.repository.name }}.love . -x ".git/*" ".github/*" "rcedit.exe"
+        run: zip -9 -r ${{ github.event.repository.name }}.love . -x ".git/*" ".github/*"
 
       - name: Build Windows 64-bit
         run: |
@@ -42,13 +58,14 @@ jobs:
         run: cp ${{ github.event.repository.name }}.love ${{ github.event.repository.name }}-linux.love
 
       - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            ${{ github.event.repository.name }}-win64.zip
-            ${{ github.event.repository.name }}-linux.love
-          name: Release ${{ github.ref_name }}
-          generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              if: steps.version_check.outputs.changed == 'true'
+              uses: softprops/action-gh-release@v2
+              with:
+                tag_name: v${{ steps.get_version.outputs.version }}
+                files: |
+                  ${{ github.event.repository.name }}-win64.zip
+                  ${{ github.event.repository.name }}-linux.love
+                name: Release ${{ steps.get_version.outputs.version }}
+                generate_release_notes: true
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
