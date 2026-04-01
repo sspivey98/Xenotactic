@@ -20,7 +20,7 @@ local lib = {}
 ---@field border color
 
 ---dropdown constructor
----@param o {x:integer,y:integer,height:integer,width:integer,options:string[]}
+---@param o {x:integer,y:integer,height:integer,width:integer,options:string[],selectedIndex?:number}
 ---@param colors? dropdown.colors
 ---@return dropdown
 function lib:new(o, colors)
@@ -42,7 +42,7 @@ function lib:new(o, colors)
         width = o.width,
         height = o.height,
         options = o.options,
-        selectedIndex = 1,
+        selectedIndex = o.selectedIndex or 1,
         hoveredIndex = nil,
         isOpen = false,
         colors = colors

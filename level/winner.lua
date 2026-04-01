@@ -1,6 +1,5 @@
 local SETTINGS = require('settings')
 local IMAGES = require('lib.images')
-local SOUNDS = require('lib.sounds')
 local ENUMS  = require('enums')
 local lib = {}
 
@@ -75,6 +74,12 @@ function lib:update(game)
         self.body = "To unlock level "..unlock..", use the following password:"
         self.password = ENUMS.Passwords[unlock]
         game.unlocked = game.gameState.level + 1
+    end
+end
+
+function lib:mousepressed(x, y, mouseButton, game)
+    if mouseButton == ENUMS.CLICK.LEFT then
+        game.state = ENUMS.STATES.LEVEL_SELECT
     end
 end
 

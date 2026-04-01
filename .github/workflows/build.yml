@@ -4,6 +4,9 @@ on:
   push:
     branches: [ main ]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -18,7 +21,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y zip
+          sudo apt-get install -y zip nodejs npm
 
       - name: Extract Version
         id: get_version
@@ -40,6 +43,12 @@ jobs:
 
       - name: Package .love file
         run: zip -9 -r ${{ github.event.repository.name }}.love . -x ".git/*" ".github/*"
+      
+      - name: Build WASM file
+        run: |
+          sudo npm install -g love.js
+          love.js ${{ github.event.repository.name }}-linux.love game -c
+          zip -9 -r ${{ github.event.repository.name }}-wasm.zip game/
 
       - name: Build Windows 64-bit
         run: |
@@ -64,6 +73,7 @@ jobs:
           files: |
             ${{ github.event.repository.name }}-win64.zip
             ${{ github.event.repository.name }}-linux.love
+            ${{ github.event.repository.name }}-wasm.zip
           name: Release ${{ steps.get_version.outputs.version }}
           generate_release_notes: true
         env:

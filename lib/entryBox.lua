@@ -1,8 +1,8 @@
 ---@class entryBox
----@field protected x integer
----@field protected y integer
----@field protected width integer
----@field protected height integer
+---@field x integer
+---@field y integer
+---@field width integer
+---@field height integer
 ---@field private text string
 ---@field private selected boolean is the box in focus
 ---@field private cursorPos integer position in text

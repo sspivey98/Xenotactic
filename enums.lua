@@ -782,7 +782,7 @@ lib.AlienDeathFrames = {
 
 ---@type string[]
 lib.Passwords = {
-    [1] = "", --no password to unlock level 1
+    [1] = "___", --no password to unlock level 1
     [2] = "4loopz",
     [3] = "nowe1",
     [4] = "reginald2",

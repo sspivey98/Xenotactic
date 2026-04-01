@@ -43,7 +43,7 @@ function love.update(dt)
     elseif game.state == ENUMS.STATES.GAME then
         LEVEL.update(game, dt)
     elseif game.state == ENUMS.STATES.SETTINGS then
-        SETTINGSMENU:update()
+        SETTINGSMENU:update(dt)
     elseif game.state == ENUMS.STATES.GAME_OVER then
         GAMEOVER:update()
     elseif game.state == ENUMS.STATES.LEVEL_WIN then
