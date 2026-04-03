@@ -61,7 +61,7 @@ jobs:
           cp love-js-repo/player.js wasm-out/player.js
           cp wasm/index.html wasm-out/index.html
           cp wasm/server.py wasm-out/server.py
-          cp wasm/Dockerfile wasm-out/Dockerfile
+          cp wasm/dockerfile wasm-out/dockerfile
           cp wasm/favicon.ico wasm-out/favicon.ico
  
           zip -9 -r ${{ github.event.repository.name }}-wasm.zip wasm-out/
