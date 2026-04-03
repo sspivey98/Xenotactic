@@ -56,7 +56,7 @@ jobs:
 
           # Assemble the wasm package
           mkdir -p wasm-out
-          cp ${{ github.event.repository.name }}-linux.love wasm-out/
+          cp ${{ github.event.repository.name }}.love wasm-out/
           cp -r love-js-repo/11.5 wasm-out/11.5
           cp love-js-repo/player.js wasm-out/player.js
           cp wasm/index.html wasm-out/index.html

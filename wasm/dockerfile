@@ -3,7 +3,7 @@ FROM python:3.12-slim
 WORKDIR /game
 
 COPY ./11.5 ./11.5
-COPY Xenotactic-linux.love .
+COPY Xenotactic.love .
 COPY player.js .
 COPY index.html .
 COPY server.py .
