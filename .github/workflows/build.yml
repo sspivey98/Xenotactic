@@ -21,7 +21,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y zip nodejs npm
+          sudo apt-get install -y zip
 
       - name: Extract Version
         id: get_version
@@ -42,13 +42,28 @@ jobs:
           fi
 
       - name: Package .love file
-        run: zip -9 -r ${{ github.event.repository.name }}.love . -x ".git/*" ".github/*"
+        run: zip -9 -r ${{ github.event.repository.name }}.love . -x ".git/*" ".github/*" ".vscode/*"
       
-      - name: Build WASM file
+      - name: Build WASM
         run: |
-          sudo npm install -g love.js
-          love.js ${{ github.event.repository.name }}-linux.love game -c
-          zip -9 -r ${{ github.event.repository.name }}-wasm.zip game/
+          # Pull only /11.5/ and player.js from 2dengine/love.js
+          git clone --depth 1 --filter=blob:none --sparse \
+            https://github.com/2dengine/love.js.git love-js-repo
+          cd love-js-repo
+          git sparse-checkout set 11.5 player.js
+          cd ..
+
+          # Assemble the wasm package
+          mkdir -p wasm-out
+          cp ${{ github.event.repository.name }}-linux.love wasm-out/
+          cp -r love-js-repo/11.5 wasm-out/11.5
+          cp love-js-repo/player.js wasm-out/player.js
+          cp wasm/index.html wasm-out/index.html
+          cp wasm/server.py wasm-out/server.py
+          cp wasm/dockerfile wasm-out/dockerfile
+          cp wasm/favicon.ico wasm-out/favicon.ico
+ 
+          zip -9 -r ${{ github.event.repository.name }}-wasm.zip wasm-out/
 
       - name: Build Windows 64-bit
         run: |

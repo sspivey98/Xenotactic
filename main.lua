@@ -115,7 +115,15 @@ function love.mousepressed(x, y, mouseButton)
         --game logic
         LEVEL.mousepressed(game, x, y, mouseButton)
     elseif game.state == ENUMS.STATES.LEVEL_WIN then
-        WINNER:mousepressed(x, y, mouseButton, game)
+        if mouseButton == ENUMS.CLICK.LEFT then
+            game.state = ENUMS.STATES.LEVEL_SELECT
+            LEVEL_SELECT.load()
+        end
+    elseif game.state == ENUMS.STATES.GAME_OVER then
+        if mouseButton == ENUMS.CLICK.LEFT then
+            game.state = ENUMS.STATES.LEVEL_SELECT
+            LEVEL_SELECT.load()
+        end
     end
 end
 
@@ -160,10 +168,12 @@ function love.keypressed(key)
     elseif game.state == ENUMS.STATES.GAME_OVER then
         if key == "escape" then
             game.state = ENUMS.STATES.LEVEL_SELECT
+            LEVEL_SELECT.load()
         end
     elseif game.state == ENUMS.STATES.LEVEL_WIN then
         if key == "escape" then
             game.state = ENUMS.STATES.LEVEL_SELECT
+            LEVEL_SELECT.load()
         end
     end
 end

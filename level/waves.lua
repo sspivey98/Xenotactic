@@ -16,6 +16,7 @@ for i=1,5 do
     ---@type WAVES
     local wave = lib["level"..i]
     wave:load(1, 10, "SCORPION", 20, 1)
+    --wave:load(1, 10, "SLIME", 20, 7, 1, nil, {amount=2, type="CYBORG"})
     wave:load(2, 10, "ALIEN", 24, 1)
     wave:load(3, 10, "BOSS1", 29, 2)
     wave:load(4, 10, "GOBLIN", 33, 2)

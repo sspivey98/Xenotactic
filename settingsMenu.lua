@@ -196,7 +196,7 @@ function lib:mousepressed(x,y,mouseButton, game)
                     break
                 end
             end
-            if not found then
+            if not found and password ~= "" then
                 self.unlockMessage = "Invalid password"
                 self.unlockMessageTimer = 3
             end

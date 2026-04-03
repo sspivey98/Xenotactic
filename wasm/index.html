@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Xenotactic</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #1a1a2e;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      gap: 24px;
+      font-family: sans-serif;
+    }
+
+    .title-block {
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 36px;
+      font-weight: 500;
+      color: #e8d5a3;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    #game-container canvas {
+      display: block;
+      margin: 0 auto;
+    }
+
+    #fs-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #ccc;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    #fs-btn:hover {
+      background: rgba(255,255,255,0.15);
+    }
+
+    #fs-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="title-block">
+    <h1>Xenotactic</h1>
+  </div>
+
+  <div id="game-container">
+    <script src="player.js?g=Xenotactic-linux.love&v=11.5"></script>
+  </div>
+
+  <button id="fs-btn" onclick="toggleFullscreen()">
+    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M1 1h4v2H3v2H1V1zm10 0h4v4h-2V3h-2V1zM1 11h2v2h2v2H1v-4zm12 2h-2v2h4v-4h-2v2z" fill="#ccc"/>
+    </svg>
+    Fullscreen
+  </button>
+
+  <script>
+    function toggleFullscreen() {
+      var canvas = document.getElementById('canvas');
+      if (!canvas) return;
+      if (canvas.requestFullScreen) canvas.requestFullScreen();
+      else if (canvas.webkitRequestFullScreen) canvas.webkitRequestFullScreen();
+      else if (canvas.mozRequestFullScreen) canvas.mozRequestFullScreen();
+    }
+  </script>
+</body>
+</html>

@@ -101,6 +101,7 @@ function lib:new(gameState, enemyTypeName, flowField, health, value, speed, scal
     --overwrite speed/health for scaling
     if health then o.health = health end
     if speed then o.speed = speed end
+    if value then o.value = value end
 
     local rand = 0
     if flowField.direction == ENUMS.FLOWFIELD.LONGITUDE then
@@ -156,7 +157,6 @@ function lib:new(gameState, enemyTypeName, flowField, health, value, speed, scal
     else
         o.scale = SETTINGS.scale
     end
-    if value then o.value = value end
     if splitter then
         o.splitter = {
             amount = splitter.amount or 0,
@@ -395,9 +395,8 @@ end
 ---Remove entity from game state and award money
 ---@param gameState GAME.GAMESTATE
 function lib:kill(gameState)
-    SOUNDS.library["enemy_kill"]:play()
-    gameState.money = gameState.money + self.value
-    gameState.enemies[self.index] = nil
+    local sound = SOUNDS.library["enemy_kill"]:clone()
+    pcall(sound.play, sound)
 
     --if splitter spawn more enemies
     if self.splitter then
@@ -405,6 +404,9 @@ function lib:kill(gameState)
             lib:new(gameState, self.splitter.type, self.flowField, self.fullHealth/self.splitter.amount, nil, nil, nil, nil, {x=self.coords.x,y=self.coords.y})
         end
     end
+
+    gameState.money = gameState.money + self.value
+    gameState.enemies[self.index] = nil
 end
 
 ---Remove entity from game state and lose life

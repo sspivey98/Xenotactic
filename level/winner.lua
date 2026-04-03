@@ -77,10 +77,4 @@ function lib:update(game)
     end
 end
 
-function lib:mousepressed(x, y, mouseButton, game)
-    if mouseButton == ENUMS.CLICK.LEFT then
-        game.state = ENUMS.STATES.LEVEL_SELECT
-    end
-end
-
 return lib
