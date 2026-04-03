@@ -29,16 +29,16 @@ jobs:
           VERSION=$(grep -oP 'return "\K[^"]*' version.lua)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
         
-      - name: Check if version changed
+      - name: Check if release for version exists
         id: version_check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git show HEAD~1:version.lua > /tmp/old_version.lua 2>/dev/null || echo 'return ""' > /tmp/old_version.lua
-          OLD_VERSION=$(grep -oP 'return "\K[^"]*' /tmp/old_version.lua || echo "")
-          
-          if [ "${{ steps.get_version.outputs.version }}" != "$OLD_VERSION" ]; then
-            echo "changed=true" >> $GITHUB_OUTPUT
-          else
+          VERSION=${{ steps.get_version.outputs.version }}
+          if gh release view "v$VERSION" --repo ${{ github.repository }} > /dev/null 2>&1; then
             echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
           fi
 
       - name: Package .love file
