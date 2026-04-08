@@ -297,8 +297,29 @@ function lib:update(dt, gameState)
     self.healthBar.y = self.position.y
     self.healthBar.value = self.health / self.fullHealth
 
-    --direction logic
+    --calc tile position and direction of tile
+    self.coords.x = math.floor(self.position.x / SETTINGS.TILE_SIZE)+1
+    self.coords.y = math.floor(self.position.y / SETTINGS.TILE_SIZE)+1
     local direction = self.flowField:getDirection(self.coords.x, self.coords.y)
+
+    --debug bounds check
+    if direction == ENUMS.FLOWFIELD.TILE.BLOCKED then
+        print(string.format("Enemy out of bounds! Coords: %d,%d Position: %.2f,%.2f",
+            self.coords.x, self.coords.y, self.position.x, self.position.y))
+
+        --push to nearest tile with a valid direction
+        local offsets = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}, {-1, -1}, {-1, 1}, {1, -1}, {1, 1}} --orthogonal then diagonal
+        for _,offset in ipairs(offsets) do
+            local newX = self.coords.x + offset[1]
+            local newY = self.coords.y + offset[2]
+            if self.flowField:getDirection(newX, newY) ~= ENUMS.FLOWFIELD.TILE.BLOCKED then
+                self.coords.x = newX
+                self.coords.y = newY
+                direction = self.flowField:getDirection(newX, newY)
+                break
+            end
+        end
+    end
 
     --check if at goal
     if direction == ENUMS.FLOWFIELD.TILE.GOAL then
@@ -355,10 +376,6 @@ function lib:update(dt, gameState)
     else
         self:turn(dt, direction)
     end
-
-    --calc tile position
-    self.coords.x = math.floor(self.position.x / SETTINGS.TILE_SIZE)+1
-    self.coords.y = math.floor(self.position.y / SETTINGS.TILE_SIZE)+1
 
     --sprite moving animation
     local animate = self.moveAnimation

@@ -160,6 +160,19 @@ function lib:load()
     ---@cast no_button button.text
     self.pause["yes_button"] = yes_button
     self.pause["no_button"] = no_button
+
+    self.pauseButton = BUTTON:new(
+        BUTTON.type.TEXT,
+        {
+            x = SETTINGS.SCREEN.MAP.WIDTH + SETTINGS.SCREEN.UI.WIDTH/2 + self.padding,
+            y = SETTINGS.SCREEN.HEIGHT/2 - 5*self.padding/2 - self.buttons["send_wave"].height,
+            width = SETTINGS.SCREEN.UI.WIDTH / 2 - 2*self.padding,
+            height = 2*self.padding,
+            color = {0.3, 0.3, 0.3},
+            textColor = ENUMS.UPGRADE_COLORS.YELLOW,
+            text = "MENU"
+        }
+    )
 end
 
 ---draw health bar frame
@@ -349,6 +362,10 @@ function lib:drawSelectedTurretUpgrade(gameState)
         end
     end
     love.graphics.setColor(1, 1, 1) -- Reset color
+end
+
+function lib:drawPauseButton()
+    self.pauseButton:draw()
 end
 
 function lib:drawPauseMenu()

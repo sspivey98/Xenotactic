@@ -14,6 +14,7 @@ local TICK = require('lib.tick')
 local SETTINGSMENU = require('settingsMenu')
 local GAMEOVER = require('level.gameover')
 local WINNER = require('level.winner')
+local WAVES = require('level.waves')
 
 local game
 
@@ -39,7 +40,7 @@ function love.update(dt)
     if game.state == ENUMS.STATES.MENU then
         MENU.update()
     elseif game.state == ENUMS.STATES.LEVEL_SELECT then
-        LEVEL_SELECT.update()
+        LEVEL_SELECT:update()
     elseif game.state == ENUMS.STATES.GAME then
         LEVEL.update(game, dt)
     elseif game.state == ENUMS.STATES.SETTINGS then
@@ -62,7 +63,7 @@ function love.mousepressed(x, y, mouseButton)
                 if button:clicked(x, y, mouseButton) then
                     if key == "PLAY" then
                         (SOUNDS.library["button_press"]):play()
-                        LEVEL_SELECT.load()
+                        LEVEL_SELECT:load()
                         game.state = ENUMS.STATES.LEVEL_SELECT
                         print("Moving game state to level select")
                     elseif key == "SETTINGS" then
@@ -82,7 +83,8 @@ function love.mousepressed(x, y, mouseButton)
                     --load level
                     (SOUNDS.library["button_press2"]):play()
                     local map = MAPS["level_"..index]
-                    local waves = require('level.waves')["level"..index]
+                    WAVES:load()
+                    local waves = WAVES["level"..index]
                     if index == 1 then
                         game.gameState = GAME.newGame(
                             60,
@@ -106,6 +108,8 @@ function love.mousepressed(x, y, mouseButton)
                     game.state = ENUMS.STATES.GAME
                     print("Selected level: " .. index)
                     break
+                else
+                    LEVEL_SELECT:mousepressed(x, y, mouseButton, game)
                 end
             end
         end
@@ -117,12 +121,12 @@ function love.mousepressed(x, y, mouseButton)
     elseif game.state == ENUMS.STATES.LEVEL_WIN then
         if mouseButton == ENUMS.CLICK.LEFT then
             game.state = ENUMS.STATES.LEVEL_SELECT
-            LEVEL_SELECT.load()
+            LEVEL_SELECT:load()
         end
     elseif game.state == ENUMS.STATES.GAME_OVER then
         if mouseButton == ENUMS.CLICK.LEFT then
             game.state = ENUMS.STATES.LEVEL_SELECT
-            LEVEL_SELECT.load()
+            LEVEL_SELECT:load()
         end
     end
 end
@@ -168,12 +172,12 @@ function love.keypressed(key)
     elseif game.state == ENUMS.STATES.GAME_OVER then
         if key == "escape" then
             game.state = ENUMS.STATES.LEVEL_SELECT
-            LEVEL_SELECT.load()
+            LEVEL_SELECT:load()
         end
     elseif game.state == ENUMS.STATES.LEVEL_WIN then
         if key == "escape" then
             game.state = ENUMS.STATES.LEVEL_SELECT
-            LEVEL_SELECT.load()
+            LEVEL_SELECT:load()
         end
     end
 end

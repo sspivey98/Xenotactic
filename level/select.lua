@@ -5,13 +5,14 @@ local SOUNDS = require('lib.sounds')
 local BUTTON = require('lib.button')
 local MAPS = require('level.maps')
 local SETTINGS = require('settings')
+local ENUMS = require('enums')
 
 ---@type button.image[]
 lib.Levels = {}
 lib.Level_MetaData = {}
 
 ---load level
-function lib.load()
+function lib:load()
     --add width and heights to level selections
     for i=1, 6 do
         local img = IMAGES.library["level_"..i]
@@ -46,7 +47,7 @@ function lib.load()
             }
         )
         ---@cast button button.image
-        lib.Levels[i] = button
+        self.Levels[i] = button
 
         --level descriptions
         local metadata = MAPS.METADATA["level_"..i]
@@ -68,14 +69,27 @@ function lib.load()
                 y = y  + height/2 + pad*2,
             }
         }
-        lib.Level_MetaData[i] = level_metadata
+        self.Level_MetaData[i] = level_metadata
     end
+
+    self.backButton = BUTTON:new(
+        BUTTON.type.TEXT,
+        {
+            x = 20,
+            y = 20,
+            width = 100,
+            height = 40,
+            text = "< Back"
+        }
+    )
+
     SOUNDS.library["next_menu"]:play()
 end
 
-function lib.update()
+function lib:update()
     local mouseX, mouseY = love.mouse.getPosition()
-    for _,level in pairs(lib.Levels) do
+    self.backButton:isHovered(mouseX, mouseY)
+    for _,level in pairs(self.Levels) do
         level:isHovered(mouseX, mouseY)
     end
 end
@@ -132,6 +146,19 @@ function lib:draw(game)
             level.color = {0.5,0.5,0.5}
             level.disabled = true
         end
+    end
+
+    --back button
+    self.backButton:draw()
+end
+
+---@param x integer
+---@param y integer
+---@param mouseButton integer
+---@param game GAME
+function lib:mousepressed(x, y, mouseButton, game)
+    if self.backButton:clicked(x,y,mouseButton) then
+        game.state = ENUMS.STATES.MENU
     end
 end
 

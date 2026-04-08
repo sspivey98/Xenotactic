@@ -50,7 +50,7 @@ jobs:
           git clone --depth 1 --filter=blob:none --sparse \
             https://github.com/2dengine/love.js.git love-js-repo
           cd love-js-repo
-          git sparse-checkout set 11.5
+          git sparse-checkout set 11.5 lua
           git checkout HEAD -- player.js
           cd ..
 
@@ -58,6 +58,7 @@ jobs:
           mkdir -p wasm-out
           cp ${{ github.event.repository.name }}.love wasm-out/
           cp -r love-js-repo/11.5 wasm-out/11.5
+          cp -r love-js-repo/lua wasm-out/lua
           cp love-js-repo/player.js wasm-out/player.js
           cp wasm/index.html wasm-out/index.html
           cp wasm/server.py wasm-out/server.py

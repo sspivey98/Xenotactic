@@ -22,7 +22,7 @@
     ✓ turret selected menu
     ✓ upgrade/sell button for turret
     ✓ health bar
-    - enemy selected property in bottom left
+    x enemy selected property in bottom left
 
 - implement wave logic
     ✓ enemy types per wave
@@ -48,5 +48,10 @@
 ✓ improve level select and lock levels behind a progression system
 
 FIXES:
-    - enemies sometimes don't respect flowfield
+    ✓ enemies sometimes don't respect flowfield
+    ✓ enemies sometimes get stuck in wall
+    - freezes still occur intermittently in WASM
+    - level 3 completion did not show password?
+    - send wave button after completion of last wave finishes level
+    ✓ waves should be repopulated after quitting
     ✓ selected turret menu doesn't work

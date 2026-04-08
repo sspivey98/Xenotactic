@@ -193,6 +193,7 @@ function lib.draw(gameState)
     UI:drawRound(gameState)
     UI:drawEnemyCounter(gameState)
     UI:drawCurrentEnemy(gameState)
+    UI:drawPauseButton()
 
     --draw UI turret buttons
     for _,turret in pairs(UI.turrets) do
@@ -219,6 +220,9 @@ end
 ---@param y number
 ---@param mouseButton ENUMS.CLICK
 function lib.mousepressed(game, x, y, mouseButton)
+    if UI.pauseButton:clicked(x, y, mouseButton) then
+        PAUSE = not PAUSE
+    end
     if not PAUSE then
         if mouseButton == ENUMS.CLICK.LEFT then
             local tile = UTIL.getTileAt(game.gameState.map, x, y)
@@ -339,6 +343,7 @@ function lib.update(game, dt)
         for _,button in pairs(UI.buttons) do
             button:isHovered(mouse.x, mouse.y)
         end
+        UI.pauseButton:isHovered(mouse.x, mouse.y)
 
         --updateMap
         local tile = UTIL.getTileAt(game.gameState.map, mouse.x, mouse.y)
