@@ -240,6 +240,10 @@ end
 ---@param dt number delta time between last frame and current frame
 ---@param newDirection ENUMS.FLOWFIELD.TILE
 function lib:turn(dt, newDirection)
+    --snap to center of current tile
+    self.position.x = (self.coords.x - 0.5)*SETTINGS.TILE_SIZE
+    self.position.y = (self.coords.y - 0.5)*SETTINGS.TILE_SIZE
+
     --get radians of new direction
     local radians = 0
     if newDirection == ENUMS.FLOWFIELD.TILE.UP then
@@ -303,8 +307,8 @@ function lib:update(dt, gameState)
     local direction = self.flowField:getDirection(self.coords.x, self.coords.y)
 
     --debug bounds check
-    if direction == ENUMS.FLOWFIELD.TILE.BLOCKED then
-        print(string.format("Enemy out of bounds! Coords: %d,%d Position: %.2f,%.2f",
+    if direction == ENUMS.FLOWFIELD.TILE.BLOCKED and not self.dying and not self.air then
+        print(string.format("Enemy out of bounds! Coords: %d,   %d Position: %.2f,%.2f",
             self.coords.x, self.coords.y, self.position.x, self.position.y))
 
         --push to nearest tile with a valid direction
@@ -313,9 +317,14 @@ function lib:update(dt, gameState)
             local newX = self.coords.x + offset[1]
             local newY = self.coords.y + offset[2]
             if self.flowField:getDirection(newX, newY) ~= ENUMS.FLOWFIELD.TILE.BLOCKED then
+                --get new tile coords
                 self.coords.x = newX
                 self.coords.y = newY
-                direction = self.flowField:getDirection(newX, newY)
+                --recenter
+                self.position.x = (self.coords.x - 0.5)*SETTINGS.TILE_SIZE
+                self.position.y = (self.coords.y - 0.5)*SETTINGS.TILE_SIZE
+                --set last direction
+                self.lastDirection = self.flowField:getDirection(newX, newY)
                 break
             end
         end

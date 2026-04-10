@@ -82,6 +82,32 @@ jobs:
       - name: Prepare Linux .love Artifact
         run: cp ${{ github.event.repository.name }}.love ${{ github.event.repository.name }}-linux.love
 
+      - name: Build macOS Artifact
+        run: |
+          curl -L https://github.com/love2d/love/releases/download/11.5/love-11.5-macos.zip -o love-macos.zip
+          unzip love-macos.zip
+
+          mv love.app ${{ github.event.repository.name }}.app
+
+          cp ${{ github.event.repository.name }}.love ${{ github.event.repository.name }}.app/Contents/Resources/
+
+          # Update Info.plist
+          sed -i '' 's|org.love2d.love|com.${{ github.event.repository.owner.login }}.${{ github.event.repository.name }}|g' \
+            ${{ github.event.repository.name }}.app/Contents/Info.plist
+          sed -i 's|<string>LÖVE</string>|<string>${{ github.event.repository.name }}</string>|' \
+            ${{ github.event.repository.name }}.app/Contents/Info.plist
+
+          # Remove UTExportedTypeDeclarations section
+          python3 -c "
+          import re, sys
+          content = open('${{ github.event.repository.name }}.app/Contents/Info.plist').read()
+          content = re.sub(r'<key>UTExportedTypeDeclarations</key>.*?</array>', '', content, flags=re.DOTALL)
+          open('${{ github.event.repository.name }}.app/Contents/Info.plist', 'w').write(content)
+          "
+
+          # -y preserves symlinks
+          zip -9 -ry ${{ github.event.repository.name }}-macos.zip ${{ github.event.repository.name }}.app/
+
       - name: Create GitHub Release
         if: steps.version_check.outputs.changed == 'true'
         uses: softprops/action-gh-release@v2
@@ -91,6 +117,7 @@ jobs:
             ${{ github.event.repository.name }}-win64.zip
             ${{ github.event.repository.name }}-linux.love
             ${{ github.event.repository.name }}-wasm.zip
+            ${{ github.event.repository.name }}-macos.zip
           name: Release ${{ steps.get_version.outputs.version }}
           generate_release_notes: true
         env:
