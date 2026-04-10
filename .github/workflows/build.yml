@@ -91,21 +91,16 @@ jobs:
 
           cp ${{ github.event.repository.name }}.love ${{ github.event.repository.name }}.app/Contents/Resources/
 
-          # Update Info.plist
-          sed -i '' 's|org.love2d.love|com.${{ github.event.repository.owner.login }}.${{ github.event.repository.name }}|g' \
-            ${{ github.event.repository.name }}.app/Contents/Info.plist
-          sed -i 's|<string>LÖVE</string>|<string>${{ github.event.repository.name }}</string>|' \
-            ${{ github.event.repository.name }}.app/Contents/Info.plist
-
-          # Remove UTExportedTypeDeclarations section
           python3 -c "
-          import re, sys
-          content = open('${{ github.event.repository.name }}.app/Contents/Info.plist').read()
+          import re
+          path = '${{ github.event.repository.name }}.app/Contents/Info.plist'
+          content = open(path).read()
+          content = content.replace('org.love2d.love', 'com.${{ github.repository_owner }}.${{ github.event.repository.name }}')
+          content = content.replace('<string>LÖVE</string>', '<string>${{ github.event.repository.name }}</string>')
           content = re.sub(r'<key>UTExportedTypeDeclarations</key>.*?</array>', '', content, flags=re.DOTALL)
-          open('${{ github.event.repository.name }}.app/Contents/Info.plist', 'w').write(content)
+          open(path, 'w').write(content)
           "
 
-          # -y preserves symlinks
           zip -9 -ry ${{ github.event.repository.name }}-macos.zip ${{ github.event.repository.name }}.app/
 
       - name: Create GitHub Release
