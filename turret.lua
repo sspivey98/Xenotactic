@@ -455,11 +455,14 @@ end
 
 ---find enemy to target. Always returns an array of enemies in range
 ---The first enemy in the array is the closest to the goal 
----@param enemies ENEMY[]
-function lib:target(enemies)
+---@param gameState GAME.GAMESTATE
+function lib:target(gameState)
     -- 1.) Search for enemies within radius of turret -> target()
     -- 2.) Select enemy closest to goal in radius -> target()
     -- 3.) updated targeting coordinates for turret -> target() -> self.targeting
+
+    --ignore wall pieces
+    if self.turretType == "WALL" then return end
 
     local center = {
         x = self.position.x + SETTINGS.TILE_SIZE,
@@ -472,20 +475,26 @@ function lib:target(enemies)
 
     --if target is still in range and not dead, then don't update
     if self.targeting then
-        if self.targeting.health <= 0 or self:inRange(self.targeting) == false then
+        if self.targeting.health <= 0 or self:inRange(self.targeting) == false or self.targeting.dying then
             self.targeting = nil
         end
     end
 
     --if not targeting, find next target
+    local selectedEnemyInRange = false
     local inRange = {}
-    for guid,enemy in pairs(enemies) do
+    for guid,enemy in pairs(gameState.enemies) do
         local dx = enemy.position.x - center.x
         local dy = enemy.position.y - center.y
         local distance = math.sqrt(dx*dx + dy*dy)
         if (distance <= self.range) and ((self.air == enemy.air) or self.turretType == "PLASMA") then
             --its in range
             table.insert(inRange, enemy)
+
+            --it is selected
+            if gameState.selectedEnemy and enemy == gameState.selectedEnemy then
+                selectedEnemyInRange = true
+            end
 
             --find enemy closest to goal
             local progress = enemy.flowField.costMap[enemy.coords.y][enemy.coords.x]
@@ -498,8 +507,16 @@ function lib:target(enemies)
 
     --add the enemy closest to the goal first
     if not self.targeting then
-        self.targeting = enemies[target]
-        table.insert(ret, enemies[target])
+        --if enemy is selected and in range, prioritize
+        if selectedEnemyInRange and gameState.selectedEnemy.health > 0 and not gameState.selectedEnemy.dying then
+                self.targeting = gameState.selectedEnemy
+                table.insert(ret, gameState.selectedEnemy)
+        else
+            if target and gameState.enemies[target] then
+                self.targeting = gameState.enemies[target]
+                table.insert(ret, gameState.enemies[target])
+            end
+        end
     end
 
     --add other enemies in the list later

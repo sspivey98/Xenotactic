@@ -85,6 +85,7 @@ lib.COLORS = {
 ---@field splash number splash radius
 ---@field stun_chance integer chance to stun
 ---@field targetOne boolean targets specific enemies or not
+---@field tooltip string
 
 ---@class ENUMS.TURRET
 ---@field WALL TurretData
@@ -138,7 +139,8 @@ lib.TURRET = {
         air = false,
         splash = 0,
         stun_chance = 0,
-        targetOne = true
+        targetOne = true,
+        tooltip = "REDIRECT GROUND ENEMIES MOVEMENT"
     },
     GATLING = {
         cost = 5,
@@ -154,7 +156,8 @@ lib.TURRET = {
         air = false,
         splash = 0,
         stun_chance = 0,
-        targetOne = true
+        targetOne = true,
+        tooltip = "SLOW SPEED, HIGH DAMAGE. SHOOTS GROUND"
     },
     PLASMA = {
         cost = 15,
@@ -170,7 +173,8 @@ lib.TURRET = {
         air = false,
         splash = 0,
         stun_chance = 0,
-        targetOne = true
+        targetOne = true,
+        tooltip = "RAPID TURRET. SHOOTS AIR & GROUND"
     },
     SAM = {
         cost = 20,
@@ -186,7 +190,8 @@ lib.TURRET = {
         air = false,
         splash = 1.5,
         stun_chance = 0,
-        targetOne = true
+        targetOne = true,
+        tooltip = "ROCKETS DO SPLASH DAMAGE. SHOOTS GROUND"
     },
     DCA = {
         cost = 50,
@@ -202,7 +207,8 @@ lib.TURRET = {
         air = true,
         splash = 1.5,
         stun_chance = 0,
-        targetOne = false
+        targetOne = false,
+        tooltip = "SHOOTS 4 ROCKETS AT A TIME. SHOOTS AIR"
     },
     FREEZE = {
         cost = 50,
@@ -218,7 +224,8 @@ lib.TURRET = {
         air = false,
         splash = 1.5,
         stun_chance = 0,
-        targetOne = true
+        targetOne = true,
+        tooltip = "SLOWS ENEMIES AND HAS SPLASH. SHOOTS GROUND"
     },
     TESLA = {
         cost = 30,
@@ -234,7 +241,8 @@ lib.TURRET = {
         air = false,
         splash = 0,
         stun_chance = 5,
-        targetOne = false
+        targetOne = false,
+        tooltip = "HITS ALL GROUND ENEMIES IN RANGE. CHANCE TO STUN"
     }
 }
 

@@ -188,11 +188,11 @@ function lib.draw(gameState)
     UI:drawSelectedTurret(gameState)
     UI:drawSelectedTurretUpgrade(gameState)
     UI:drawMoney(gameState.money)
-    UI:drawHealthBar(gameState.lives, SETTINGS.SCREEN.MAP.WIDTH, 0)
+    UI:drawHealthBar(gameState.lives)
     UI:drawTimer(gameState)
     UI:drawRound(gameState)
     UI:drawEnemyCounter(gameState)
-    UI:drawCurrentEnemy(gameState)
+    --UI:drawCurrentEnemy(gameState)
     UI:drawPauseButton()
 
     --draw UI turret buttons
@@ -211,6 +211,13 @@ function lib.draw(gameState)
 
     if gameState.selectedEnemy then
         UI:drawHealth(gameState.selectedEnemy)
+    end
+
+    --tooltips
+    for _,button in pairs(UI.turrets) do
+        if button.hovered and button.tooltip then
+            button:drawTooltip()
+        end
     end
 end
 
@@ -257,6 +264,7 @@ function lib.mousepressed(game, x, y, mouseButton)
                         if enemy:select(x, y) then
                             checkEnemy = true
                             game.gameState.selectedEnemy = enemy
+                            break
                         end
                     end
                     if not checkEnemy then game.gameState.selectedEnemy = nil end
@@ -336,11 +344,34 @@ function lib.update(game, dt)
         end
 
         --UI selection
-        for _,turret in pairs(UI.turrets) do
+        for name,turret in pairs(UI.turrets) do
+            if ENUMS.TURRET[name].cost > game.gameState.money then
+                turret.disabled = true
+                turret.color = {0.5, 0.5, 0.5}
+            else
+                turret.disabled = false
+                turret.color = {1,1,1}
+            end
             turret:isHovered(mouse.x, mouse.y)
         end
 
-        for _,button in pairs(UI.buttons) do
+        for key,button in pairs(UI.buttons) do
+            if key == "upgrade" and game.gameState.selectedTurret then
+                if game.gameState.selectedTurret.turretType ~= "WALL" then
+                    local cost = ENUMS.UPGRADE_PATH[game.gameState.selectedTurret.turretType]["LEVEL"..game.gameState.selectedTurret.level+1].cost
+                    if cost > game.gameState.money then
+                        button.disabled = true
+                        button.color = {0.1, 0.1, 0.1}
+                        button.hovered = false
+                    else
+                        button.disabled = false
+                        button.color = {0.3, 0.3, 0.3}
+                    end
+                end
+            else
+                button.disabled = false
+                button.color = {0.3, 0.3, 0.3}
+            end
             button:isHovered(mouse.x, mouse.y)
         end
         UI.pauseButton:isHovered(mouse.x, mouse.y)
@@ -376,7 +407,7 @@ function lib.update(game, dt)
         --turrets
         for _,turret in pairs(game.gameState.turrets) do
             turret:update(dt, game.gameState)
-            turret:target(game.gameState.enemies)
+            turret:target(game.gameState)
         end
 
         --blocked animation

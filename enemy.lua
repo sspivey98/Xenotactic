@@ -25,7 +25,7 @@ enemies will have different paths based on position and final
 ---@field flowField FLOWFIELD which flowField for the enemy to follow
 ---@field selected boolean determine if enemy is selected
 ---@field protected splitter {amount: integer, type:ENUMS.ENEMY_TYPE, x:integer,y:integer} enemies that split into more enemies after dying
----@field protected dying boolean mark enemy is dying or not
+---@field dying boolean mark enemy is dying or not
 ---@field fullHealth number enemy's health when full
 ---@field protected healthBar {width:number,height:number,x:number,y:number,value:number}
 ---@field protected origin {x:number,y:number} origin x,y for rotation
@@ -41,7 +41,6 @@ local lib = setmetatable({},
     }
 )
 
-local SETTINGS = require('settings')
 local enemies_sprite_sheet = IMAGES.library["enemies"]
 
 ---creates array of sprites for the enemy

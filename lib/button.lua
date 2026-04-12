@@ -25,6 +25,7 @@ local SOUNDS = require('lib.sounds')
 ---button object constructor parameters
 ---@class button.image.options : button.options
 ---@field image any for image buttons only
+---@field tooltip? string
 ---@field scale? {x?:number,y?:number} for image buttons only
 
 ---button object constructor parameters
@@ -93,6 +94,7 @@ end
 
 ---@class button.image : button
 ---@field image any
+---@field tooltip string|nil
 ---@field scale {x:number,y:number}
 local IButtonImage = {}
 
@@ -109,13 +111,14 @@ function IButtonImage:new(o)
         x = o.scale.x or 1,
         y = o.scale.y or 1
     }
+    obj.tooltip = o.tooltip
     return obj
 end
 
 ---override
 function IButtonImage:draw()
     if self.hovered then
-       love.graphics.setColor(self.hoveredColor)
+        love.graphics.setColor(self.hoveredColor)
     else
         love.graphics.setColor(self.color)
     end
@@ -130,6 +133,53 @@ function IButtonImage:draw()
     --border
     love.graphics.setColor(0, 0, 0)  -- Black color
     love.graphics.rectangle("line", self.x, self.y, self.width, self.height)
+end
+
+function IButtonImage:drawTooltip()
+    local font = love.graphics.getFont()
+    local textWidth = font:getWidth(self.tooltip)
+    local textHeight = font:getHeight()
+    local padding = 8
+
+    -- Calculate tooltip dimensions
+    local tooltipWidth = textWidth + padding * 2
+    local tooltipHeight = textHeight + padding * 2
+
+    -- Start with tooltip centered above button
+    local tooltipX = self.x + self.width / 2 - tooltipWidth / 2
+    local tooltipY = self.y - tooltipHeight - 5
+
+    -- Flip tooltip below button if too close to top
+    if tooltipY < 0 then
+        tooltipY = self.y + self.height + 5
+    end
+
+    -- Check if tooltip goes off left edge
+    if tooltipX < 0 then
+        tooltipX = 5
+    end
+
+    -- Check if tooltip goes off right edge
+    if tooltipX + tooltipWidth > love.graphics.getWidth() then
+        tooltipX = love.graphics.getWidth() - tooltipWidth - 5
+    end
+
+    -- Check if tooltip goes off bottom edge
+    if tooltipY + tooltipHeight > love.graphics.getHeight() then
+        tooltipY = self.y - tooltipHeight - 5
+    end
+
+    -- Draw tooltip background
+    love.graphics.setColor(0.1, 0.1, 0.1, 0.9)
+    love.graphics.rectangle("fill", tooltipX, tooltipY, tooltipWidth, tooltipHeight, 4, 4)
+
+    -- Draw tooltip border
+    love.graphics.setColor(0.6, 0.6, 0.6)
+    love.graphics.rectangle("line", tooltipX, tooltipY, tooltipWidth, tooltipHeight, 4, 4)
+
+    -- Draw tooltip text
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.print(self.tooltip, tooltipX + padding, tooltipY + padding)
 end
 
 --<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

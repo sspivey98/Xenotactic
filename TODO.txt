@@ -56,7 +56,7 @@ FIXES:
     ✓ send wave button after completion of last wave finishes level
     ✓ waves should be repopulated after quitting
     ✓ selected turret menu doesn't work
-    - implement selected enemy is preferred target
-    - add tooltips for turrets
-    - darken turret icons when insufficient funds
-    - disable upgrade button when insufficient funds
+    ✓ implement selected enemy is preferred target
+    ✓ add tooltips for turrets
+    ✓ darken turret icons when insufficient funds
+    ✓ disable upgrade button when insufficient funds

@@ -76,11 +76,12 @@ function lib:load()
                 height = height,
                 image = img,
                 color = {1,1,1},
-                hoveredColor = {1,0.7,0.7},
+                hoveredColor = {1, 0.7, 0.7},
                 scale = {
                     x = scale.x,
                     y = scale.y
-                }
+                },
+                tooltip = ENUMS.TURRET[key].tooltip
             }
         )
 
@@ -164,12 +165,12 @@ function lib:load()
     self.pauseButton = BUTTON:new(
         BUTTON.type.TEXT,
         {
-            x = SETTINGS.SCREEN.MAP.WIDTH + SETTINGS.SCREEN.UI.WIDTH/2 + self.padding,
-            y = SETTINGS.SCREEN.HEIGHT/2 - 5*self.padding/2 - self.buttons["send_wave"].height,
-            width = SETTINGS.SCREEN.UI.WIDTH / 2 - 2*self.padding,
-            height = 2*self.padding,
+            x = 0,
+            y = 0,
+            width = SETTINGS.SCREEN.UI.WIDTH / 2 - 4*self.padding,
+            height = self.padding*SETTINGS.scale,
             color = {0.3, 0.3, 0.3},
-            textColor = ENUMS.UPGRADE_COLORS.YELLOW,
+            textColor = ENUMS.UPGRADE_COLORS.CYAN,
             text = "MENU"
         }
     )
@@ -177,7 +178,9 @@ end
 
 ---draw health bar frame
 ---@param health integer 1-20
-function lib:drawHealthBar(health, x, y)
+function lib:drawHealthBar(health)
+    local x = SETTINGS.SCREEN.MAP.WIDTH - frames[health]:getWidth()*1.5
+    local y = 0
     love.graphics.setColor{1,1,1}
     love.graphics.draw(
         frames[health],
@@ -222,8 +225,8 @@ function lib:drawTimer(gameState)
     local font = love.graphics.getFont()
     local textWidth = font:getWidth(text)
     local textHeight = font:getHeight()
-    local x = SETTINGS.SCREEN.MAP.WIDTH - textWidth - self.padding/2
-    local y = self.padding/2
+    local x = SETTINGS.SCREEN.MAP.WIDTH - self.padding/2 - textWidth
+    local y = SETTINGS.SCREEN.HEIGHT - self.padding
 
     --background box
     love.graphics.setColor(0, 0, 0, 0.7)
@@ -269,7 +272,7 @@ function lib:drawRound(gameState)
     local font = love.graphics.getFont()
     local textWidth = font:getWidth(text)
     local textHeight = font:getHeight()
-    local x = self.padding/2
+    local x = SETTINGS.SCREEN.MAP.WIDTH + self.padding/2
     local y = self.padding/2
 
     --background box
@@ -289,7 +292,9 @@ function lib:drawEnemyCounter(gameState)
     local font = love.graphics.getFont()
     local textWidth = font:getWidth(text)
     local textHeight = font:getHeight()
-    local x = SETTINGS.SCREEN.MAP.WIDTH - self.padding/2 - textWidth
+    -- local x = SETTINGS.SCREEN.MAP.WIDTH - self.padding/2 - textWidth
+    -- local y = SETTINGS.SCREEN.HEIGHT - self.padding
+    local x = self.padding/2
     local y = SETTINGS.SCREEN.HEIGHT - self.padding
 
     --background box
