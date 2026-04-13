@@ -49,7 +49,7 @@ end
 ---@return GAME.GAMESTATE
 function lib.newGame(money, level, map, waves, path1, path2)
     local game = {
-        money = money or 30,
+        money = money or 60,
         map = map or {},
         path1 = path1, --flowField left -> right
         path2 = path2, --flowField up -> down

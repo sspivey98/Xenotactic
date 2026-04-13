@@ -357,7 +357,7 @@ function lib.update(game, dt)
 
         for key,button in pairs(UI.buttons) do
             if key == "upgrade" and game.gameState.selectedTurret then
-                if game.gameState.selectedTurret.turretType ~= "WALL" then
+                if game.gameState.selectedTurret.turretType ~= "WALL" and game.gameState.selectedTurret.level ~= 6 then
                     local cost = ENUMS.UPGRADE_PATH[game.gameState.selectedTurret.turretType]["LEVEL"..game.gameState.selectedTurret.level+1].cost
                     if cost > game.gameState.money then
                         button.disabled = true
@@ -367,6 +367,9 @@ function lib.update(game, dt)
                         button.disabled = false
                         button.color = {0.3, 0.3, 0.3}
                     end
+                else
+                    button.disabled = true
+                    button.color = {0.1, 0.1, 0.1}
                 end
             else
                 button.disabled = false
