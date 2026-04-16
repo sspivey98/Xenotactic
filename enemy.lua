@@ -421,7 +421,7 @@ end
 ---@param gameState GAME.GAMESTATE
 function lib:kill(gameState)
     local sound = SOUNDS.library["enemy_kill"]:clone()
-    pcall(sound.play, sound)
+    sound:play()
 
     --if splitter spawn more enemies
     if self.splitter then

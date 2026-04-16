@@ -187,7 +187,7 @@ lib.METADATA = {
     level_6 = {
         CATEGORY = "EXPERT.",
         DESCRIPTION = "2 LINES OF ALIENS.",
-        LENGTH = "20 WAVES TO BEAT."
+        LENGTH = "100 WAVES TO BEAT."
     },
 }
 
