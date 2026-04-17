@@ -666,8 +666,8 @@ lib.UPGRADE_PATH = {
         },
         LEVEL6 = {
             cost = 310,
-            damage = 480,
-            range = 80,
+            damage = 540,
+            range = 100,
             value = 247,
             slow = 0,
             splash = 0,
