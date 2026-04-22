@@ -55,6 +55,24 @@
       width: 14px;
       height: 14px;
     }
+
+    .footer {
+      color: rgba(255,255,255,0.4);
+      font-size: 13px;
+      margin-top: 8px;
+    }
+ 
+    .footer a {
+      color: #e8d5a3;
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.2s;
+    }
+ 
+    .footer a:hover {
+      border-bottom-color: #e8d5a3;
+    }
+
   </style>
 </head>
 <body>
@@ -72,6 +90,11 @@
     </svg>
     Fullscreen
   </button>
+
+  <div class="footer">
+    <a href="https://github.com/sspivey98/Xenotactic" target="_blank" rel="noopener noreferrer">View Source Code</a>
+  </div>
+
 
   <script>
     function toggleFullscreen() {

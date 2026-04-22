@@ -197,7 +197,7 @@ lib.TURRET = {
         cost = 50,
         value = 25,
         range = 60,
-        speed = 2,
+        speed = 4,
         damage = 20,
         image = IMAGES.library["turret_sam"],
         sound = SOUNDS.library["shoot_missile"]:clone(),
@@ -731,7 +731,7 @@ lib.UPGRADE_PATH = {
             value = 41,
             slow = 0,
             splash = 0,
-            stun_chance = 7,
+            stun_chance = 10,
         },
         LEVEL3 = {
             cost = 50,
@@ -740,7 +740,7 @@ lib.UPGRADE_PATH = {
             value = 79,
             slow = 0,
             splash = 0,
-            stun_chance = 10,
+            stun_chance = 13,
         },
         LEVEL4 = {
             cost = 100,
@@ -749,7 +749,7 @@ lib.UPGRADE_PATH = {
             value = 153,
             slow = 0,
             splash = 0,
-            stun_chance = 13,
+            stun_chance = 15,
         },
         LEVEL5 = {
             cost = 185,
@@ -758,7 +758,7 @@ lib.UPGRADE_PATH = {
             value = 292,
             slow = 0,
             splash = 0,
-            stun_chance = 15,
+            stun_chance = 20,
         },
         LEVEL6 = {
             cost = 355,
@@ -767,7 +767,7 @@ lib.UPGRADE_PATH = {
             value = 558,
             slow = 0,
             splash = 0,
-            stun_chance = 20,
+            stun_chance = 25,
         }
     }
 }
