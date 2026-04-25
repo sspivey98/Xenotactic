@@ -71,6 +71,12 @@ jobs:
  
           zip -9 -r ${{ github.event.repository.name }}-wasm.zip wasm-out/
 
+      - name: Upload WASM artifact for GitHub pages
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm-out
+          path: wasm-out/
+
       - name: Build Windows 64-bit
         run: |
           mkdir -p releases/win64
