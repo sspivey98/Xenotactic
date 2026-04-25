@@ -7,9 +7,9 @@ COPY ./lua ./lua
 COPY Xenotactic.love .
 COPY player.js .
 COPY index.html .
-COPY server.py .
 COPY favicon.ico .
+COPY coi-serviceworker.js .
 
 EXPOSE 8000
 
-CMD ["python", "server.py"]
+CMD ["python", "-m", "http.server", "8000"]

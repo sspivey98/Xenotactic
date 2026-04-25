@@ -54,14 +54,18 @@ jobs:
           git checkout HEAD -- player.js
           cd ..
 
+          # Fetch coi-serviceworker for GitHub Pages CORS support
+          curl -L https://raw.githubusercontent.com/gzuidhof/coi-serviceworker/master/coi-serviceworker.js \
+            -o coi-serviceworker.js
+
           # Assemble the wasm package
           mkdir -p wasm-out
           cp ${{ github.event.repository.name }}.love wasm-out/
           cp -r love-js-repo/11.5 wasm-out/11.5
           cp -r love-js-repo/lua wasm-out/lua
           cp love-js-repo/player.js wasm-out/player.js
+          cp coi-serviceworker.js wasm-out/coi-serviceworker.js
           cp wasm/index.html wasm-out/index.html
-          cp wasm/server.py wasm-out/server.py
           cp wasm/dockerfile wasm-out/dockerfile
           cp wasm/favicon.ico wasm-out/favicon.ico
  
@@ -117,3 +121,28 @@ jobs:
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    deploy:
+      runs-on: ubuntu-latest
+      needs: build
+      permissions:
+        pages: write
+        id-token: write
+      environment:
+        name: github-pages
+        url: ${{ steps.deployment.outputs.page_url }}
+      steps:
+        - name: Download wasm artifact
+          uses: actions/download-artifact@v4
+          with:
+            name: wasm-out
+            path: wasm-out
+  
+        - name: Upload to GitHub Pages
+          uses: actions/upload-pages-artifact@v3
+          with:
+            path: wasm-out/
+  
+        - name: Deploy to GitHub Pages
+          id: deployment
+          uses: actions/deploy-pages@v4
