@@ -10,6 +10,7 @@ local UI = require('level.ui')
 --GLOBALS
 local VISUAL_TILE_MAP
 local PAUSE = false
+local SHIFT = false
 local COLOR = {}
 
 local blockedAnimation = {
@@ -241,7 +242,9 @@ function lib.mousepressed(game, x, y, mouseButton)
                         SOUNDS.library["invalid"]:play()
                     else --turret is placed
                         TURRET:new(game.gameState, currentTile.x, currentTile.y, SETTINGS.scale)
-                        game.gameState.placementMode = false
+                        if not SHIFT then
+                            game.gameState.placementMode = false
+                        end
                         SOUNDS.library["turret_build"]:play()
                         --update enemy pathing
                         game.gameState.path1:setBlocked(tile.x, tile.y)
@@ -302,11 +305,10 @@ function lib.mousepressed(game, x, y, mouseButton)
                         end
                     end
                 end
-
-                if UI.buttons["send_wave"]:clicked(x, y, mouseButton) then
-                    game.gameState.waves:next(game.gameState)
-                end
             end
+        if UI.buttons["send_wave"]:clicked(x, y, mouseButton) then
+            game.gameState.waves:next(game.gameState)
+        end
         elseif mouseButton == ENUMS.CLICK.RIGHT then
             --deselect whatever
             game.gameState.selectedTurret = nil
@@ -432,8 +434,18 @@ function lib.update(game, dt)
 end
 
 function lib:keypressed(key)
+    if key == "lshift" then
+        SHIFT = true
+    end
+
     if key == "escape" then
        PAUSE = not PAUSE
+    end
+end
+
+function lib:keyreleased(key)
+    if key == "lshift" then
+        SHIFT = false
     end
 end
 

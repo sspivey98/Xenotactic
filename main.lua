@@ -181,3 +181,9 @@ function love.keypressed(key)
         end
     end
 end
+
+function love.keyreleased(key)
+    if game.state == ENUMS.STATES.GAME then
+        LEVEL:keyreleased(key)
+    end
+end

@@ -12,8 +12,8 @@ lib.Buttons = {}
 
 ---initialize buttons
 function lib.load()
-    local width = 150
-    local height = 50
+    local width = 200
+    local height = 70
 
     local play_button = BUTTON:new(
         BUTTON.type.TEXT,
@@ -35,20 +35,8 @@ function lib.load()
             text = "SETTINGS"
         }
     )
-    local quit_button = BUTTON:new(
-        BUTTON.type.TEXT,
-        {
-            x = SETTINGS.SCREEN.WIDTH / 2 - width / 2,
-            y = SETTINGS.SCREEN.HEIGHT / 2 + 2*height,
-            width = width,
-            height = height,
-            text = "QUIT"
-        }
-    )
-
     lib.Buttons["PLAY"] = play_button
     lib.Buttons["SETTINGS"] = settings_button
-    lib.Buttons["QUIT"] = quit_button
 end
 
 ---update state logic

@@ -116,10 +116,10 @@ function lib:load()
     local send_wave = BUTTON:new(
         BUTTON.type.TEXT,
         {
-            x = SETTINGS.SCREEN.MAP.WIDTH + SETTINGS.SCREEN.UI.WIDTH/2 + self.padding,
-            y = SETTINGS.SCREEN.HEIGHT/2 - 2*self.padding,
-            width = SETTINGS.SCREEN.UI.WIDTH / 2 - 2*self.padding,
-            height = 2*self.padding,
+            x = SETTINGS.SCREEN.MAP.WIDTH - (SETTINGS.SCREEN.UI.WIDTH / 2 - 5*self.padding),
+            y = SETTINGS.SCREEN.HEIGHT - 3*self.padding/2,
+            width = SETTINGS.SCREEN.UI.WIDTH / 2 - 5*self.padding,
+            height = self.padding*SETTINGS.scale,
             color = {0.3, 0.3, 0.3},
             textColor = ENUMS.UPGRADE_COLORS.CYAN,
             text = "SEND WAVE"
@@ -167,7 +167,7 @@ function lib:load()
         {
             x = 0,
             y = 0,
-            width = SETTINGS.SCREEN.UI.WIDTH / 2 - 4*self.padding,
+            width = SETTINGS.SCREEN.UI.WIDTH / 2 - 5*self.padding,
             height = self.padding*SETTINGS.scale,
             color = {0.3, 0.3, 0.3},
             textColor = ENUMS.UPGRADE_COLORS.CYAN,
@@ -226,7 +226,7 @@ function lib:drawTimer(gameState)
     local textWidth = font:getWidth(text)
     local textHeight = font:getHeight()
     local x = SETTINGS.SCREEN.MAP.WIDTH - self.padding/2 - textWidth
-    local y = SETTINGS.SCREEN.HEIGHT - self.padding
+    local y = SETTINGS.SCREEN.HEIGHT - 5*self.padding/2
 
     --background box
     love.graphics.setColor(0, 0, 0, 0.7)

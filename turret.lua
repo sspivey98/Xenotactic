@@ -473,9 +473,14 @@ function lib:target(gameState)
 
     local ret = {}
 
-    --if target is still in range and not dead, then don't update
+    --if target dies, goes out of range, or is not the selected enemy, then don't update
     if self.targeting then
-        if self.targeting.health <= 0 or self:inRange(self.targeting) == false or self.targeting.dying then
+        if
+            self.targeting.health <= 0
+            or self:inRange(self.targeting) == false
+            or self.targeting.dying
+            or (gameState.selectedEnemy and self:inRange(gameState.selectedEnemy) and self.targeting ~= gameState.selectedEnemy)
+        then
             self.targeting = nil
         end
     end

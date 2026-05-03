@@ -50,9 +50,8 @@
 FIXES:
     ✓ enemies sometimes don't respect flowfield
     ✓ enemies sometimes get stuck in wall
-    - performance on chrome & safari can be really bad
+    x performance on chrome & safari can be really bad - this is due to compatibility mode
     ✓ freezes still occur intermittently in WASM
-    - level 3 completion did not show password?
     ✓ send wave button after completion of last wave finishes level
     ✓ waves should be repopulated after quitting
     ✓ selected turret menu doesn't work
@@ -60,3 +59,7 @@ FIXES:
     ✓ add tooltips for turrets
     ✓ darken turret icons when insufficient funds
     ✓ disable upgrade button when insufficient funds
+
+✓ Shift + Left Click to place multiple of same turret
+✓ move send_wave button to be next to the timer
+✓ selected enemy should force turret to re-target
