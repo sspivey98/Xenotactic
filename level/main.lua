@@ -242,7 +242,7 @@ function lib.mousepressed(game, x, y, mouseButton)
                         SOUNDS.library["invalid"]:play()
                     else --turret is placed
                         TURRET:new(game.gameState, currentTile.x, currentTile.y, SETTINGS.scale)
-                        if not SHIFT then
+                        if not SHIFT or (game.gameState.money < ENUMS.TURRET[game.gameState.selectedTurretType].cost) then
                             game.gameState.placementMode = false
                         end
                         SOUNDS.library["turret_build"]:play()
