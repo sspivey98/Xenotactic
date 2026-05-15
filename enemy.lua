@@ -426,7 +426,7 @@ function lib:kill(gameState)
     --if splitter spawn more enemies
     if self.splitter then
         for i=1,self.splitter.amount do
-            lib:new(gameState, self.splitter.type, self.flowField, self.fullHealth/self.splitter.amount, nil, nil, nil, nil, {x=self.coords.x,y=self.coords.y})
+            lib:new(gameState, self.splitter.type, self.flowField, self.fullHealth/self.splitter.amount, math.ceil(self.value/self.splitter.amount), nil, nil, nil, {x=self.coords.x,y=self.coords.y})
         end
     end
 
