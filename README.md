@@ -6,6 +6,18 @@ This is a remaster of the browser game, Xeno Tactic, in Love2d. I'm aiming to re
 ## Reference
 You can play the original game [here](https://www.newgrounds.com/portal/view/382321).
 
+## Differences from the original
+- Shift + Left Click can place multiple
+- User can send next wave before current wave is complete
+- DCA shoots 50% faster
+- password level unlock system
+- DCA level 6 has a significant buff with more damage, range, and lower cost
+- Helicopters in level 6 waves 50-100 have less health
+- Sonic turrets have a higher stun chance
+- splitters now add up to the parent enemy value, effectively doubling the value of a slime
+- selecting an enemy prioritizes the turret to target selected enemy
+- turrets have tooltips
+
 ## Developing
 It is highly recommend that you use the following extensions in `VS Code` or `VSCodium`:
 
