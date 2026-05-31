@@ -49,8 +49,8 @@ function lib:load()
         local key = ENUMS.TURRET_TYPE[i]
         local img = IMAGES.library["icon_"..i]
         local scale = {
-            x = 100 / img:getWidth(), --80 / 50
-            y = 100 / img:getHeight()
+            x = SETTINGS.scale * 80 / img:getWidth(), --80 / 50
+            y = SETTINGS.scale * 80 / img:getHeight()
         }
         local width = img:getWidth() * scale.x
         local height = img:getHeight() * scale.y
@@ -65,7 +65,7 @@ function lib:load()
             x = x + (SETTINGS.SCREEN.UI.WIDTH / 2) + width / 2
         end
         --split y into 2 rows
-        local y = 20 + (math.ceil(i / 3) - 1) * height + SETTINGS.SCREEN.HEIGHT/6 - height
+        local y = 25*SETTINGS.scale + (math.ceil(i / 3) - 1) * height + SETTINGS.SCREEN.HEIGHT/6 - height
 
         local turretButton = BUTTON:new(
             BUTTON.type.IMAGE,
@@ -81,7 +81,8 @@ function lib:load()
                     x = scale.x,
                     y = scale.y
                 },
-                tooltip = ENUMS.TURRET[key].tooltip
+                tooltip = ENUMS.TURRET[key].tooltip,
+                hoveredText = ENUMS.TURRET[key].cost.."g"
             }
         )
 
@@ -116,10 +117,10 @@ function lib:load()
     local send_wave = BUTTON:new(
         BUTTON.type.TEXT,
         {
-            x = SETTINGS.SCREEN.MAP.WIDTH - (SETTINGS.SCREEN.UI.WIDTH / 2 - 5*self.padding),
-            y = SETTINGS.SCREEN.HEIGHT - 3*self.padding/2,
-            width = SETTINGS.SCREEN.UI.WIDTH / 2 - 5*self.padding,
-            height = self.padding*SETTINGS.scale,
+            x = SETTINGS.SCREEN.MAP.WIDTH / 2 + 7*self.padding,
+            y = SETTINGS.SCREEN.HEIGHT - 5*self.padding/2,
+            width = SETTINGS.SCREEN.MAP.WIDTH - (SETTINGS.SCREEN.MAP.WIDTH / 2 + 7*self.padding),
+            height = 5*self.padding/2,
             color = {0.3, 0.3, 0.3},
             textColor = ENUMS.UPGRADE_COLORS.CYAN,
             text = "SEND WAVE"
@@ -167,8 +168,8 @@ function lib:load()
         {
             x = 0,
             y = 0,
-            width = SETTINGS.SCREEN.UI.WIDTH / 2 - 5*self.padding,
-            height = self.padding*SETTINGS.scale,
+            width = (SETTINGS.SCREEN.MAP.WIDTH / 2 - 7*self.padding),
+            height = 5*self.padding/2,
             color = {0.3, 0.3, 0.3},
             textColor = ENUMS.UPGRADE_COLORS.CYAN,
             text = "MENU"
@@ -179,11 +180,12 @@ end
 ---draw health bar frame
 ---@param health integer 1-20
 function lib:drawHealthBar(health)
+    local health_final = math.max(0, health)
     local x = SETTINGS.SCREEN.MAP.WIDTH - frames[health]:getWidth()*1.5
     local y = 0
     love.graphics.setColor{1,1,1}
     love.graphics.draw(
-        frames[health],
+        frames[health_final],
         x,
         y,
         0,
@@ -225,8 +227,8 @@ function lib:drawTimer(gameState)
     local font = love.graphics.getFont()
     local textWidth = font:getWidth(text)
     local textHeight = font:getHeight()
-    local x = SETTINGS.SCREEN.MAP.WIDTH - self.padding/2 - textWidth
-    local y = SETTINGS.SCREEN.HEIGHT - 5*self.padding/2
+    local x = self.padding/2
+    local y = SETTINGS.SCREEN.HEIGHT - 2*self.padding - 2*math.ceil(SETTINGS.scale)
 
     --background box
     love.graphics.setColor(0, 0, 0, 0.7)
@@ -311,10 +313,10 @@ end
 ---@param gameState GAME.GAMESTATE
 function lib:drawSelectedTurret(gameState)
     local box = {
-        x = SETTINGS.SCREEN.MAP.WIDTH + self.padding,
-        y = SETTINGS.SCREEN.HEIGHT / 2 + self.padding/2,
+        x = SETTINGS.SCREEN.MAP.WIDTH + SETTINGS.SCREEN.UI.WIDTH / 2 + self.padding,
+        y = 2*SETTINGS.SCREEN.HEIGHT / 3 + self.padding/2,
         width = SETTINGS.SCREEN.UI.WIDTH / 2 - 2*self.padding,
-        height = SETTINGS.SCREEN.HEIGHT / 2 - 4*self.padding
+        height = SETTINGS.SCREEN.HEIGHT / 3 - 4*self.padding
     }
     --draw box outline
     love.graphics.setColor{0, 0, 0, 0.8}
@@ -342,10 +344,10 @@ end
 ---@param gameState GAME.GAMESTATE
 function lib:drawSelectedTurretUpgrade(gameState)
     local box = {
-        x = SETTINGS.SCREEN.MAP.WIDTH + SETTINGS.SCREEN.UI.WIDTH / 2 + self.padding,
-        y = SETTINGS.SCREEN.HEIGHT / 2 + self.padding/2,
+        x = SETTINGS.SCREEN.MAP.WIDTH + self.padding,
+        y = 2*SETTINGS.SCREEN.HEIGHT / 3 + self.padding/2,
         width = SETTINGS.SCREEN.UI.WIDTH / 2 - 2*self.padding,
-        height = SETTINGS.SCREEN.HEIGHT / 2 - 4*self.padding
+        height = SETTINGS.SCREEN.HEIGHT / 3 - 4*self.padding
     }
     --draw box outline
     love.graphics.setColor{0, 0, 0, 0.8}

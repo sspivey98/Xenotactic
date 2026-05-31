@@ -27,6 +27,7 @@ local SOUNDS = require('lib.sounds')
 ---@field image any for image buttons only
 ---@field tooltip? string
 ---@field scale? {x?:number,y?:number} for image buttons only
+---@field hoveredText? string text that appears right over the picture when hovered
 
 ---button object constructor parameters
 ---@class button.text.options : button.options
@@ -96,6 +97,7 @@ end
 ---@field image any
 ---@field tooltip string|nil
 ---@field scale {x:number,y:number}
+---@field hoveredText string|nil
 local IButtonImage = {}
 
 ---@param o button.image.options
@@ -111,6 +113,7 @@ function IButtonImage:new(o)
         x = o.scale.x or 1,
         y = o.scale.y or 1
     }
+    obj.hoveredText = o.hoveredText
     obj.tooltip = o.tooltip
     return obj
 end
@@ -133,6 +136,33 @@ function IButtonImage:draw()
     --border
     love.graphics.setColor(0, 0, 0)  -- Black color
     love.graphics.rectangle("line", self.x, self.y, self.width, self.height)
+
+    --draw hoveredtext, if applicable
+    if self.hovered and self.hoveredText then
+        local font = love.graphics.getFont()
+        local textWidth = font:getWidth(self.hoveredText)
+        local textHeight = font:getHeight()
+
+        local centerX = self.x + (self.width / 2)
+        local centerY = self.y + (self.height / 2)
+
+        local padding = 4
+        local textX = centerX - (textWidth / 2)
+        local textY = centerY - (textHeight / 2)
+
+        love.graphics.setColor(0, 0, 0, 1)
+        love.graphics.rectangle(
+            "fill",
+            textX - padding,
+            textY - padding,
+            textWidth + (padding * 2),
+            textHeight + (padding * 2)
+        )
+
+        love.graphics.setColor(ENUMS.UPGRADE_COLORS.YELLOW)
+
+        love.graphics.print(self.hoveredText, textX, textY)
+    end
 end
 
 function IButtonImage:drawTooltip()

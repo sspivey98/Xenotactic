@@ -63,3 +63,8 @@ FIXES:
 ✓ Shift + Left Click to place multiple of same turret
 ✓ move send_wave button to be next to the timer
 ✓ selected enemy should force turret to re-target
+
+✓ move up upgrade + sell buttons and move down text
+✓ add arrows to map tile set
+✓ hovering turret icon adds price on icon
+- prevent healthbar from going to negative

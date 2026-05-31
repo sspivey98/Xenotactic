@@ -56,6 +56,8 @@ lib.VISUAL_TILES = {
     [14] = IMAGES.library["tile_corner_wall_UL"],
     [15] = IMAGES.library["tile_corner_wall_DR"],
     [16] = IMAGES.library["tile_corner_wall_UR"],
+    [17] = IMAGES.library["tile_arrow_right"],
+    [18] = IMAGES.library["tile_arrow_down"]
 }
 
 ---@alias Color number[] RGB or RGBA color array
