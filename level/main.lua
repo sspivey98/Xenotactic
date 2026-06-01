@@ -273,6 +273,10 @@ function lib.mousepressed(game, x, y, mouseButton)
                     if not checkEnemy then game.gameState.selectedEnemy = nil end
                 end
             else --select from UI
+                --deselect selectedTurret if in placementMode and left-click the UI
+                if game.gameState.placementMode then
+                    game.gameState.placementMode = false
+                end
                 for name,turret in pairs(UI.turrets) do
                     if turret:clicked(x,y,mouseButton) then
                         if game.gameState.money < ENUMS.TURRET[name].cost then

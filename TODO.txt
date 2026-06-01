@@ -67,4 +67,5 @@ FIXES:
 ✓ move up upgrade + sell buttons and move down text
 ✓ add arrows to map tile set
 ✓ hovering turret icon adds price on icon
-- prevent healthbar from going to negative
+✓ prevent healthbar from going to negative
+✓ left clicking outside main screen while turretSelected removes turretSelected

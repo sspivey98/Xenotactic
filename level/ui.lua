@@ -18,6 +18,7 @@ lib.pause = {}
 --padding
 lib.padding = SETTINGS.TILE_SIZE
 
+---@type love.Image[]
 local frames = {
     [0] = IMAGES.library["healthbar_0"],
     [1] = IMAGES.library["healthbar_1"],
@@ -94,9 +95,9 @@ function lib:load()
         BUTTON.type.TEXT,
         {
             x = SETTINGS.SCREEN.MAP.WIDTH + SETTINGS.SCREEN.UI.WIDTH/2 + self.padding,
-            y = SETTINGS.SCREEN.HEIGHT - 3*self.padding,
+            y = SETTINGS.SCREEN.HEIGHT - SETTINGS.scale*3*self.padding,
             width = SETTINGS.SCREEN.UI.WIDTH / 2 - 2*self.padding,
-            height = 2*self.padding,
+            height = SETTINGS.scale*5*self.padding/2,
             color = {0.3, 0.3, 0.3},
             text = "SELL"
         }
@@ -106,9 +107,9 @@ function lib:load()
         BUTTON.type.TEXT,
         {
             x = SETTINGS.SCREEN.MAP.WIDTH + self.padding,
-            y = SETTINGS.SCREEN.HEIGHT - 3*self.padding,
+            y = SETTINGS.SCREEN.HEIGHT - SETTINGS.scale*3*self.padding,
             width = SETTINGS.SCREEN.UI.WIDTH / 2 - 2*self.padding,
-            height = 2*self.padding,
+            height = SETTINGS.scale*5*self.padding/2,
             color = {0.3, 0.3, 0.3},
             text = "UPGRADE"
         }
@@ -117,9 +118,9 @@ function lib:load()
     local send_wave = BUTTON:new(
         BUTTON.type.TEXT,
         {
-            x = SETTINGS.SCREEN.MAP.WIDTH / 2 + 7*self.padding,
+            x = 0,
             y = SETTINGS.SCREEN.HEIGHT - 5*self.padding/2,
-            width = SETTINGS.SCREEN.MAP.WIDTH - (SETTINGS.SCREEN.MAP.WIDTH / 2 + 7*self.padding),
+            width = SETTINGS.SCREEN.MAP.WIDTH / 2 - 7*self.padding,
             height = 5*self.padding/2,
             color = {0.3, 0.3, 0.3},
             textColor = ENUMS.UPGRADE_COLORS.CYAN,
@@ -227,7 +228,7 @@ function lib:drawTimer(gameState)
     local font = love.graphics.getFont()
     local textWidth = font:getWidth(text)
     local textHeight = font:getHeight()
-    local x = self.padding/2
+    local x = SETTINGS.SCREEN.MAP.WIDTH - self.padding/2 - textWidth
     local y = SETTINGS.SCREEN.HEIGHT - 2*self.padding - 2*math.ceil(SETTINGS.scale)
 
     --background box
@@ -294,9 +295,7 @@ function lib:drawEnemyCounter(gameState)
     local font = love.graphics.getFont()
     local textWidth = font:getWidth(text)
     local textHeight = font:getHeight()
-    -- local x = SETTINGS.SCREEN.MAP.WIDTH - self.padding/2 - textWidth
-    -- local y = SETTINGS.SCREEN.HEIGHT - self.padding
-    local x = self.padding/2
+    local x = SETTINGS.SCREEN.MAP.WIDTH - self.padding/2 - textWidth
     local y = SETTINGS.SCREEN.HEIGHT - self.padding
 
     --background box
@@ -314,7 +313,7 @@ end
 function lib:drawSelectedTurret(gameState)
     local box = {
         x = SETTINGS.SCREEN.MAP.WIDTH + SETTINGS.SCREEN.UI.WIDTH / 2 + self.padding,
-        y = 2*SETTINGS.SCREEN.HEIGHT / 3 + self.padding/2,
+        y = SETTINGS.SCREEN.HEIGHT / 2 + SETTINGS.scale*2*self.padding,
         width = SETTINGS.SCREEN.UI.WIDTH / 2 - 2*self.padding,
         height = SETTINGS.SCREEN.HEIGHT / 3 - 4*self.padding
     }
@@ -345,7 +344,7 @@ end
 function lib:drawSelectedTurretUpgrade(gameState)
     local box = {
         x = SETTINGS.SCREEN.MAP.WIDTH + self.padding,
-        y = 2*SETTINGS.SCREEN.HEIGHT / 3 + self.padding/2,
+        y = SETTINGS.SCREEN.HEIGHT / 2 + SETTINGS.scale*2*self.padding,
         width = SETTINGS.SCREEN.UI.WIDTH / 2 - 2*self.padding,
         height = SETTINGS.SCREEN.HEIGHT / 3 - 4*self.padding
     }
