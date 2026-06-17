@@ -322,7 +322,7 @@ function lib:update(dt, gameState)
                 --recenter
                 self.position.x = (self.coords.x - 0.5)*SETTINGS.TILE_SIZE
                 self.position.y = (self.coords.y - 0.5)*SETTINGS.TILE_SIZE
-                --set last direction
+                --set last direction 
                 self.lastDirection = self.flowField:getDirection(newX, newY)
                 break
             end

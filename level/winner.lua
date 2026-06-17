@@ -1,6 +1,7 @@
 local SETTINGS = require('settings')
 local IMAGES = require('lib.images')
 local ENUMS  = require('enums')
+local SAVE = require('lib.save')
 local lib = {}
 
 
@@ -74,6 +75,7 @@ function lib:update(game)
         self.body = "To unlock level "..unlock..", use the following password:"
         self.password = ENUMS.Passwords[unlock]
         game.unlocked = game.gameState.level + 1
+        SAVE:save({level=game.unlocked})
     end
 end
 

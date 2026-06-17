@@ -15,20 +15,22 @@ local SETTINGSMENU = require('settingsMenu')
 local GAMEOVER = require('level.gameover')
 local WINNER = require('level.winner')
 local WAVES = require('level.waves')
+local SAVE = require('lib.save')
 
 local game
 
 ---initialize function
 function love.load(arg)
+    local saveData = SAVE:load()
     love.window.setTitle("Xenotactic v"..VERSION)
     love.window.setVSync(1)
-    local resolution = SETTINGS.resolution
-    love.window.setMode(resolution.WIDTH, resolution.HEIGHT)
+    love.window.setMode(saveData.width, saveData.height)
+    love.audio.setVolume(saveData.volume)
 
     --enforce 60 FPS for now
     TICK.framerate = 60
 
-    game = GAME.initGame()
+    game = GAME.initGame(saveData.level)
     love.graphics.setNewFont("/assets/fonts/11_Visitor_TT1_BRK.ttf", 16)
     SETTINGS.load()
     MENU.load()

@@ -23,8 +23,9 @@
 local lib = {}
 
 ---initialize the menu
+---@param level? integer level 1-6 unlocked
 ---@return GAME
-function lib.initGame()
+function lib.initGame(level)
     local ENUMS = require('enums')
     local game = {
         state = ENUMS.STATES.MENU,
@@ -33,7 +34,7 @@ function lib.initGame()
             h = love.graphics.getHeight()
         },
         gameState = nil, --newGame() goes here on level load
-        unlocked = 1
+        unlocked = level or 1
     }
 
     return game

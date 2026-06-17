@@ -137,7 +137,7 @@ function IButtonImage:draw()
     love.graphics.setColor(0, 0, 0)  -- Black color
     love.graphics.rectangle("line", self.x, self.y, self.width, self.height)
 
-    --draw hoveredtext, if applicable
+    --draw hoveredText, if applicable
     if self.hovered and self.hoveredText then
         local font = love.graphics.getFont()
         local textWidth = font:getWidth(self.hoveredText)

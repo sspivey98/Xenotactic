@@ -5,6 +5,7 @@ local SETTINGS = require('settings')
 local IMAGES = require('lib.images')
 local ENUMS = require('enums')
 local MENU = require('menu')
+local SAVE = require('lib.save')
 
 ---@class settingsMenu
 local lib = {}
@@ -175,13 +176,9 @@ end
 ---@param game GAME
 function lib:mousepressed(x,y,mouseButton, game)
     self.dropdown:mousePressed(x,y,mouseButton)
-    if self.audio:mousePressed(x,y,mouseButton) then
-        local res = self.audio.options[self.audio.selectedIndex]
-        local sub = res:sub(1, -2)
-        local num = tonumber(sub)/100
-        love.audio.setVolume(num)
-    end
+    self.audio:mousePressed(x,y,mouseButton)
     if self.button:clicked(x,y,mouseButton) then
+        local saveData = {}
         ---check password
         if self.entryBox:getText() then
             local password = string.lower(self.entryBox:getText())
@@ -192,6 +189,7 @@ function lib:mousepressed(x,y,mouseButton, game)
                     self.unlockMessage = "LEVEL " .. num .. " UNLOCKED!"
                     self.unlockMessageTimer = 3
                     game.unlocked = num
+                    saveData.level = num
                     found = true
                     break
                 end
@@ -211,10 +209,22 @@ function lib:mousepressed(x,y,mouseButton, game)
             ---don't update when no change
             if width ~= SETTINGS.SCREEN.WIDTH or height ~= SETTINGS.SCREEN.HEIGHT then
                 SETTINGS:setResolution(width,height)
+                saveData.width = width
+                saveData.height = height
                 MENU.load()
                 self:load()
             end
         end
+
+        ---change audio, if applicable
+        local audio = self.audio.options[self.audio.selectedIndex]
+        local sub = audio:sub(1, -2)
+        local num = tonumber(sub)/100
+        love.audio.setVolume(num)
+        saveData.volume = num
+
+        --save file
+        SAVE:save(saveData)
     end
     if self.backButton:clicked(x,y,mouseButton) then
         game.state = ENUMS.STATES.MENU
