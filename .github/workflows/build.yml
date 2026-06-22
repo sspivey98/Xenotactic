@@ -21,7 +21,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y zip
+          sudo apt-get install -y zip ninja-build cmake
 
       - name: Extract Version
         id: get_version
@@ -88,6 +88,42 @@ jobs:
           cp love-11.5-win64/*.dll releases/win64/
           cp love-11.5-win64/license.txt releases/win64/
           cd releases && zip -r ../${{ github.event.repository.name }}-win64.zip win64/
+      
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+      
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android NDK & Build Components
+        run: |
+          sdkmanager "platforms;android-34" "build-tools;34.0.0" "ndk;26.1.10909125"
+
+      - name: Clone and Setup love-android Repository
+        run: |
+          git clone --recurse-submodules https://github.com/love2d/love-android.git love-android-project
+          mkdir -p love-android-project/app/src/embed/assets
+          cp ${{ github.event.repository.name }}.love love-android-project/app/src/embed/assets/game.love
+          cp android/gradle.properties love-android-project/gradle.properties
+          cp android/love48.png love-android-project/app/src/main/res/drawable-mdpi/love.png
+          cp android/love72.png love-android-project/app/src/main/res/drawable-hdpi/love.png
+          cp android/love96.png love-android-project/app/src/main/res/drawable-xhdpi/love.png
+          cp android/love144.png love-android-project/app/src/main/res/drawable-xxhdpi/love.png
+          cp android/love192.png love-android-project/app/src/main/res/drawable-xxxhdpi/love.png
+
+      - name: Compile Android APK
+        run: |
+          cd love-android-project
+          chmod +x gradlew
+          ./gradlew assembleEmbedNoRecordDebug
+      
+      - name: Package Android Binary
+        run: |
+          # Copy the compiled debug APK out and rename it to your repository asset name
+          cp love-android-project/app/build/outputs/apk/embedNoRecord/debug/app-embedNoRecord-debug.apk ${{ github.event.repository.name }}-android-debug.apk
 
       - name: Prepare Linux .love Artifact
         run: cp ${{ github.event.repository.name }}.love ${{ github.event.repository.name }}-linux.love
@@ -123,6 +159,7 @@ jobs:
             ${{ github.event.repository.name }}-linux.love
             ${{ github.event.repository.name }}-wasm.zip
             ${{ github.event.repository.name }}-macos.zip
+            ${{ github.event.repository.name }}-android-debug.apk
           name: Release ${{ steps.get_version.outputs.version }}
           generate_release_notes: true
         env:

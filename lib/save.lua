@@ -10,6 +10,7 @@ local saveFile = "save.xeno"
 ---@field volume number `0-1`
 ---@field width integer
 ---@field height integer
+---@field easyPlacementMode boolean
 
 ---@type saveFile
 local defaults = {
@@ -17,10 +18,11 @@ local defaults = {
     volume = 1.0,
     width = 1280,
     height = 720,
+    easyPlacementMode = false
 }
 
 ---save file
----@param data {level?:integer,volume?:number,width?:number,height?:number}
+---@param data {level?:integer,volume?:number,width?:number,height?:number,easyPlacementMode?:boolean}
 function lib:save(data)
     --keep existing settings that were not modified
     local save = self:load()

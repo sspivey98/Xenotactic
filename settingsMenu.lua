@@ -93,11 +93,23 @@ function lib:load()
         height = h,   -- height per item
     })
 
+    ---placementMode
+    local placementOptions = {"FALSE", "TRUE"}
+    local placementCurrent = 1
+    self.placementMode = DROPDOWN:new({
+        x = x - w/2,
+        y = y+3*padding,
+        width = w,
+        height = h,
+        options = placementOptions,
+        selectedIndex = placementCurrent
+    })
+
     self.button = BUTTON:new(
         BUTTON.type.TEXT,
         {
             x = x - w/2,
-            y = y+3*padding,
+            y = y+4*padding,
             width = w,
             height = h,
             text = "Confirm"
@@ -107,7 +119,8 @@ function lib:load()
     self.labels = {
         {text = "Resolution:", y = y - 30},
         {text = "Volume:", y = y + padding - 30},
-        {text = "Password:", y = y + 2*padding - 30}
+        {text = "Password:", y = y + 2*padding - 30},
+        {text = "Mobile-friendly Placement Mode:", y = y + 3*padding - 30}
     }
 end
 function lib:update(dt)
@@ -154,6 +167,7 @@ function lib:draw()
     self.backButton:draw()
     self.entryBox:draw()
     self.audio:draw()
+    self.placementMode:draw()
     self.dropdown:draw()
 
     --password unlock text
@@ -177,6 +191,7 @@ end
 function lib:mousepressed(x,y,mouseButton, game)
     self.dropdown:mousePressed(x,y,mouseButton)
     self.audio:mousePressed(x,y,mouseButton)
+    self.placementMode:mousePressed(x,y,mouseButton)
     if self.button:clicked(x,y,mouseButton) then
         local saveData = {}
         ---check password
@@ -222,6 +237,16 @@ function lib:mousepressed(x,y,mouseButton, game)
         local num = tonumber(sub)/100
         love.audio.setVolume(num)
         saveData.volume = num
+
+        ---placementMode
+        local placementMode = self.placementMode.options[self.placementMode.selectedIndex]
+        if placementMode == "TRUE" then
+            saveData.easyPlacementMode = true
+            SETTINGS.easyPlacementMode = true
+        else
+            saveData.easyPlacementMode = false
+            SETTINGS.easyPlacementMode = false
+        end
 
         --save file
         SAVE:save(saveData)

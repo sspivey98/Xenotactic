@@ -12,6 +12,9 @@ local VISUAL_TILE_MAP
 local PAUSE = false
 local SHIFT = false
 local COLOR = {}
+local EASY_PLACEMENT = {
+    dragging = false
+}
 
 local blockedAnimation = {
     timer = 1,
@@ -160,7 +163,7 @@ function lib.draw(gameState)
                 love.graphics.circle("line",
                     currentTile.x + SETTINGS.TILE_SIZE,
                     currentTile.y + SETTINGS.TILE_SIZE,
-                    100, --radius, should come from turret?
+                    ENUMS.TURRET[gameState.selectedTurretType].range * SETTINGS.scale,
                     20
                 )
             else
@@ -170,6 +173,19 @@ function lib.draw(gameState)
                     currentTile.y,
                     SETTINGS.TILE_SIZE*2,
                     SETTINGS.TILE_SIZE*2
+                )
+            end
+
+            -- Easy placement mode hint text
+            if SETTINGS.easyPlacementMode then
+                love.graphics.setColor(1, 1, 1, 0.8)
+                local hintText = "Hold and drag to position"
+                local font = love.graphics.getFont()
+                local textWidth = font:getWidth(hintText)
+                love.graphics.print(
+                    hintText,
+                    currentTile.x + SETTINGS.TILE_SIZE - textWidth / 2,
+                    currentTile.y - 20
                 )
             end
         end
@@ -195,6 +211,7 @@ function lib.draw(gameState)
     UI:drawEnemyCounter(gameState)
     --UI:drawCurrentEnemy(gameState)
     UI:drawPauseButton()
+    UI:drawPlaceTurretButton()
 
     --draw UI turret buttons
     for _,turret in pairs(UI.turrets) do
@@ -222,6 +239,29 @@ function lib.draw(gameState)
     end
 end
 
+---@param gameState GAME.GAMESTATE
+local function attemptPlaceTurret(gameState)
+    --check placement is valid
+    if UTIL:isValidPlacement(currentTile, gameState) == false then
+        blockedAnimation.show = true
+        SOUNDS.library["invalid"]:play()
+    else --turret is placed
+        TURRET:new(gameState, currentTile.x, currentTile.y, SETTINGS.scale)
+        if not SHIFT or (gameState.money < ENUMS.TURRET[gameState.selectedTurretType].cost) then
+            gameState.placementMode = false
+        end
+        SOUNDS.library["turret_build"]:play()
+        --update enemy pathing
+        gameState.path1:setBlocked(currentTile.x, currentTile.y, true)
+        if gameState.path2 then
+            gameState.path2:setBlocked(currentTile.x, currentTile.y, true)
+        end
+
+        --reset easy placement state
+        EASY_PLACEMENT.dragging = false
+    end
+end
+
 ---interact function
 ---@param game GAME
 ---@param x number
@@ -233,24 +273,21 @@ function lib.mousepressed(game, x, y, mouseButton)
     end
     if not PAUSE then
         if mouseButton == ENUMS.CLICK.LEFT then
+            if
+                game.gameState.placementMode
+                and SETTINGS.easyPlacementMode
+                and UI.placeTurret:clicked(x,y,mouseButton)
+            then
+                attemptPlaceTurret(game.gameState)
+                return
+            end
             local tile = UTIL.getTileAt(game.gameState.map, x, y)
             if tile then
                 if game.gameState.placementMode then
-                    --check placement is valid
-                    if UTIL:isValidPlacement(currentTile, game.gameState) == false then
-                        blockedAnimation.show = true
-                        SOUNDS.library["invalid"]:play()
-                    else --turret is placed
-                        TURRET:new(game.gameState, currentTile.x, currentTile.y, SETTINGS.scale)
-                        if not SHIFT or (game.gameState.money < ENUMS.TURRET[game.gameState.selectedTurretType].cost) then
-                            game.gameState.placementMode = false
-                        end
-                        SOUNDS.library["turret_build"]:play()
-                        --update enemy pathing
-                        game.gameState.path1:setBlocked(tile.x, tile.y)
-                        if game.gameState.path2 then
-                            game.gameState.path2:setBlocked(tile.x, tile.y)
-                        end
+                    if SETTINGS.easyPlacementMode then
+                        EASY_PLACEMENT.dragging = true
+                    else
+                        attemptPlaceTurret(game.gameState)
                     end
                 else
                     local checkTurret = false
@@ -280,13 +317,18 @@ function lib.mousepressed(game, x, y, mouseButton)
                 for name,turret in pairs(UI.turrets) do
                     if turret:clicked(x,y,mouseButton) then
                         if game.gameState.money < ENUMS.TURRET[name].cost then
-                            SOUNDS.library["invalid"]:play()
+                            if not SETTINGS.easyPlacementMode then
+                                SOUNDS.library["invalid"]:play()
+                            end
                             --flash icon dark red?
                         else
                             SOUNDS.library["button_press"]:play()
                             --turret build logic
                             game.gameState.selectedTurretType = name
                             game.gameState.placementMode = true
+
+                            --reset placement metadata
+                            EASY_PLACEMENT.dragging = false
                         end
                     end
                 end
@@ -342,8 +384,17 @@ function lib.update(game, dt)
     then
         game.state = ENUMS.STATES.LEVEL_WIN
     end
+
     local mouse = { x=0, y=0 }
-    mouse.x, mouse.y = love.mouse.getPosition()
+    local mx, my = love.mouse.getPosition()
+    --transpose if canvas
+    if SETTINGS.CANVAS.GAME then
+        mouse.x = (mx - SETTINGS.CANVAS.OFFSET.x) / SETTINGS.CANVAS.SCALE
+        mouse.y = (my - SETTINGS.CANVAS.OFFSET.y) / SETTINGS.CANVAS.SCALE
+    else
+        mouse.x, mouse.y = mx, my
+    end
+
     if not PAUSE then
         if game.gameState.lives == 0 then
             SOUNDS.library["mission_failed"]:play()
@@ -384,7 +435,9 @@ function lib.update(game, dt)
             button:isHovered(mouse.x, mouse.y)
         end
         UI.pauseButton:isHovered(mouse.x, mouse.y)
-
+        if SETTINGS.easyPlacementMode then
+            UI.placeTurret:isHovered(mouse.x, mouse.y)
+        end
         --updateMap
         local tile = UTIL.getTileAt(game.gameState.map, mouse.x, mouse.y)
         if tile and tile.type ~= 1 then
@@ -451,6 +504,36 @@ function lib:keyreleased(key)
     if key == "lshift" then
         SHIFT = false
     end
+end
+
+
+function lib:mousereleased(x,y,button)
+    if button ~= ENUMS.CLICK.LEFT then return end
+
+    if SETTINGS.easyPlacementMode and EASY_PLACEMENT.dragging then
+        EASY_PLACEMENT.dragging = false
+    end
+end
+
+---@param gameState GAME.GAMESTATE
+---@param x any
+---@param y any
+---@param dx any
+---@param dy any
+function lib:mousemoved(gameState, x, y, dx, dy)
+    ---sanity check for inside map?
+    -- if SETTINGS.easyPlacementMode and gameState.placementMode then
+    -- end
+end
+---touch support
+function lib:touchpressed(game, id, x, y, dx, dy, pressure)
+    self.mousepressed(game, x, y, 1)
+end
+function lib:touchreleased(id, x, y, dx, dy, pressure)
+    self:mousereleased(x, y, 1)
+end
+function lib:touchmoved(id, x, y, dx, dy, pressure)
+    self:mousemoved(x, y, dx, dy)
 end
 
 return lib

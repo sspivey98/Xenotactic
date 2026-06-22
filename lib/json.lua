@@ -1,3 +1,4 @@
+---@diagnostic disable: undefined-global, deprecated
 local type = type
 local next = next
 local error = error

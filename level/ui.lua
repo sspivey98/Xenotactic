@@ -46,6 +46,7 @@ local frames = {
 function lib:load()
     --create UI
     --turrets icons
+    local dimm = {w=0,h=0}
     for i=1, 7 do
         local key = ENUMS.TURRET_TYPE[i]
         local img = IMAGES.library["icon_"..i]
@@ -55,6 +56,9 @@ function lib:load()
         }
         local width = img:getWidth() * scale.x
         local height = img:getHeight() * scale.y
+
+        dimm.w = width
+        dimm.h = height
 
         --split x into 3 columns
         local x = SETTINGS.SCREEN.MAP.WIDTH
@@ -90,6 +94,22 @@ function lib:load()
         ---@cast turretButton button.image
         self.turrets[key] = turretButton
     end
+
+    local row3Y = 25*SETTINGS.scale + (math.ceil(8 / 3) - 1) * dimm.h + SETTINGS.SCREEN.HEIGHT/6 - dimm.h
+    local col2X = SETTINGS.SCREEN.MAP.WIDTH + (SETTINGS.SCREEN.UI.WIDTH / 2) - dimm.w / 2
+
+    self.placeTurret = BUTTON:new(
+        BUTTON.type.TEXT,
+        {
+            x = col2X,
+            y = row3Y,
+            width = dimm.w*2,
+            height = dimm.h,
+            color = {0.3, 0.3, 0.3},
+            textColor = ENUMS.UPGRADE_COLORS.CYAN,
+            text = "PLACE TURRET"
+        }
+    )
 
     local sell_button = BUTTON:new(
         BUTTON.type.TEXT,
@@ -136,13 +156,21 @@ function lib:load()
     self.buttons["upgrade"] = upgrade_button
     self.buttons["send_wave"] = send_wave
 
+    local boxWidth  = SETTINGS.SCREEN.WIDTH / 3
+    local boxHeight = SETTINGS.SCREEN.HEIGHT / 3
+    local boxX = (SETTINGS.SCREEN.WIDTH - boxWidth) / 2
+    local boxY = (SETTINGS.SCREEN.HEIGHT - boxHeight) / 2
+    local btnWidth  = boxWidth * 0.35 --35%
+    local btnHeight = boxHeight * 0.25 --25%
+    local btnY = boxY + (boxHeight * 0.6)
+
     local yes_button = BUTTON:new(
         BUTTON.type.TEXT,
         {
-            x = (SETTINGS.SCREEN.WIDTH - 300)/2 + self.padding,
-            y = (SETTINGS.SCREEN.HEIGHT - 150)/2 + 4*self.padding,
-            width = 100,
-            height = 40,
+            x = boxX + (boxWidth * 0.1),
+            y = btnY,
+            width = btnWidth,
+            height = btnHeight,
             text = "YES",
             color = ENUMS.UPGRADE_COLORS.GREEN
         }
@@ -150,10 +178,10 @@ function lib:load()
     local no_button = BUTTON:new(
         BUTTON.type.TEXT,
         {
-            x = (SETTINGS.SCREEN.WIDTH - 300)/2 + 7*self.padding,
-            y = (SETTINGS.SCREEN.HEIGHT - 150)/2 + 4*self.padding,
-            width = 100,
-            height = 40,
+            x = boxX + boxWidth - (boxWidth * 0.1) - btnWidth,
+            y = btnY,
+            width = btnWidth,
+            height = btnHeight,
             text = "NO",
             color = ENUMS.UPGRADE_COLORS.RED
         }
@@ -380,8 +408,8 @@ function lib:drawPauseMenu()
     love.graphics.rectangle("fill", 0, 0, SETTINGS.SCREEN.WIDTH, SETTINGS.SCREEN.HEIGHT)
 
     --menu box
-    local boxWidth = 300
-    local boxHeight = 150
+    local boxWidth = SETTINGS.SCREEN.WIDTH / 3
+    local boxHeight = SETTINGS.SCREEN.HEIGHT / 3
     local boxX = (SETTINGS.SCREEN.WIDTH - boxWidth) / 2
     local boxY = (SETTINGS.SCREEN.HEIGHT - boxHeight) / 2
 
@@ -481,6 +509,12 @@ function lib:drawCurrentEnemy(gameState)
     end
 
     love.graphics.setColor(1, 1, 1) -- Reset color
+end
+
+function lib:drawPlaceTurretButton()
+    if SETTINGS.easyPlacementMode then
+        self.placeTurret:draw()
+    end
 end
 
 return lib

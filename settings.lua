@@ -15,6 +15,15 @@ local lib = {}
 ---@type dimension
 lib.resolution = {WIDTH=1280, HEIGHT=720}
 lib.scale = 1.5
+lib.easyPlacementMode = false
+lib.CANVAS = {
+    GAME = nil,
+    OFFSET = {
+        x = 0,
+        y = 0
+    },
+    SCALE = 1
+}
 
 function lib:setResolution(width, height)
     if width == 1280 and height == 720 then
@@ -35,7 +44,9 @@ function lib:setResolution(width, height)
     else
         error("Bad argument")
     end
-    love.window.setMode(width,height)
+    if not self.isMobile() then
+        love.window.setMode(width,height)
+    end
     self.SCREEN.MAP = {
         WIDTH = self.map.Width * self.TILE_SIZE,
         HEIGHT = self.map.Height * self.TILE_SIZE
@@ -62,12 +73,27 @@ lib.SCREEN = {
 
 ---load default window settings
 function lib.load()
-    lib.SCREEN.WIDTH = love.graphics.getWidth()
-    lib.SCREEN.HEIGHT = love.graphics.getHeight()
+    if lib.resolution.WIDTH and lib.resolution.HEIGHT then
+        lib.SCREEN.WIDTH = lib.resolution.WIDTH
+        lib.SCREEN.HEIGHT = lib.resolution.HEIGHT
+    else
+        lib.SCREEN.WIDTH = love.graphics.getWidth()
+        lib.SCREEN.HEIGHT = love.graphics.getHeight()
+    end
     lib.SCREEN.UI = {
         WIDTH = lib.SCREEN.WIDTH - lib.SCREEN.MAP.WIDTH,
         HEIGHT = lib.SCREEN.HEIGHT
     }
+end
+
+---@return boolean
+function lib.isMobile()
+    local OS = string.lower(love.system.getOS())
+    if OS == "android" or OS == "ios" then
+        return true
+    else
+        return false
+    end
 end
 
 return lib

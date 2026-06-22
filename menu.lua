@@ -12,8 +12,8 @@ lib.Buttons = {}
 
 ---initialize buttons
 function lib.load()
-    local width = 200
-    local height = 70
+    local width = SETTINGS.SCREEN.WIDTH/5
+    local height = SETTINGS.SCREEN.HEIGHT/10
 
     local play_button = BUTTON:new(
         BUTTON.type.TEXT,

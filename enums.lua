@@ -147,7 +147,7 @@ lib.TURRET = {
     GATLING = {
         cost = 5,
         value = 3,
-        range = 60,
+        range = 80,
         speed = 1,
         damage = 10,
         image = IMAGES.library["turret_gatling"],
@@ -489,7 +489,7 @@ lib.UPGRADE_PATH = {
         LEVEL2 = {
             cost = 5,
             damage = 20,
-            range = 60,
+            range = 90,
             value = 7,
             slow = 0,
             splash = 0,
@@ -498,7 +498,7 @@ lib.UPGRADE_PATH = {
         LEVEL3 = {
             cost = 10,
             damage = 40,
-            range = 60,
+            range = 90,
             value = 15,
             slow = 0,
             splash = 0,
@@ -507,7 +507,7 @@ lib.UPGRADE_PATH = {
         LEVEL4 = {
             cost = 20,
             damage = 80,
-            range = 60,
+            range = 90,
             value = 30,
             slow = 0,
             splash = 0,
@@ -516,7 +516,7 @@ lib.UPGRADE_PATH = {
         LEVEL5 = {
             cost = 40,
             damage = 160,
-            range = 60,
+            range = 90,
             value = 60,
             slow = 0,
             splash = 0,
@@ -798,6 +798,14 @@ lib.Passwords = {
     [4] = "reginald2",
     [5] = "newgrounds07",
     [6] = "impossible6"
+}
+
+---@type {w:number,h:number}[]
+lib.Resolutions = {
+    [1] = {w=1920, h=1080},
+    [2] = {w=1600, h=900},
+    [3] = {w=1280, h=720},
+    [4] = {w=800, h=600},
 }
 
 return lib
