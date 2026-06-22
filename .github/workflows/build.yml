@@ -123,7 +123,7 @@ jobs:
       - name: Package Android Binary
         run: |
           # Copy the compiled debug APK out and rename it to your repository asset name
-          cp love-android-project/app/build/outputs/apk/embedNoRecord/debug/app-embed-NoRecord-debug.apk ${{ github.event.repository.name }}-android-debug.apk
+          cp love-android-project/app/build/outputs/apk/embedNoRecord/debug/*.apk ${{ github.event.repository.name }}-android-debug.apk
 
       - name: Prepare Linux .love Artifact
         run: cp ${{ github.event.repository.name }}.love ${{ github.event.repository.name }}-linux.love
