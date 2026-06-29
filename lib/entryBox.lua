@@ -3,8 +3,8 @@
 ---@field y integer
 ---@field width integer
 ---@field height integer
+---@field selected boolean is the box in focus
 ---@field private text string
----@field private selected boolean is the box in focus
 ---@field private cursorPos integer position in text
 ---@field private cursorBlink number timer
 local lib = {}

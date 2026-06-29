@@ -129,6 +129,12 @@ function lib:update(dt)
     self.backButton:isHovered(mouseX, mouseY)
     self.entryBox:update()
 
+    if self.entryBox.selected and SETTINGS.isMobile() then
+        love.keyboard.setTextInput(true)
+    else
+        love.keyboard.setTextInput(false)
+    end
+
     --fade ack text after 3s
     if self.unlockMessageTimer > 0 then
         self.unlockMessageTimer = self.unlockMessageTimer - dt

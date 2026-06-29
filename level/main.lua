@@ -340,7 +340,7 @@ function lib.mousepressed(game, x, y, mouseButton)
                                 --check cost
                                 if game.gameState.selectedTurret:upgrade(game.gameState) then
                                     SOUNDS.library["upgrading"]:play()
-                                else
+                                elseif not SETTINGS.easyPlacementMode then
                                     SOUNDS.library["invalid"]:play()
                                 end
                             elseif name == "sell" then

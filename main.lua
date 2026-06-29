@@ -20,7 +20,7 @@ local SAVE = require('lib.save')
 local game
 
 ---initialize function
-function love.load()
+function love.load(arg)
     local saveData = SAVE:load()
     love.window.setTitle("Xenotactic v"..VERSION)
     love.window.setVSync(1)
