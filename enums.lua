@@ -572,7 +572,7 @@ lib.UPGRADE_PATH = {
         },
         LEVEL6 = {
             cost = 290,
-            damage = 320,
+            damage = 400,
             range = 85,
             value = 337,
             slow = 0,
@@ -620,11 +620,11 @@ lib.UPGRADE_PATH = {
         },
         LEVEL6 = {
             cost = 260,
-            damage = 256,
+            damage = 300,
             range = 130,
             value = 180,
             slow = 0,
-            splash = 3,
+            splash = 4,
             stun_chance = 0,
         }
     },
@@ -763,7 +763,7 @@ lib.UPGRADE_PATH = {
             stun_chance = 20,
         },
         LEVEL6 = {
-            cost = 355,
+            cost = 325,
             damage = 320,
             range = 47,
             value = 558,

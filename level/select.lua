@@ -21,7 +21,7 @@ function lib:load()
         local width = img:getWidth() * scaleX
         local height = img:getHeight() * scaleY
         --split y into 2 rows
-        local y = (math.ceil(i / 3) - 1) * (SETTINGS.SCREEN.HEIGHT / 3) + height / 2
+        local y = (math.ceil(i / 3) - 1) * (SETTINGS.SCREEN.HEIGHT / 2) + height / 2
 
         --split x into 3 columns
         local x
@@ -51,22 +51,22 @@ function lib:load()
 
         --level descriptions
         local metadata = MAPS.METADATA["level_"..i]
-        local pad = 20
+        local pad = SETTINGS.scale*20
         local level_metadata = {
             [1] = {
                 text = metadata.CATEGORY,
                 x = x + width + pad,
-                y = y + height/2,
+                y = y + height/4,
             },
             [2] = {
                 text = metadata.DESCRIPTION,
                 x = x + width + pad,
-                y = y  + height/2 + pad,
+                y = y  + height/4 + pad,
             },
             [3] = {
                 text = metadata.LENGTH,
                 x = x + width + pad,
-                y = y  + height/2 + pad*2,
+                y = y  + height/4 + pad*3,
             }
         }
         self.Level_MetaData[i] = level_metadata
@@ -77,8 +77,8 @@ function lib:load()
         {
             x = 20,
             y = 20,
-            width = 100,
-            height = 40,
+            width = 60*SETTINGS.scale,
+            height = 40*SETTINGS.scale,
             text = "< Back"
         }
     )
@@ -111,13 +111,13 @@ function lib:draw(game)
 
         local metadata = lib.Level_MetaData[i]
         love.graphics.setColor{0.9, 0.8, 0.1}
-        love.graphics.printf(metadata[1].text, metadata[1].x, metadata[1].y, 200, "left")
+        love.graphics.printf(metadata[1].text, metadata[1].x, metadata[1].y, 120*SETTINGS.scale, "left")
 
         love.graphics.setColor(1, 1, 1)
-        love.graphics.printf(metadata[2].text, metadata[2].x, metadata[2].y, 200, "left")
+        love.graphics.printf(metadata[2].text, metadata[2].x, metadata[2].y, 120*SETTINGS.scale, "left")
 
         love.graphics.setColor(1, 1, 1)
-        love.graphics.printf(metadata[3].text, metadata[3].x, metadata[3].y, 200, "left")
+        love.graphics.printf(metadata[3].text, metadata[3].x, metadata[3].y, 120*SETTINGS.scale, "left")
     end
 
     --draw locks
