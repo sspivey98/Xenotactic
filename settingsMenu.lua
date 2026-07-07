@@ -129,10 +129,17 @@ function lib:update(dt)
     self.backButton:isHovered(mouseX, mouseY)
     self.entryBox:update()
 
-    if self.entryBox.selected and SETTINGS.isMobile() then
-        love.keyboard.setTextInput(true)
-    else
-        love.keyboard.setTextInput(false)
+    if SETTINGS.isMobile() then
+        local wasSelected = self.entryBoxSelected or false
+        local isSelected = self.entryBox.selected
+
+        if isSelected and not wasSelected then
+            love.keyboard.setTextInput(true)
+        elseif not isSelected and wasSelected then
+            love.keyboard.setTextInput(false)
+        end
+
+        self.entryBoxSelected = isSelected
     end
 
     --fade ack text after 3s
