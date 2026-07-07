@@ -667,8 +667,8 @@ lib.UPGRADE_PATH = {
             stun_chance = 0,
         },
         LEVEL6 = {
-            cost = 300,
-            damage = 640,
+            cost = 250,
+            damage = 800,
             range = 100,
             value = 239,
             slow = 0,

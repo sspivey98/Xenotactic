@@ -177,14 +177,14 @@ function lib:load()
     lib.level6:load(90, 1, "REDALIEN", 969791, 200, 0.8, 1.4)
     lib.level6:load(91, 10, "SCORPION", 88089, 12, 1.5)
     lib.level6:load(92, 4, "SLIME", 96017, 30, 1, 1.1, {amount=2, type="SCORPION"})
-    lib.level6:load(93, 10, "HELICOPTER", 104658/2, 12)
+    lib.level6:load(93, 10, "HELICOPTER", 104658/3, 12)
     lib.level6:load(94, 10, "BOSS1", 114078, 12)
     lib.level6:load(95, 10, "ALIEN", 123735, 12)
     lib.level6:load(96, 10, "WENDIGO", 135536, 13)
     lib.level6:load(97, 10, "TERMITE", 147734, 13, 1.2)
     lib.level6:load(98, 1, "SCORPION", 1921913, 220, 1.25)
     lib.level6:load(99, 4, "SLIME", 175523, 32, 0.8, 1.1, {amount=2, type="QUEEN"})
-    lib.level6:load(100, 10, "HELICOPTER", 191000/2, 20, 0.8)
+    lib.level6:load(100, 10, "HELICOPTER", 191001/3, 20, 0.8)
 end
 
 
