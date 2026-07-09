@@ -210,7 +210,7 @@ end
 ---@param health integer 1-20
 function lib:drawHealthBar(health)
     local health_final = math.max(0, health)
-    local x = SETTINGS.SCREEN.MAP.WIDTH - frames[health]:getWidth()*1.5
+    local x = SETTINGS.SCREEN.MAP.WIDTH - frames[health_final]:getWidth()*1.5
     local y = 0
     love.graphics.setColor{1,1,1}
     love.graphics.draw(
