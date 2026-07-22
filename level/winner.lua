@@ -70,12 +70,12 @@ function lib:update(game)
         self.body = "THANKS FOR PLAYING!"
         self.password = ":)"
     end
-    if self.password == "" then
+    if game.unlocked <= game.gameState.level then
         local unlock = game.gameState.level + 1
         self.body = "To unlock level "..unlock..", use the following password:"
         self.password = ENUMS.Passwords[unlock]
-        game.unlocked = game.gameState.level + 1
-        SAVE:save({level=game.unlocked})
+        game.unlocked = unlock
+        SAVE:save({level=unlock})
     end
 end
 
